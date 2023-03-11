@@ -1,0 +1,12 @@
+X:\Programming\tcgct\tcgct\tcgct-mtg\bin\Debug\net6.0\tcgct-mtg.deps.json
+X:\Programming\tcgct\tcgct\tcgct-mtg\bin\Debug\net6.0\tcgct-mtg.dll
+X:\Programming\tcgct\tcgct\tcgct-mtg\bin\Debug\net6.0\tcgct-mtg.pdb
+X:\Programming\tcgct\tcgct\tcgct-mtg\obj\Debug\net6.0\tcgct-mtg.csproj.AssemblyReference.cache
+X:\Programming\tcgct\tcgct\tcgct-mtg\obj\Debug\net6.0\tcgct-mtg.GeneratedMSBuildEditorConfig.editorconfig
+X:\Programming\tcgct\tcgct\tcgct-mtg\obj\Debug\net6.0\tcgct-mtg.AssemblyInfoInputs.cache
+X:\Programming\tcgct\tcgct\tcgct-mtg\obj\Debug\net6.0\tcgct-mtg.AssemblyInfo.cs
+X:\Programming\tcgct\tcgct\tcgct-mtg\obj\Debug\net6.0\tcgct-mtg.csproj.CoreCompileInputs.cache
+X:\Programming\tcgct\tcgct\tcgct-mtg\obj\Debug\net6.0\tcgct-mtg.dll
+X:\Programming\tcgct\tcgct\tcgct-mtg\obj\Debug\net6.0\refint\tcgct-mtg.dll
+X:\Programming\tcgct\tcgct\tcgct-mtg\obj\Debug\net6.0\tcgct-mtg.pdb
+X:\Programming\tcgct\tcgct\tcgct-mtg\obj\Debug\net6.0\ref\tcgct-mtg.dll
