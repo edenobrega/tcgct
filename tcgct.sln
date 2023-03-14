@@ -3,11 +3,16 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33205.214
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tcgct", "tcgct\tcgct.csproj", "{6ACF1DFC-DA01-4BE9-B802-1A195914D04B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "tcgct", "tcgct\tcgct.csproj", "{6ACF1DFC-DA01-4BE9-B802-1A195914D04B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tcgct-mtg", "tcgct-mtg\tcgct-mtg.csproj", "{0BE5AD49-5B6F-42A9-8521-39FBFF81EBA5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "tcgct-mtg", "tcgct-mtg\tcgct-mtg.csproj", "{0BE5AD49-5B6F-42A9-8521-39FBFF81EBA5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tcgct-admin", "tcgct-admin\tcgct-admin.csproj", "{BFF6B735-89A9-474E-AADF-ACC95D0A4329}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "tcgct-admin", "tcgct-admin\tcgct-admin.csproj", "{BFF6B735-89A9-474E-AADF-ACC95D0A4329}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{85F45ED4-6F78-4FEC-B2CC-E53279B6194D}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

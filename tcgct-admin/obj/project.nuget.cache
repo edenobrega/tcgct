@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "ylh8QeTjfriKjqtsJCtjniKsubaU6dcpGdBysYk4TXYzoQrrHGlbvhvt7DSbuszYxR1rRQvOkzCQx8GuROE7Vg==",
+  "dgSpecHash": "WjJWWXJZfWLrfg/ovOxW4563I8z4NIOJvizyY+4Jq7lcKZT8jpCUYB0suANJPU5ll08J+kuvclK9tWSRf+X0nA==",
   "success": true,
-  "projectFilePath": "X:\\Programming\\tcgct\\tcgct\\tcgct-admin\\tcgct-admin.csproj",
+  "projectFilePath": "X:\\Programming\\tcgct-new\\tcgct\\tcgct-admin\\tcgct-admin.csproj",
   "expectedPackageFiles": [],
   "logs": []
 }
