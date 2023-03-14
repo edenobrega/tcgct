@@ -12,10 +12,19 @@
           "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "6.0.11",
           "Microsoft.AspNetCore.Identity.UI": "6.0.11",
           "Microsoft.EntityFrameworkCore.SqlServer": "6.0.11",
-          "Microsoft.EntityFrameworkCore.Tools": "6.0.11"
+          "Microsoft.EntityFrameworkCore.Tools": "6.0.11",
+          "tcgct-mtg": "1.0.0"
         },
         "runtime": {
           "tcgct.dll": {}
+        }
+      },
+      "Dapper/2.0.123": {
+        "runtime": {
+          "lib/net5.0/Dapper.dll": {
+            "assemblyVersion": "2.0.0.0",
+            "fileVersion": "2.0.123.33578"
+          }
         }
       },
       "Humanizer.Core/2.8.26": {
@@ -536,6 +545,15 @@
             "fileVersion": "4.700.19.56404"
           }
         }
+      },
+      "tcgct-mtg/1.0.0": {
+        "dependencies": {
+          "Dapper": "2.0.123",
+          "Microsoft.Data.SqlClient": "2.1.4"
+        },
+        "runtime": {
+          "tcgct-mtg.dll": {}
+        }
       }
     }
   },
@@ -544,6 +562,13 @@
       "type": "project",
       "serviceable": false,
       "sha512": ""
+    },
+    "Dapper/2.0.123": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-RDFF4rBLLmbpi6pwkY7q/M6UXHRJEOerplDGE5jwEkP/JGJnBauAClYavNKJPW1yOTWRPIyfj4is3EaJxQXILQ==",
+      "path": "dapper/2.0.123",
+      "hashPath": "dapper.2.0.123.nupkg.sha512"
     },
     "Humanizer.Core/2.8.26": {
       "type": "package",
@@ -908,6 +933,11 @@
       "sha512": "sha512-CeWTdRNfRaSh0pm2gDTJFwVaXfTq6Xwv/sA887iwPTneW7oMtMlpvDIO+U60+3GWTB7Aom6oQwv5VZVUhQRdPQ==",
       "path": "system.windows.extensions/4.7.0",
       "hashPath": "system.windows.extensions.4.7.0.nupkg.sha512"
+    },
+    "tcgct-mtg/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
     }
   }
 }

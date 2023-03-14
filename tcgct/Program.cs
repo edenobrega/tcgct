@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Identity.UI;
 using Microsoft.EntityFrameworkCore;
 using tcgct.Areas.Identity;
 using tcgct.Data;
+using tcgct_mtg.Models;
+using tcgct_mtg.Services;
 
 namespace tcgct
 {
@@ -26,6 +28,7 @@ namespace tcgct
             builder.Services.AddServerSideBlazor();
             builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
             builder.Services.AddSingleton<WeatherForecastService>();
+            builder.Services.AddScoped<MTGSetService>();
 
             var app = builder.Build();
 

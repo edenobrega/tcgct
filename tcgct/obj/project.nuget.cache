@@ -1,9 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "t/GmHOpIIAaHelxYjSI4lJ/9VPqsLecp4Ss0viXx9VHKgm8KeMrfetYKO0zLMz8bJAf3ir/5A83wxrYbAG2xnw==",
+  "dgSpecHash": "ioMzBkqTFA9CPPwlmEDXsaO5MqQdOX9JGdmHrGTLu/LOH6aqLXQCpW+nbjweqMG/FZacjc/V/5HcFCBTGS3ItQ==",
   "success": true,
-  "projectFilePath": "X:\\Programming\\tcgct\\tcgct\\tcgct\\tcgct.csproj",
+  "projectFilePath": "X:\\Programming\\tcgct-new\\tcgct\\tcgct\\tcgct.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\edeno\\.nuget\\packages\\dapper\\2.0.123\\dapper.2.0.123.nupkg.sha512",
     "C:\\Users\\edeno\\.nuget\\packages\\humanizer.core\\2.8.26\\humanizer.core.2.8.26.nupkg.sha512",
     "C:\\Users\\edeno\\.nuget\\packages\\microsoft.aspnetcore.cryptography.internal\\6.0.11\\microsoft.aspnetcore.cryptography.internal.6.0.11.nupkg.sha512",
     "C:\\Users\\edeno\\.nuget\\packages\\microsoft.aspnetcore.cryptography.keyderivation\\6.0.11\\microsoft.aspnetcore.cryptography.keyderivation.6.0.11.nupkg.sha512",

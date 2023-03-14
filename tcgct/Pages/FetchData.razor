@@ -2,14 +2,13 @@
 
 <PageTitle>Weather forecast</PageTitle>
 
-@using tcgct.Data
-@inject WeatherForecastService ForecastService
+@using tcgct_mtg.Models
+@using tcgct.Data.MTG
+@inject tcgct_mtg.Services.MTGSetService mtgset
 
 <h1>Weather forecast</h1>
 
-<p>This component demonstrates fetching data from a service.</p>
-
-@if (forecasts == null)
+@if (sets == null)
 {
     <p><em>Loading...</em></p>
 }
@@ -18,31 +17,74 @@ else
     <table class="table">
         <thead>
             <tr>
-                <th>Date</th>
-                <th>Temp. (C)</th>
-                <th>Temp. (F)</th>
-                <th>Summary</th>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Shorthand</th>
+                <th>Icon</th>
+                <th>Search URI</th>
+                <th>Set Type</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var forecast in forecasts)
+            @foreach (var set in sets)
             {
-                <tr>
-                    <td>@forecast.Date.ToShortDateString()</td>
-                    <td>@forecast.TemperatureC</td>
-                    <td>@forecast.TemperatureF</td>
-                    <td>@forecast.Summary</td>
+                <tr style="display:@set.Display;visibility:@set.Visibility">
+                    <td>@set.Set.ID</td>
+                    <td>@set.Set.Name</td>
+                    <td>@set.Set.Shorthand</td>
+                    <td>@set.Set.Icon</td>
+                    <td>@set.Set.Search_Uri</td>
+                    <td>@set.Set.Set_Type_id.Name</td>
                 </tr>
             }
         </tbody>
     </table>
+    <button class="btn btn-primary" @onclick="PreviousPage">Previous Page</button>
+    <button class="btn btn-primary" @onclick="NextPage">Next Page</button>
+    <h5>@(page)</h5>
 }
 
 @code {
-    private WeatherForecast[]? forecasts;
+    int page = 0;
+    int perPage = 20;
+    private List<ViewSet>? sets;
+
+    void LoadPage()
+    {
+        for (int i = page * perPage; i < (page * perPage) + perPage; i++)
+        {
+            sets[i].FlipVisibility();
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
-        forecasts = await ForecastService.GetForecastAsync(DateTime.Now);
+        IEnumerable<MTGSet> _sets = await mtgset.GetAll();
+        sets = _sets.Select(x => new ViewSet(x)).ToList();
+
+        LoadPage();
+    }
+
+    //int pageCount = (records + recordsPerPage - 1) / recordsPerPage;
+    void NextPage()
+    {
+        if (page + 1 > (sets.Count + perPage - 1) / perPage)
+        {
+            return;
+        }
+        LoadPage();
+        page++;
+        LoadPage();
+    }
+
+    void PreviousPage()
+    {
+        if(page - 1 < 0)
+        {
+            return;
+        }
+        LoadPage();
+        page--;
+        LoadPage();
     }
 }
