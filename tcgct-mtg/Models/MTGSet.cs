@@ -1,4 +1,7 @@
-﻿namespace tcgct_dotnet.Models.Collection.MTG
+﻿using Microsoft.Data.SqlClient;
+using Dapper;
+
+namespace tcgct_mtg.Models
 {
     public class MTGSet
     {
