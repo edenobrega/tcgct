@@ -3,9 +3,9 @@ using tcgct_mtg.Models;
 
 namespace tcgct.Data.MTG
 {
-    public class ViewSet : ITableItem
+    public class MTGViewSet : ITableItem
     {
-        public ViewSet(MTGSet Set)
+        public MTGViewSet(MTGSet Set)
         {
             this.Set = Set;
             Visible = false;
