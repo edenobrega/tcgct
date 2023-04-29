@@ -51,18 +51,12 @@ namespace tcgct_mtg.Services
             {
                 conn.Open();
 
-                //var sql = @"
-                //    SELECT *
-                //    FROM [MTG].[MTG_Set] as ms
-                //";
-                //var results = await conn.QueryAsync<Set>(sql);
-                var sql = $@"
-                    SELECT *
-                    FROM [MTG].[Set] as ms
-                    left join [MTG].[SetType] as mst on set_type_id = mst.id 
-                ";
-                var results = await conn.QueryAsync<Set, SetType, Set>(sql, (set, settype) => { set.Set_Type_id = settype.ID; return set; }, splitOn: "set_type_id");
+                var sql = "SELECT * FROM [MTG].[Set]";
+                var results = await conn.QueryAsync<Set>(sql);
                 conn.Close();
+
+                this.GetSetTypes().Result.ToList().ForEach(fe => results.Where(r => r.Set_Type_id ==  fe.ID).ToList().ForEach(r2 => r2.Set_Type = fe));
+
                 return results;
             }
         }
