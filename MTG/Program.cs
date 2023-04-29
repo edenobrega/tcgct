@@ -82,6 +82,9 @@ namespace MTG
 
             }
 
+            // Update card types
+            // todo: refactor
+            // perhaps first join all strings together, then split, then loop through that
             parsed.ToList().ForEach(fe =>fe.type_line?.Split(' ').ToList().ForEach(t =>
             {
                 if (!cardtypes.Exists(e => e.Name == t))
@@ -94,6 +97,20 @@ namespace MTG
                     });
                 }
             }));
+
+            // Update rarity
+            parsed.ToList().Select(s => s.rarity).Distinct().ToList().ForEach(fe =>
+            {
+                if(!rarities.Exists(e => e.Name == fe))
+                {
+                    int ri = mtgservice.CreateRarity(fe).Result;
+                    rarities.Add(new Rarity
+                    {
+                        ID = ri,
+                        Name = fe
+                    });
+                }
+            });
 
             return;
             foreach (var _card in parsed)
