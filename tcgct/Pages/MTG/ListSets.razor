@@ -4,7 +4,7 @@
 
 @using tcgct_mtg.Models
 @using tcgct.Data.MTG
-@inject tcgct_mtg.Services.MTGSetService mtgset
+@inject tcgct_mtg.Services.MTGService mtgset
 
 <h1>Weather forecast</h1>
 
@@ -18,30 +18,12 @@ else
     <table class="table">
         <thead>
             <tr>
-                <th>ID  <select>
-                    <option>Sort</option>
-                    <option>Ascending</option>
-                    <option>Descending</option>
-                    </select>
-                    </th>
-                <th>Name  <select>
-                    <option>Sort</option>
-                    <option>Ascending</option>
-                    <option>Descending</option>
-                    </select></th>
+                <th>ID</th>
+                <th>Name</th>
                 <th>Shorthand</th>
                 <th>Icon</th>
                 <th>Search URI</th>
-                <th>
-                    Set Type
-                    <select @onchange=FilterSetType>
-                        <option value=""></option>
-                        @foreach (var set_type in sets.Select(x => x.Set.Set_Type_id.Name).Distinct())
-                        {
-                            <option value="@set_type">@set_type</option>
-                        }
-                    </select>
-                </th>
+                <th>Set Type</th>
             </tr>
         </thead>
         <tbody>
@@ -77,6 +59,19 @@ else
         set 
         { 
             filterValue = value;
+            if(string.IsNullOrEmpty(filterValue) || string.IsNullOrWhiteSpace(filterValue))
+            {
+                foreach (var set in sets)
+                {
+                    set.Filtered = false;
+                    if (set.Visible)
+                    {
+                        set.FlipVisibility();
+                    }
+                }
+                return;    
+            }
+
             foreach (var set in sets)
             {
                 if (set.Set.Name.ToLower().Contains(filterValue.ToLower()))
@@ -113,7 +108,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        IEnumerable<MTGSet> _sets = await mtgset.GetAll();
+        IEnumerable<MTGSet> _sets = await mtgset.GetAllSets();
         sets = _sets.Select(x => new MTGViewSet(x)).ToList();
 
         LoadPage();
