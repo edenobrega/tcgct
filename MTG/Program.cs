@@ -3,6 +3,7 @@ using MTG.Classes.Base;
 using MTG.Classes.Response;
 using Newtonsoft.Json;
 using RestSharp;
+using System.Threading.Channels;
 using tcgct_mtg.Models;
 using tcgct_mtg.Services;
 
@@ -24,16 +25,77 @@ namespace MTG
             //var parsed = JsonConvert.DeserializeObject<List<APICard>>(response.Content);
 
             var parsed = JsonConvert.DeserializeObject<List<APICard>>(File.ReadAllText(@"D:\Programming\tcgct-new\tcgct\MTG\Data\bulkcards.json"));
-            //var _parsed = JsonConvert.DeserializeObject<APICard>(File.ReadAllText(@"D:\Programming\tcgct-new\tcgct\MTG\Data\single.json"));
-            //List<APICard> parsed = new List<APICard> { _parsed };
             MTGService mtgservice = new MTGService();
             List<Set> sets = mtgservice.GetAllSets().Result.ToList();
             List<SetType> settypes = mtgservice.GetSetTypes().Result.ToList();
             List<Card> cards = mtgservice.GetAllCards().Result.ToList();
             List<Rarity> rarities = mtgservice.GetRarities().Result.ToList();
             List<CardType> cardtypes = mtgservice.GetAllCardTypes().Result.ToList();
-            var val = parsed.Single(x => x.card_id == "00255899-aaaf-46c6-8037-bd0e3c06250c");
 
+            // Update sets + set types
+            foreach (var _card in parsed.DistinctBy(x => x.set_uri))
+            {
+                break;
+                int _si = -1;   // set id
+                int _sti = -1;  // set type id
+                if (sets.Exists(s => s.Name == _card.set_name))
+                {
+                    continue;
+                }
+                // Rate limit on api
+                var _s = HttpHelpers.GetSet(_card.set_uri);
+                Thread.Sleep(400);
+                if (!settypes.Exists(x => x.Name == _s.set_type))
+                {
+                    _sti = mtgservice.CreateSetType(_card.set_type).Result;
+                    settypes.Add(new SetType { ID = _sti, Name = _s.set_type });
+                    Set set = new Set
+                    {
+                        Name = _s.name,
+                        Shorthand = _s.code,
+                        Icon = _s.icon_svg_uri,
+                        Search_Uri = _s.search_uri,
+                        Scryfall_id = _s.id,
+                        Set_Type_id = _sti
+
+                    };
+                    _si = mtgservice.CreateSet(set).Result;
+                    sets.Add(set);
+                }
+                else
+                {
+                    _sti = settypes.Single(x => x.Name == _s.set_type).ID;
+                    Set set = new Set
+                    {
+                        Name = _s.name,
+                        Shorthand = _s.code,
+                        Icon = _s.icon_svg_uri,
+                        Search_Uri = _s.search_uri,
+                        Scryfall_id = _s.id,
+                        Set_Type_id = _sti
+
+                    };
+                    _si = mtgservice.CreateSet(set).Result;
+                    set.ID = _si;
+                    sets.Add(set);
+                }
+
+            }
+
+            parsed.ToList().ForEach(fe =>fe.type_line?.Split(' ').ToList().ForEach(t =>
+            {
+                if (!cardtypes.Exists(e => e.Name == t))
+                {
+                    int ct = mtgservice.CreateCardType(t).Result;
+                    cardtypes.Add(new CardType
+                    {
+                        ID = ct,
+                        Name = t
+                    });
+                }
+            }));
+
+            return;
             foreach (var _card in parsed)
             {
                 int _si = -1;   // set id
@@ -89,7 +151,6 @@ namespace MTG
                         set.ID = _si;
                         sets.Add(set);
                     }
-
                 }
                 else
                 {
@@ -151,7 +212,6 @@ namespace MTG
                         _cti = cardtypes.Single(x => x.Name == type).ID;
                     }
                     mtgservice.CreateTypeLine(_cti, card_id);
-
                 }
             }
         }
