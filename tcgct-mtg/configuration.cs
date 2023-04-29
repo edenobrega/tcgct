@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace tcgct_mtg
 {
-    static internal class configuration
+    static public class configuration
     {
-        public const string connectionString = "Server=DESKTOP-80083JA\\SQLEXPRESS;Database=tcgct;Trusted_Connection=True;Initial Catalog=tcgct;MultipleActiveResultSets=true";
+        public const string connectionString = "Server=localhost\\SQLEXPRESS;Database=tcgct;Trusted_Connection=True;";
     }
 }

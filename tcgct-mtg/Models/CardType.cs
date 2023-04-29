@@ -6,8 +6,7 @@ using System.Threading.Tasks;
 
 namespace tcgct_mtg.Models
 {
-    // TODO: Implement display name
-    public class MTGSetType
+    public class CardType
     {
         public int ID { get; set; }
         public string Name { get; set; }
