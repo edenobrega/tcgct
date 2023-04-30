@@ -26,5 +26,6 @@ namespace tcgct_mtg.Models
         public string OracleID { get; set; }
         public int Rarity_ID { get; set; }
         public Rarity Rarity { get; set; }
+        public bool MultiFace { get; set; }
     }
 }

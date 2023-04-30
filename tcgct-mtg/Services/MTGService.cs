@@ -129,7 +129,8 @@ namespace tcgct_mtg.Services
                                 ,[image]
                                 ,[image_flipped]
                                 ,[oracle_id]
-                                ,[rarity_id])
+                                ,[rarity_id]
+                                ,[multi_face])
 	                        OUTPUT inserted.id
                             VALUES
                                 (@name
@@ -146,7 +147,8 @@ namespace tcgct_mtg.Services
                                 ,@image
                                 ,@imageflipped
                                 ,@oracleid
-                                ,@rarity_id)";
+                                ,@rarity_id,
+                                ,@multi_face)";
                 return await conn.QuerySingleAsync<int>(sql, new
                 {
                     card.Name,
@@ -163,7 +165,80 @@ namespace tcgct_mtg.Services
                     card.Image,
                     card.ImageFlipped,
                     card.OracleID,
-                    card.Rarity_ID
+                    card.Rarity_ID,
+                    card.MultiFace
+                });
+            }
+        }
+        #endregion
+
+        #region Card Face
+        public async Task<IEnumerable<CardFace>> GetAllCardFaces()
+        {
+            using (var conn = new SqlConnection(configuration.connectionString))
+            {
+                conn.Open();
+                var sql = "select * from [MTG].[CardFace]";
+                return await conn.QueryAsync<CardFace>(sql);
+            }
+        }
+        public async Task<IEnumerable<CardFace>> GetCardFaces(int id)
+        {
+            using (var conn = new SqlConnection(configuration.connectionString))
+            {
+                conn.Open();
+                var sql = "select * from [MTG].[CardFace] where ID = @ID";
+                return await conn.QueryAsync<CardFace>(sql, new { ID = id });
+            }
+        }
+        public async Task<int> CreateCardFace(CardFace card)
+        {
+            using (var conn = new SqlConnection(configuration.connectionString))
+            {
+                string sql = @"INSERT INTO [MTG].[CardFace]([CardID]
+                              ,[Object]
+                              ,[Name]
+                              ,[Image]
+                              ,[Mana_Cost]
+                              ,[Oracle_Text]
+                              ,[ConvertedCost]
+                              ,[FlavourText]
+                              ,[Layout]
+                              ,[Loyalty]
+                              ,[OracleID]
+                              ,[Power]
+                              ,[Toughness])
+                        OUTPUT inserted.ID
+                        VALUES(
+                               @CardID
+                              ,@Object
+                              ,@Name
+                              ,@Image
+                              ,@Mana_Cost
+                              ,@Oracle_Text
+                              ,@ConvertedCost
+                              ,@FlavourText
+                              ,@Layout
+                              ,@Loyalty
+                              ,@OracleID
+                              ,@Power
+                              ,@Toughness)";
+
+                return await conn.QuerySingleAsync<int>(sql, new
+                {
+                    card.CardID,
+                    card.Object,
+                    card.Name,
+                    card.Image,
+                    card.ManaCost,
+                    card.OracleText,
+                    card.ConvertedCost,
+                    card.FlavourText,
+                    card.Layout,
+                    card.Loyalty,
+                    card.OracleID,
+                    card.Power,
+                    card.Toughness
                 });
             }
         }
