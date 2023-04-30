@@ -31,11 +31,11 @@ namespace MTG
             List<Card> cards = mtgservice.GetAllCards().Result.ToList();
             List<Rarity> rarities = mtgservice.GetRarities().Result.ToList();
             List<CardType> cardtypes = mtgservice.GetAllCardTypes().Result.ToList();
+            List<tcgct_mtg.Models.CardFace> cardfaces = mtgservice.GetAllCardFaces().Result.ToList();
 
             // Update sets + set types
             foreach (var _card in parsed.DistinctBy(x => x.set_uri))
             {
-                break;
                 int _si = -1;   // set id
                 int _sti = -1;  // set type id
                 if (sets.Exists(s => s.Name == _card.set_name))
@@ -112,6 +112,84 @@ namespace MTG
                 }
             });
 
+            // Update cards
+            foreach (var card in parsed)
+            {
+                if (cards.Exists(e => e.ScryfallID == card.card_id))
+                {
+                    // todo: perhaps should check if any of the properties have changed then update?
+                    continue;
+                }
+
+                Set _set = sets.Single(s => s.Scryfall_id == card.set_id);
+                Rarity _rarity = rarities.Single(r => r.Name == card.rarity);
+                if(card.oracle_id == null)
+                {
+                    card.oracle_id = card.card_faces[0].oracle_id;
+                }
+                Card _card = new Card
+                {
+                    Name = card.card_name,
+                    ManaCost = card.mana_cost,
+                    Text = card.oracle_text,
+                    Flavor = card.flavor_text,
+                    Artist = card.artist,
+                    CollectorNumber = card.collector_number,
+                    Power = card.power,
+                    Toughness = card.toughness,
+                    Card_Set_ID = _set.ID,
+                    ScryfallID = card.card_id,
+                    ConvertedCost = card.cmc,
+                    Image = card.image_uris?.normal,
+                    OracleID = card.oracle_id,
+                    Rarity_ID = _rarity.ID,
+                    Rarity = _rarity,
+                    MultiFace = card.card_faces != null
+
+                };
+
+                int _ci = mtgservice.CreateCard(_card).Result;
+                _card.ID = _ci;
+                cards.Add(_card);
+
+                if(_card.MultiFace)
+                {
+                    foreach (var face in card.card_faces)
+                    {
+                        if (cardfaces.Exists(e => e.CardID == _ci && e.Name == face.name))
+                        {
+                            continue;
+                        }
+                        if (face.image_uris == null)
+                        {
+
+                        }
+                        tcgct_mtg.Models.CardFace _cf = new tcgct_mtg.Models.CardFace
+                        {
+                            CardID = _ci,
+                            Card = _card,
+                            Object = face.@object,
+                            Name = face.name,
+                            Image = face.image_uris?.normal,
+                            ManaCost = face.mana_cost,
+                            OracleText = face.oracle_text,
+                            ConvertedCost = Convert.ToInt32(face.cmc),
+                            FlavourText = face.flavor_text,
+                            Layout = face.layout,
+                            Loyalty = face.loyalty,
+                            OracleID = face.oracle_id,
+                            Power = face.power,
+                            Toughness = face.toughness
+                        };
+
+                        int _cfi = mtgservice.CreateCardFace(_cf).Result;
+                        _cf.ID = _cfi;
+                        cardfaces.Add(_cf);
+                    }
+                }
+            }
+
+            // Update card parts
             return;
             foreach (var _card in parsed)
             {
