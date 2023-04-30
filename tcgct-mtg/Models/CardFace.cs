@@ -13,7 +13,7 @@ namespace tcgct_mtg.Models
         public Card Card { get; set; }
         public string Object { get; set; }
         public string Name { get; set; }
-        public Uri Image { get; set; }
+        public string Image { get; set; }
         public string ManaCost { get; set; }
         public string OracleText { get; set; }
         public int ConvertedCost { get; set; }

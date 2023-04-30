@@ -147,8 +147,8 @@ namespace tcgct_mtg.Services
                                 ,@image
                                 ,@imageflipped
                                 ,@oracleid
-                                ,@rarity_id,
-                                ,@multi_face)";
+                                ,@rarity_id
+                                ,@multiface)";
                 return await conn.QuerySingleAsync<int>(sql, new
                 {
                     card.Name,
@@ -214,8 +214,8 @@ namespace tcgct_mtg.Services
                               ,@Object
                               ,@Name
                               ,@Image
-                              ,@Mana_Cost
-                              ,@Oracle_Text
+                              ,@ManaCost
+                              ,@OracleText
                               ,@ConvertedCost
                               ,@FlavourText
                               ,@Layout
