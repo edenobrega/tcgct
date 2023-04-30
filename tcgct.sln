@@ -14,6 +14,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.gitignore = .gitignore
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MTG", "Updaters\MTG\MTG.csproj", "{0AB3B51B-DE21-491E-AE63-805383B1B535}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Updaters", "Updaters", "{94DD27A5-7A9E-485E-9015-CBE3060553D6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,9 +36,16 @@ Global
 		{BFF6B735-89A9-474E-AADF-ACC95D0A4329}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BFF6B735-89A9-474E-AADF-ACC95D0A4329}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BFF6B735-89A9-474E-AADF-ACC95D0A4329}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0AB3B51B-DE21-491E-AE63-805383B1B535}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0AB3B51B-DE21-491E-AE63-805383B1B535}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0AB3B51B-DE21-491E-AE63-805383B1B535}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0AB3B51B-DE21-491E-AE63-805383B1B535}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{0AB3B51B-DE21-491E-AE63-805383B1B535} = {94DD27A5-7A9E-485E-9015-CBE3060553D6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2F2EE9D6-03EB-4DAB-8AE2-A120A4DC34E8}

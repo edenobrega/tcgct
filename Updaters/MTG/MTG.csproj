@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\tcgct-mtg\tcgct-mtg.csproj" />
+    <ProjectReference Include="..\..\tcgct-mtg\tcgct-mtg.csproj" />
   </ItemGroup>
 
   <ItemGroup>
