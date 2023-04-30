@@ -19,11 +19,11 @@ namespace tcgct_mtg.Models
         public string Toughness { get; set; }
         public int Card_Set_ID { get; set; }
         public Set Set { get; set; }
-        public string ScryfallID { get; set; }
+        public string Scryfall_ID { get; set; }
         public float ConvertedCost { get; set; }
         public string Image { get; set; }
         public string ImageFlipped { get; set; }
-        public string OracleID { get; set; }
+        public string Oracle_ID { get; set; }
         public int Rarity_ID { get; set; }
         public Rarity Rarity { get; set; }
         public bool MultiFace { get; set; }

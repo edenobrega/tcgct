@@ -33,6 +33,7 @@ namespace MTG
             List<Rarity> rarities = mtgservice.GetRarities().Result.ToList();
             List<CardType> cardtypes = mtgservice.GetAllCardTypes().Result.ToList();
             List<tcgct_mtg.Models.CardFace> cardfaces = mtgservice.GetAllCardFaces().Result.ToList();
+            List<tcgct_mtg.Models.CardPart> cardparts = mtgservice.GetAllCardParts().Result.ToList();
 
             // Update sets + set types
             foreach (var _card in parsed.DistinctBy(x => x.set_uri))
@@ -116,7 +117,7 @@ namespace MTG
             // Update cards
             foreach (var card in parsed)
             {
-                if (cards.Exists(e => e.ScryfallID == card.card_id))
+                if (cards.Exists(e => e.Scryfall_ID == card.card_id))
                 {
                     // todo: perhaps should check if any of the properties have changed then update?
                     continue;
@@ -139,10 +140,10 @@ namespace MTG
                     Power = card.power,
                     Toughness = card.toughness,
                     Card_Set_ID = _set.ID,
-                    ScryfallID = card.card_id,
+                    Scryfall_ID = card.card_id,
                     ConvertedCost = card.cmc,
                     Image = card.image_uris?.normal,
-                    OracleID = card.oracle_id,
+                    Oracle_ID = card.oracle_id,
                     Rarity_ID = _rarity.ID,
                     Rarity = _rarity,
                     MultiFace = card.card_faces != null
@@ -184,7 +185,33 @@ namespace MTG
             }
 
             // Update card parts
-            return;
+            foreach (var card in parsed.Where(w => w.all_parts != null).ToList())
+            {
+                Card? _c = null;
+                foreach (var part in card.all_parts)
+                {
+                    if (!cardparts.Exists(e => e.Card?.Scryfall_ID == card.card_id))
+                    {
+                        if(_c == null)
+                        {
+                            _c = cards.Single(s => s.Scryfall_ID == card.card_id);
+                        }
+
+                        tcgct_mtg.Models.CardPart cpa = new tcgct_mtg.Models.CardPart
+                        {
+                            Object = part.@object,
+                            Component = part.component,
+                            Name = part.name,
+                            Uri = part.uri,
+                            CardID = _c.ID
+                        };
+
+                        int _cpi = mtgservice.CreateCardPart(cpa).Result;
+                        cpa.ID = _cpi;
+                        cardparts.Add(cpa);
+                    }
+                }
+            }
         }
     }
 

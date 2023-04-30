@@ -142,11 +142,11 @@ namespace tcgct_mtg.Services
                                 ,@power
                                 ,@toughness
                                 ,@card_set_id
-                                ,@scryfallid
+                                ,@scryfall_id
                                 ,@convertedcost
                                 ,@image
                                 ,@imageflipped
-                                ,@oracleid
+                                ,@oracle_id
                                 ,@rarity_id
                                 ,@multiface)";
                 return await conn.QuerySingleAsync<int>(sql, new
@@ -160,11 +160,11 @@ namespace tcgct_mtg.Services
                     card.Power,
                     card.Toughness,
                     card.Card_Set_ID,
-                    card.ScryfallID,
+                    card.Scryfall_ID,
                     card.ConvertedCost,
                     card.Image,
                     card.ImageFlipped,
-                    card.OracleID,
+                    card.Oracle_ID,
                     card.Rarity_ID,
                     card.MultiFace
                 });
@@ -240,6 +240,46 @@ namespace tcgct_mtg.Services
                     card.Power,
                     card.Toughness
                 });
+            }
+        }
+        #endregion
+
+        #region Card Parts
+        public async Task<IEnumerable<CardPart>> GetAllCardParts()
+        {
+            using (var conn = new SqlConnection(configuration.connectionString))
+            {
+                conn.Open();
+                var sql = "select * from [MTG].[CardPart]";
+                var results = await conn.QueryAsync<CardPart>(sql);
+                return results;
+            }
+        }
+
+        public async Task<int> CreateCardPart(CardPart cardPart)
+        {
+            using (var conn = new SqlConnection(configuration.connectionString))
+            {
+                conn.Open();
+                var sql = @"INSERT INTO [MTG].[CardPart]
+                                   ([CardID]
+                                   ,[Object]
+                                   ,[Component]
+                                   ,[Name])
+                             OUTPUT inserted.ID
+                             VALUES
+                                   (@CardID,
+                                   @Object,
+                                   @Component,
+                                   @Name)";
+                var result = await conn.QuerySingleAsync<int>(sql, new
+                {
+                    cardPart.CardID,
+                    cardPart.Object,
+                    cardPart.Component,
+                    cardPart.Name
+                });
+                return result;
             }
         }
         #endregion
