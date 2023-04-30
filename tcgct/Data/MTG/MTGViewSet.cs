@@ -5,7 +5,7 @@ namespace tcgct.Data.MTG
 {
     public class MTGViewSet : ITableItem
     {
-        public MTGViewSet(MTGSet Set)
+        public MTGViewSet(Set Set)
         {
             this.Set = Set;
             Visible = false;
@@ -13,7 +13,7 @@ namespace tcgct.Data.MTG
             Visibility = "hidden";
         }
 
-        public MTGSet Set { get; set; }
+        public Set Set { get; set; }
         public string Display { get; set; }
         public string Visibility { get; set; }
         public bool Filtered { get; set; }
