@@ -6,20 +6,12 @@ using System.Text;
 using System.Threading.Tasks;
 using tcgct_mtg.Models;
 using Dapper;
+using System.ComponentModel.DataAnnotations;
 
 namespace tcgct_mtg.Services
 {
     public class MTGService
     {
-        //using (var conn = new SqlConnection(configuration.connectionString))
-        //{
-        //    SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(configuration.connectionString);
-        //    conn.Open();
-        //    var sql = $@"";
-        //    var results = await conn.QueryAsync<Set>(sql);
-        //    conn.Close();
-        //    return results;
-        //}
         #region Set
         public async Task<Set> GetSet(int id)
         {
@@ -187,7 +179,7 @@ namespace tcgct_mtg.Services
             using (var conn = new SqlConnection(configuration.connectionString))
             {
                 conn.Open();
-                var sql = "select * from [MTG].[CardFace] where ID = @ID";
+                var sql = "select * from [MTG].[CardFace] where CardID = @ID";
                 return await conn.QueryAsync<CardFace>(sql, new { ID = id });
             }
         }
@@ -346,6 +338,30 @@ namespace tcgct_mtg.Services
         #endregion
 
         #region CardType
+        public async Task<CardType> GetCardType(int type_id)
+        {
+            using (var conn = new SqlConnection(configuration.connectionString))
+            {
+                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(configuration.connectionString);
+                conn.Open();
+                var sql = $@"select [id], [name] from [MTG].[CardType] where [id] = @type_id";
+                var result = await conn.QuerySingleAsync<CardType>(sql, new { type_id });
+                return result;
+            }
+        }
+
+        public async Task<CardType> GetCardType(string type_name)
+        {
+            using (var conn = new SqlConnection(configuration.connectionString))
+            {
+                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(configuration.connectionString);
+                conn.Open();
+                var sql = $@"select [id], [name] from [MTG].[CardType] where [name] = @type_name";
+                var result = await conn.QuerySingleAsync<CardType>(sql, new { type_name });
+                return result;
+            }
+        }
+
         public async Task<IEnumerable<CardType>> GetAllCardTypes()
         {
             using (var conn = new SqlConnection(configuration.connectionString))
@@ -356,6 +372,7 @@ namespace tcgct_mtg.Services
                 return results;
             }
         }
+
         public async Task<int> CreateCardType(string name)
         {
             using (var conn = new SqlConnection(configuration.connectionString))
@@ -375,8 +392,25 @@ namespace tcgct_mtg.Services
                 SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(configuration.connectionString);
                 conn.Open();
                 var sql = $@"insert into [MTG].[TypeLine] values (@CARD_ID, @TYPE_ID)";
-                var results = await conn.QueryAsync<Set>(sql,new { card_id, type_id });
+                await conn.ExecuteAsync(sql,new { card_id, type_id });
                 conn.Close();
+            }
+        }
+
+        public async Task<IEnumerable<TypeLine>> GetTypeLine(int card_id)
+        {
+            using (var conn = new SqlConnection(configuration.connectionString))
+            {
+                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(configuration.connectionString);
+                conn.Open();
+                var sql = $@"select [id], [card_id], [type_id] from [MTG].[TypeLine] where [card_id] = @card_id";
+                var results = await conn.QueryAsync<TypeLine>(sql, new { card_id });
+                conn.Close();
+                foreach (var line in results)
+                {
+                    line.Type = this.GetCardType(line.TypeID).Result;
+                }
+                return results;
             }
         }
         #endregion

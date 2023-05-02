@@ -13,7 +13,6 @@ namespace MTG
     {
         static void Main(string[] args)
         {
-
             //BulkResponse br = new BulkResponse();
             //br.Get();
             //var h = br.data.Single(x => x.type == "default_cards").download_uri;
@@ -24,9 +23,9 @@ namespace MTG
             //var response = client.Get(request);
             //var parsed = JsonConvert.DeserializeObject<List<APICard>>(response.Content);
 
-            var parsed = JsonConvert.DeserializeObject<List<APICard>>(File.ReadAllText(@"D:\Programming\tcgct-new\tcgct\Updaters\MTG\Data\bulkcards.json"));
-
             MTGService mtgservice = new MTGService();
+
+            var parsed = JsonConvert.DeserializeObject<List<APICard>>(File.ReadAllText(@"D:\Programming\tcgct-new\tcgct\Updaters\MTG\Data\bulkcards.json"));
             List<Set> sets = mtgservice.GetAllSets().Result.ToList();
             List<SetType> settypes = mtgservice.GetSetTypes().Result.ToList();
             List<Card> cards = mtgservice.GetAllCards().Result.ToList();
@@ -35,9 +34,18 @@ namespace MTG
             List<tcgct_mtg.Models.CardFace> cardfaces = mtgservice.GetAllCardFaces().Result.ToList();
             List<tcgct_mtg.Models.CardPart> cardparts = mtgservice.GetAllCardParts().Result.ToList();
 
+            //foreach (var card in _cards.ToList())
+            //{
+            //    foreach (var part in results.Where(w => w.CardID == card.ID))
+            //    {
+            //        part.Card = card;
+            //    }
+            //}
+
             // Update sets + set types
             foreach (var _card in parsed.DistinctBy(x => x.set_uri))
             {
+                break;
                 int _si = -1;   // set id
                 int _sti = -1;  // set type id
                 if (sets.Exists(s => s.Name == _card.set_name))
@@ -95,7 +103,7 @@ namespace MTG
                     cardtypes.Add(new CardType
                     {
                         ID = ct,
-                        Name = t
+                        Name = t.Trim()
                     });
                 }
             }));
@@ -117,6 +125,7 @@ namespace MTG
             // Update cards
             foreach (var card in parsed)
             {
+                break;
                 if (cards.Exists(e => e.Scryfall_ID == card.card_id))
                 {
                     // todo: perhaps should check if any of the properties have changed then update?
@@ -187,29 +196,51 @@ namespace MTG
             // Update card parts
             foreach (var card in parsed.Where(w => w.all_parts != null).ToList())
             {
+                break;
                 Card? _c = null;
                 foreach (var part in card.all_parts)
                 {
-                    if (!cardparts.Exists(e => e.Card?.Scryfall_ID == card.card_id))
+                    if (cardparts.Exists(e => e.Card?.Scryfall_ID == card.card_id))
                     {
-                        if(_c == null)
-                        {
-                            _c = cards.Single(s => s.Scryfall_ID == card.card_id);
-                        }
-
-                        tcgct_mtg.Models.CardPart cpa = new tcgct_mtg.Models.CardPart
-                        {
-                            Object = part.@object,
-                            Component = part.component,
-                            Name = part.name,
-                            Uri = part.uri,
-                            CardID = _c.ID
-                        };
-
-                        int _cpi = mtgservice.CreateCardPart(cpa).Result;
-                        cpa.ID = _cpi;
-                        cardparts.Add(cpa);
+                        continue;
                     }
+
+                    if(_c == null)
+                    {
+                        _c = cards.Single(s => s.Scryfall_ID == card.card_id);
+                    }
+
+                    tcgct_mtg.Models.CardPart cpa = new tcgct_mtg.Models.CardPart
+                    {
+                        Object = part.@object,
+                        Component = part.component,
+                        Name = part.name,
+                        Uri = part.uri,
+                        CardID = _c.ID
+                    };
+
+                    int _cpi = mtgservice.CreateCardPart(cpa).Result;
+                    cpa.ID = _cpi;
+                    cardparts.Add(cpa);
+                }
+            }
+
+            foreach (var card in parsed)
+            {
+                if (string.IsNullOrEmpty(card.type_line))
+                {
+                    continue;
+                }
+                int _ci = cards.Single(s => s.Scryfall_ID == card.card_id).ID;
+                List<TypeLine> _ts = mtgservice.GetTypeLine(_ci).Result.ToList();
+                foreach (var _type in card.type_line.Split(' '))
+                {
+                    if (_ts.Exists(e => e.Type.Name == _type))
+                    {
+                        continue;
+                    }
+                    int _cti = cardtypes.Single(s => s.Name == _type).ID;
+                    mtgservice.CreateTypeLine(_cti, _ci);
                 }
             }
         }

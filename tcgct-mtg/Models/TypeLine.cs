@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace tcgct_mtg.Models
 {
-    internal class TypeLine
+    public class TypeLine
     {
         public int ID { get; set; }
         public int CardID { get; set; }
