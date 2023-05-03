@@ -401,3 +401,5 @@ FodyWeavers.xsd
 # data Files
 bulkcards.json
 single.json
+/sandbox/sandbox.csproj
+/sandbox

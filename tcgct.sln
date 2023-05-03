@@ -18,6 +18,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MTG", "Updaters\MTG\MTG.csp
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Updaters", "Updaters", "{94DD27A5-7A9E-485E-9015-CBE3060553D6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "sandbox", "sandbox\sandbox.csproj", "{D58556C4-F1A3-465B-95D7-6C24E5AAD18C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -40,6 +42,10 @@ Global
 		{0AB3B51B-DE21-491E-AE63-805383B1B535}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0AB3B51B-DE21-491E-AE63-805383B1B535}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0AB3B51B-DE21-491E-AE63-805383B1B535}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D58556C4-F1A3-465B-95D7-6C24E5AAD18C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D58556C4-F1A3-465B-95D7-6C24E5AAD18C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D58556C4-F1A3-465B-95D7-6C24E5AAD18C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D58556C4-F1A3-465B-95D7-6C24E5AAD18C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

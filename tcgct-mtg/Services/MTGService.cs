@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using tcgct_mtg.Models;
 using Dapper;
 using System.ComponentModel.DataAnnotations;
+using System.Runtime.InteropServices;
 
 namespace tcgct_mtg.Services
 {
@@ -87,17 +88,23 @@ namespace tcgct_mtg.Services
             throw new NotImplementedException();
             List<Rarity> rarities = GetRarities().Result.ToList();
             Set set = GetSet(id).Result;
+        } 
+        public async Task<Card> GetCard(int id)
+        {
             using (var conn = new SqlConnection(configuration.connectionString))
             {
                 SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(configuration.connectionString);
                 conn.Open();
                 var sql = $@"select *
                               from [MTG].[Card]
-                              where card_set_id = @id";
-                //var results = await conn.QueryAsync<Card, Rarity, Card>(sql, (card, rarity) => { card.Rarity = rarity; return card; });
-
+                              where [id] = @id";
+                var result = await conn.QuerySingleAsync<Card>(sql, new { id });
                 conn.Close();
-                //return results;
+
+                result.Rarity = await this.GetRarity(result.Rarity_ID);
+                result.Set = await this.GetSet(result.Card_Set_ID);
+                result.TypeLine = await this.GetCardTypeLine(id);
+                return result;
             }
         }
         public async Task<int> CreateCard(Card card)
@@ -385,6 +392,14 @@ namespace tcgct_mtg.Services
         #endregion
 
         #region Type Line
+        #region Internal Classes
+        internal class TypeLineSQL
+        {
+            public int id { get; set; }
+            public int type_id { get; set; }
+            public string name { get; set; }
+        }
+        #endregion
         public async void CreateTypeLine(int type_id, int card_id)
         {
             using (var conn = new SqlConnection(configuration.connectionString))
@@ -397,21 +412,40 @@ namespace tcgct_mtg.Services
             }
         }
 
-        public async Task<IEnumerable<TypeLine>> GetTypeLine(int card_id)
+        public async Task<CardTypeLine> GetCardTypeLine(int card_id)
         {
-            using (var conn = new SqlConnection(configuration.connectionString))
-            {
-                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(configuration.connectionString);
-                conn.Open();
-                var sql = $@"select [id], [card_id], [type_id] from [MTG].[TypeLine] where [card_id] = @card_id";
-                var results = await conn.QueryAsync<TypeLine>(sql, new { card_id });
-                conn.Close();
-                foreach (var line in results)
+            return await Task.Run<CardTypeLine>(() => 
+            { 
+                using (var conn = new SqlConnection(configuration.connectionString))
                 {
-                    line.Type = this.GetCardType(line.TypeID).Result;
-                }
-                return results;
-            }
+                    conn.Open();
+                    var sql = $@"select tl.id as [ID], tl.[type_id] as [TypeID], ct.[name] 
+                                 from [MTG].[TypeLine] as tl
+                                 inner join [MTG].[CardType] as ct on ct.id = tl.[type_id]
+                                 where card_id = @card_id";
+                    var results = conn.Query<TypeLineSQL>(sql, new { card_id });
+
+                    conn.Close();
+                    List<TypeLine> typeLines = new List<TypeLine>();
+                    foreach (var item in results)
+                    {
+                        typeLines.Add(new TypeLine
+                        {
+                            ID = item.id,
+                            CardID = card_id,
+                            TypeID = item.type_id,
+                            Type = new CardType 
+                            { 
+                                ID = item.type_id,
+                                Name = item.name 
+                            }
+                        });
+                    }
+
+                    return new CardTypeLine(typeLines);
+                }            
+            });
+
         }
         #endregion
     }
