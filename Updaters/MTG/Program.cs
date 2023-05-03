@@ -13,16 +13,6 @@ namespace MTG
     {
         static void Main(string[] args)
         {
-            //BulkResponse br = new BulkResponse();
-            //br.Get();
-            //var h = br.data.Single(x => x.type == "default_cards").download_uri;
-            //string url = $"{h.Scheme}://{h.Host}";
-            //var options = new RestClientOptions(url);
-            //var client = new RestClient(options);
-            //var request = new RestRequest(h.AbsoluteUri);
-            //var response = client.Get(request);
-            //var parsed = JsonConvert.DeserializeObject<List<APICard>>(response.Content);
-
             MTGService mtgservice = new MTGService();
 
             var parsed = JsonConvert.DeserializeObject<List<APICard>>(File.ReadAllText(@"D:\Programming\tcgct-new\tcgct\Updaters\MTG\Data\bulkcards.json"));
@@ -34,18 +24,9 @@ namespace MTG
             List<tcgct_mtg.Models.CardFace> cardfaces = mtgservice.GetAllCardFaces().Result.ToList();
             List<tcgct_mtg.Models.CardPart> cardparts = mtgservice.GetAllCardParts().Result.ToList();
 
-            //foreach (var card in _cards.ToList())
-            //{
-            //    foreach (var part in results.Where(w => w.CardID == card.ID))
-            //    {
-            //        part.Card = card;
-            //    }
-            //}
-
             // Update sets + set types
             foreach (var _card in parsed.DistinctBy(x => x.set_uri))
             {
-                break;
                 int _si = -1;   // set id
                 int _sti = -1;  // set type id
                 if (sets.Exists(s => s.Name == _card.set_name))
@@ -125,7 +106,6 @@ namespace MTG
             // Update cards
             foreach (var card in parsed)
             {
-                break;
                 if (cards.Exists(e => e.Scryfall_ID == card.card_id))
                 {
                     // todo: perhaps should check if any of the properties have changed then update?
@@ -196,7 +176,6 @@ namespace MTG
             // Update card parts
             foreach (var card in parsed.Where(w => w.all_parts != null).ToList())
             {
-                break;
                 Card? _c = null;
                 foreach (var part in card.all_parts)
                 {
