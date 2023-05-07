@@ -264,19 +264,22 @@ namespace tcgct_mtg.Services
                                    ([CardID]
                                    ,[Object]
                                    ,[Component]
-                                   ,[Name])
+                                   ,[Name]
+                                   ,[RelatedCardID])
                              OUTPUT inserted.ID
                              VALUES
                                    (@CardID,
                                    @Object,
                                    @Component,
-                                   @Name)";
+                                   @Name,
+                                   @RelatedCardID)";
                 var result = await conn.QuerySingleAsync<int>(sql, new
                 {
                     cardPart.CardID,
                     cardPart.Object,
                     cardPart.Component,
-                    cardPart.Name
+                    cardPart.Name,
+                    cardPart.RelatedCardID
                 });
                 return result;
             }

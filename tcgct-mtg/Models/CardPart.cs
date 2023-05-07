@@ -12,6 +12,8 @@ namespace tcgct_mtg.Models
         public int ID { get; set; }
         public int CardID { get; set; }
         public Card Card { get; set; }
+        public int RelatedCardID { get; set; }
+        public Card RelatedCard { get; set; }
         public string Component { get; set; }
         public string Name { get; set; }
         public Uri Uri { get; set; }
