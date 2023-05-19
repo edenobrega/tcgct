@@ -201,7 +201,7 @@ namespace tcgct_mtg.Services
                                 ,@text
                                 ,@flavor
                                 ,@artist
-                                ,@collectornumber
+                                ,@collector_number
                                 ,@power
                                 ,@toughness
                                 ,@card_set_id
@@ -219,7 +219,7 @@ namespace tcgct_mtg.Services
                     card.Text,
                     card.Flavor,
                     card.Artist,
-                    card.CollectorNumber,
+                    card.Collector_Number,
                     card.Power,
                     card.Toughness,
                     card.Card_Set_ID,
@@ -247,9 +247,22 @@ namespace tcgct_mtg.Services
         }
         public IEnumerable<Card> GetSetCards(int id)
         {
-            throw new NotImplementedException();
-            List<Rarity> rarities = GetRaritiesAsync().Result.ToList();
-            Set set = GetSetAsync(id).Result;
+            using (var conn = new SqlConnection(configuration.connectionString))
+            {
+                conn.Open();
+                var sql = "select * from [MTG].[Card] where card_set_id=@id";
+                var results = conn.Query<Card>(sql, new { id }).ToList();
+                List<Rarity> rarities = GetRarities().ToList();
+                Set set = GetSet(id);
+                results.ForEach(fe => 
+                {
+                    fe.Set = set;
+                    fe.Rarity = rarities.Single(s => s.ID == fe.Rarity_ID);
+                    fe.TypeLine = GetCardTypeLine(fe.ID);
+                });
+                Console.WriteLine(results.Count);
+                return results;
+            }
         }
         public Card GetCard(int id)
         {
@@ -297,7 +310,7 @@ namespace tcgct_mtg.Services
                                 ,@text
                                 ,@flavor
                                 ,@artist
-                                ,@collectornumber
+                                ,@collector_number
                                 ,@power
                                 ,@toughness
                                 ,@card_set_id
@@ -315,7 +328,7 @@ namespace tcgct_mtg.Services
                     card.Text,
                     card.Flavor,
                     card.Artist,
-                    card.CollectorNumber,
+                    card.Collector_Number,
                     card.Power,
                     card.Toughness,
                     card.Card_Set_ID,

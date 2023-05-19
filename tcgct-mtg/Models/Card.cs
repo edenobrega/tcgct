@@ -14,7 +14,7 @@ namespace tcgct_mtg.Models
         public string Text { get; set; }
         public string Flavor { get; set; }
         public string Artist { get; set; }
-        public string CollectorNumber { get; set; }
+        public string Collector_Number { get; set; }
         public string Power { get; set; }
         public string Toughness { get; set; }
         public int Card_Set_ID { get; set; }
