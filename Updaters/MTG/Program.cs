@@ -23,7 +23,7 @@ namespace MTG
 
         static void Main(string[] args)
         {
-            bool multithread = falsewwwwwwww;
+            bool multithread = false;
             mtgservice = new MTGService();
 
             List<APICard> bad_cards = new List<APICard>();
@@ -38,13 +38,13 @@ namespace MTG
             }
             bad_cards.ForEach(fe => { parsed.Remove(fe); });
 
-            sets = mtgservice.GetAllSets().Result.ToList();
-            settypes = mtgservice.GetSetTypes().Result.ToList();
-            cards = mtgservice.GetAllCards().Result.ToList();
-            rarities = mtgservice.GetRarities().Result.ToList();
-            cardtypes = mtgservice.GetAllCardTypes().Result.ToList();
-            cardfaces = mtgservice.GetAllCardFaces().Result.ToList();
-            cardparts = mtgservice.GetAllCardParts().Result.ToList();
+            sets = mtgservice.GetAllSets().ToList();
+            settypes = mtgservice.GetSetTypes().ToList();
+            cards = mtgservice.GetAllCards().ToList();
+            rarities = mtgservice.GetRarities().ToList();
+            cardtypes = mtgservice.GetAllCardTypes().ToList();
+            cardfaces = mtgservice.GetAllCardFaces().ToList();
+            cardparts = mtgservice.GetAllCardParts().ToList();
 
             // Update sets + set types
             foreach (var _card in parsed.DistinctBy(x => x.set_uri))
@@ -61,7 +61,7 @@ namespace MTG
                 Thread.Sleep(400);
                 if (!settypes.Exists(x => x.Name == _s.set_type))
                 {
-                    _sti = mtgservice.CreateSetType(_card.set_type).Result;
+                    _sti = mtgservice.CreateSetType(_card.set_type);
                     settypes.Add(new SetType { ID = _sti, Name = _s.set_type });
                     Set set = new Set
                     {
@@ -73,7 +73,7 @@ namespace MTG
                         Set_Type_id = _sti
 
                     };
-                    _si = mtgservice.CreateSet(set).Result;
+                    _si = mtgservice.CreateSet(set);
                     sets.Add(set);
                 }
                 else
@@ -89,7 +89,7 @@ namespace MTG
                         Set_Type_id = _sti
 
                     };
-                    _si = mtgservice.CreateSet(set).Result;
+                    _si = mtgservice.CreateSet(set);
                     set.ID = _si;
                     sets.Add(set);
                 }
@@ -104,7 +104,7 @@ namespace MTG
                 return;
                 if (!cardtypes.Exists(e => e.Name == t))
                 {
-                    int ct = mtgservice.CreateCardType(t).Result;
+                    int ct = mtgservice.CreateCardType(t);
                     cardtypes.Add(new CardType
                     {
                         ID = ct,
@@ -119,7 +119,7 @@ namespace MTG
                 return;
                 if(!rarities.Exists(e => e.Name == fe))
                 {
-                    int ri = mtgservice.CreateRarity(fe).Result;
+                    int ri = mtgservice.CreateRarity(fe);
                     rarities.Add(new Rarity
                     {
                         ID = ri,
@@ -222,7 +222,7 @@ namespace MTG
                         Text = card.oracle_text,
                         Flavor = card.flavor_text,
                         Artist = card.artist,
-                        CollectorNumber = card.collector_number,
+                        Collector_Number = card.collector_number,
                         Power = card.power,
                         Toughness = card.toughness,
                         Card_Set_ID = _set.ID,
@@ -236,7 +236,7 @@ namespace MTG
 
                     };
 
-                    int _ci = mtgservice.CreateCard(_card).Result;
+                    int _ci = mtgservice.CreateCard(_card);
                     _card.ID = _ci;
                     cards.Add(_card);
 
@@ -263,7 +263,7 @@ namespace MTG
                                 Toughness = face.toughness
                             };
 
-                            int _cfi = mtgservice.CreateCardFace(_cf).Result;
+                            int _cfi = mtgservice.CreateCardFace(_cf);
                             _cf.ID = _cfi;
                             cardfaces.Add(_cf);
                         }
@@ -304,7 +304,7 @@ namespace MTG
                         }
 
 
-                        int _cpi = mtgservice.CreateCardPart(cpa).Result;
+                        int _cpi = mtgservice.CreateCardPart(cpa);
                         cpa.ID = _cpi;
                         cardparts.Add(cpa);
                     }
@@ -319,7 +319,7 @@ namespace MTG
                     }
 
                     int _ci = cards.Single(s => s.Scryfall_ID == card.card_id).ID;
-                    List<TypeLine> _ts = mtgservice.GetCardTypeLine(_ci).Result.TypeLines;
+                    List<TypeLine> _ts = mtgservice.GetCardTypeLine(_ci).TypeLines;
                     foreach (var _type in card.type_line.Split(' '))
                     {
                         if (_ts.Exists(e => e.Type.Name == _type))
@@ -361,7 +361,7 @@ namespace MTG
                     Text = card.oracle_text,
                     Flavor = card.flavor_text,
                     Artist = card.artist,
-                    CollectorNumber = card.collector_number,
+                    Collector_Number = card.collector_number,
                     Power = card.power,
                     Toughness = card.toughness,
                     Card_Set_ID = _set.ID,
@@ -375,7 +375,7 @@ namespace MTG
 
                 };
 
-                int _ci = mtgservice.CreateCard(_card).Result;
+                int _ci = mtgservice.CreateCard(_card);
                 _card.ID = _ci;
                 cards.Add(_card);
 
@@ -402,7 +402,7 @@ namespace MTG
                             Toughness = face.toughness
                         };
 
-                        int _cfi = mtgservice.CreateCardFace(_cf).Result;
+                        int _cfi = mtgservice.CreateCardFace(_cf);
                         _cf.ID = _cfi;
                         cardfaces.Add(_cf);
                     }
@@ -438,7 +438,7 @@ namespace MTG
                         CardID = _c.ID
                     };
 
-                    int _cpi = mtgservice.CreateCardPart(cpa).Result;
+                    int _cpi = mtgservice.CreateCardPart(cpa);
                     cpa.ID = _cpi;
                     cardparts.Add(cpa);
                 }
@@ -456,7 +456,7 @@ namespace MTG
                 }
 
                 int _ci = cards.Single(s => s.Scryfall_ID == card.card_id).ID;
-                List<TypeLine> _ts = mtgservice.GetCardTypeLine(_ci).Result.TypeLines;
+                List<TypeLine> _ts = mtgservice.GetCardTypeLine(_ci).TypeLines;
                 foreach (var _type in card.type_line.Split(' '))
                 {
                     if (_ts.Exists(e => e.Type.Name == _type))
