@@ -6,6 +6,12 @@
 @using tcgct.Data.MTG
 @inject tcgct_mtg.Services.MTGService mtgset
 
+<style>
+    img{
+        max-height: 25px;
+    }
+</style>
+
 <h1>Weather forecast</h1>
 
 @if (sets == null)
@@ -22,7 +28,6 @@ else
                 <th>Name</th>
                 <th>Shorthand</th>
                 <th>Icon</th>
-                <th>Search URI</th>
                 <th>Set Type</th>
             </tr>
         </thead>
@@ -30,15 +35,11 @@ else
             @foreach (var set in sets)
             {
                 <tr style="display:@set.Display;visibility:@set.Visibility">
-                    <td>
-                        <NavLink href="viewset">Fetch data</NavLink>
-                    </td>
                     <td>@set.Set.ID</td>
                     <td>@set.Set.Name</td>
                     <td>@set.Set.Shorthand</td>
-                    <td>@set.Set.Icon</td>
-                    <td>@set.Set.Search_Uri</td>
-                    <td>@set.Set.Set_Type_id.Name</td>
+                    <td><img src="@set.Set.Icon" /></td>
+                    <td>@set.Set.Set_Type.Name</td>
                 </tr>
             }
         </tbody>
@@ -50,7 +51,7 @@ else
 
 @code {
     int page = 0;
-    int perPage = 20;
+    int perPage = 10;
 
     private string filterValue;
     public string FilterValue
@@ -106,10 +107,9 @@ else
         }
     }
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        IEnumerable<MTGSet> _sets = await mtgset.GetAllSets();
-        sets = _sets.Select(x => new MTGViewSet(x)).ToList();
+        sets = mtgset.GetAllSets().Select(x => new MTGViewSet(x)).ToList();
 
         LoadPage();
     }
@@ -133,7 +133,7 @@ else
 
         foreach (var set in sets)
         {
-            if (set.Set.Set_Type_id.Name == (string)e.Value)
+            if (set.Set.Set_Type.Name == (string)e.Value)
             {
                 if (set.Visible)
                 {
