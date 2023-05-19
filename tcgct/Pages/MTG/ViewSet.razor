@@ -1,10 +1,84 @@
 ﻿@page "/mtg/viewset/{set_id}"
+@inject tcgct_mtg.Services.MTGService mtgservice
+@using tcgct_mtg.Models
+@using tcgct.Data.MTG
 
 <h3>@set_id</h3>
+<style>
+    img{
+        max-height:250px;
+    }
+</style>
+<table>
+    <thead>
+        <tr>
+            <th>Collector Number</th>
+            <th>Name</th>
+            <th>Type Line</th>
+            <th>Text</th>
+            <th>Image</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var card in cards)
+        {
+            <tr style="display:@card.Display;visibility:@card.Visibility">
+                <td>@card.Card.Collector_Number</td>
+                <td>@card.Card.Name</td>
+                <td>@card.Card.TypeLine.ToString()</td>
+                <td>@card.Card.Text</td>
+                <td><img src="@card.Card.Image" /></td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<button class="btn btn-primary" @onclick="PreviousPage">Previous Page</button>
+<button class="btn btn-primary" @onclick="NextPage">Next Page</button>
+<h5>@(page)</h5>
 
 @code {
     [Parameter]
     public string set_id { get; set; }
-    //protected override async Task OnInitializedAsync
 
+    public List<MTGViewCard>? cards;
+
+    int page = 0;
+    int perPage = 10;
+
+    protected override void OnInitialized()
+    {
+        cards = mtgservice.GetSetCards(int.Parse(set_id)).Select(s => new MTGViewCard(s)).ToList();
+        LoadPage();
+    }
+
+    void LoadPage()
+    {
+        for (int i = page * perPage; i < (page * perPage) + perPage; i++)
+        {
+            cards[i].FlipVisibility();
+        }
+    }
+    void NextPage()
+    {
+        if (page + 1 > (cards.Count + perPage - 1) / perPage)
+        {
+            return;
+        }
+        LoadPage();
+        page++;
+        LoadPage();
+    }
+
+    void PreviousPage()
+    {
+        if (page - 1 < 0)
+        {
+            return;
+        }
+        LoadPage();
+        page--;
+        LoadPage();
+    }
 }
