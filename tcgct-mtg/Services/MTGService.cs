@@ -897,5 +897,92 @@ namespace tcgct_mtg.Services
         }
         #endregion
         #endregion
+
+        #region Collected
+        #region sync 
+        public void UpdateCollected(List<Collection> newCollection, string UserID)
+        {
+            var oldCollection = GetCollectionDynamic(newCollection.Select(s => s.CardID), UserID).ToList();
+            List<Collection> update = new List<Collection>();
+            List<Collection> delete = new List<Collection>();
+            List<Collection> insert = new List<Collection>();
+
+            foreach (var item in newCollection)
+            {
+                if(item.Count == 0)
+                {
+                    delete.Add(item);
+                    continue;
+                }
+                if(oldCollection.Exists(oc => oc.CardID == item.CardID && oc.UserID == item.UserID))
+                {
+                    var sing = oldCollection.Single(oc => oc.CardID == item.CardID && oc.UserID == item.UserID);
+                    if (sing.Count != item.Count)
+                    {
+                        update.Add(item);
+                    }
+                }
+                else
+                {
+                    insert.Add(item);
+                }
+            }
+            using (var conn = new SqlConnection(configuration.connectionString))
+            {
+                string sql;
+                foreach (var item in delete)
+                {
+                    sql = "delete from [MTG].[Collection] where CardID = @CardID and UserID = @UserID";
+                    conn.Execute(sql, new { item.CardID, UserID });
+                }
+
+                foreach (var item in update)
+                {
+                    sql = "update [MTG].[Collection] set [Count] = @Count where CardID = @CardID and UserID = @UserID";
+                    conn.Execute(sql, new { item.Count, item.CardID, UserID });
+                }
+                //sql = "insert into [MTG].[Collection] values (@insert)";
+                //conn.Execute(sql, new { insert });
+                foreach (var item in insert)
+                {
+                    sql = "insert into [MTG].[Collection] values (@CardID, @UserID, @Count)";
+                    conn.Execute(sql, new { item.CardID, item.UserID, item.Count });
+                }
+            }
+        }
+
+        public IEnumerable<Collection> GetCollectedSet(string UserID, int SetID)
+        {
+            using (var conn = new SqlConnection(configuration.connectionString))
+            {
+                conn.Open();
+                string sql = @"select col.CardID
+	                                  ,s.id as SetID
+	                                  ,col.[Count]
+                                      ,col.UserID
+                                from [tcgct].[MTG].[Collection] col
+                                inner join MTG.[Card] c on c.id = col.CardID
+                                inner join MTG.[Set] s on s.id = c.card_set_id
+                                where col.UserID = @UserID and c.card_set_id = @SetID";
+                return conn.Query<Collection>(sql, new { UID = UserID, SetID });
+            }
+
+        }
+
+        public IEnumerable<Collection> GetCollectionDynamic(IEnumerable<int> CardIDs, string UserID)
+        {
+            using (var conn = new SqlConnection(configuration.connectionString))
+            {
+                conn.Open();
+                string sql = @"select [CardID]
+                                     ,[Count]
+                                     ,[UserID]
+                              from [tcgct].[MTG].[Collection]
+                              where UserID = @UserID and CardID in @CardIDs";
+                return conn.Query<Collection>(sql, new { UserID ,CardIDs });
+            }
+        }
+        #endregion
+        #endregion
     }
 }
