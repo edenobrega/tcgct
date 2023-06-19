@@ -260,7 +260,6 @@ namespace tcgct_mtg.Services
                     fe.Rarity = rarities.Single(s => s.ID == fe.Rarity_ID);
                     fe.TypeLine = GetCardTypeLine(fe.ID);
                 });
-                Console.WriteLine(results.Count);
                 return results;
             }
         }
@@ -941,8 +940,7 @@ namespace tcgct_mtg.Services
                     sql = "update [MTG].[Collection] set [Count] = @Count where CardID = @CardID and UserID = @UserID";
                     conn.Execute(sql, new { item.Count, item.CardID, UserID });
                 }
-                //sql = "insert into [MTG].[Collection] values (@insert)";
-                //conn.Execute(sql, new { insert });
+
                 foreach (var item in insert)
                 {
                     sql = "insert into [MTG].[Collection] values (@CardID, @UserID, @Count)";
@@ -964,7 +962,7 @@ namespace tcgct_mtg.Services
                                 inner join MTG.[Card] c on c.id = col.CardID
                                 inner join MTG.[Set] s on s.id = c.card_set_id
                                 where col.UserID = @UserID and c.card_set_id = @SetID";
-                return conn.Query<Collection>(sql, new { UID = UserID, SetID });
+                return conn.Query<Collection>(sql, new { UserID, SetID });
             }
 
         }

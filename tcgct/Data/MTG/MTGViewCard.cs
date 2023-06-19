@@ -5,10 +5,12 @@ namespace tcgct.Data.MTG
 {
     public class MTGViewCard : TableItem
     {
-        public MTGViewCard(Card Card)
+        public MTGViewCard(Card card, Collection collection)
         {
-            this.Card = Card;
+            this.Card = card;
+            Collection = collection;
         }
         public Card Card { get; set; }
+        public Collection Collection { get; set; }
     }
 }

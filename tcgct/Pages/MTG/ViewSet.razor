@@ -1,15 +1,17 @@
 ﻿@page "/mtg/viewset/{set_id}"
 @inject tcgct_mtg.Services.MTGService mtgservice
+@inject AuthenticationStateProvider auth
 @using tcgct_mtg.Models
 @using tcgct.Data.MTG
 
-<h3>@set_id</h3>
+<h3>@cards[0].Card.Set.Name</h3>
 <style>
     img{
         max-height:250px;
     }
 </style>
-<table>
+<input @onchange="(ChangeEventArgs _e) => FilterValue = _e?.Value?.ToString()"/>
+<table class="table">
     <thead>
         <tr>
             <th>Collector Number</th>
@@ -17,6 +19,7 @@
             <th>Type Line</th>
             <th>Text</th>
             <th>Image</th>
+            <th>Collected</th>
         </tr>
     </thead>
 
@@ -29,6 +32,7 @@
                 <td>@card.Card.TypeLine.ToString()</td>
                 <td>@card.Card.Text</td>
                 <td><img src="@card.Card.Image" /></td>
+                <td>@card.Collection.Count</td>
             </tr>
         }
     </tbody>
@@ -47,9 +51,95 @@
     int page = 0;
     int perPage = 10;
 
+    bool SingleItem;
+    MTGViewCard? singleItem;
+
+    private string filterValue;
+    public string FilterValue
+    {
+        get { return filterValue; }
+        set
+        {
+            if (SingleItem)
+            {
+                char newChar = value.Last();
+                switch (newChar)
+                {
+                    case '+':
+                        singleItem.Collection.Count++;
+                        Console.WriteLine(filterValue);
+                        //filterValue = string.Concat(value.SkipLast(1));
+                        return;
+                    case '-':
+                        singleItem.Collection.Count--;
+                        Console.WriteLine(filterValue);
+
+                        //filterValue = string.Concat(value.SkipLast(1));
+                        return;
+                    case '*':
+                        return;
+                    case '/':
+                        return;
+                }
+            }
+            filterValue = value;
+            if (string.IsNullOrEmpty(filterValue) || string.IsNullOrWhiteSpace(filterValue))
+            {
+                foreach (var card in cards)
+                {
+                    card.Filtered = false;
+                    if (card.Visible)
+                    {
+                        card.Visible = !card.Visible;
+                    }
+                }
+                LoadPage();
+                return;
+            }
+
+            int visible = 0;
+            foreach (var card in cards)
+            {
+                if (card.Card.Collector_Number.ToLower() == filterValue.ToLower())
+                {
+                    card.Filtered = true;
+                    card.Visible = true;
+                    visible++;
+                    singleItem = card;
+                }
+                else
+                {
+                    card.Filtered = false;
+                    card.Visible = false;
+                }
+            }
+            if(visible == 1)
+            {
+                SingleItem = true;
+                return;
+            }
+            SingleItem = false;
+            singleItem = null;
+        }
+    }
+
     protected override void OnInitialized()
     {
-        cards = mtgservice.GetSetCards(int.Parse(set_id)).Select(s => new MTGViewCard(s)).ToList();
+        AuthenticationState authState = auth.GetAuthenticationStateAsync().Result;
+        string cid = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier";
+        string uid = authState.User.Claims.First(f => f.Type == cid).Value;
+        List<Collection> collection = mtgservice.GetCollectedSet(uid, int.Parse(set_id)).ToList();
+        List<Card> cards_raw = mtgservice.GetSetCards(int.Parse(set_id)).ToList();
+        cards = new List<MTGViewCard>();
+        foreach (var _c in cards_raw)
+        {
+            Collection col = collection.FirstOrDefault(f => f.CardID == _c.ID, new Collection{ CardID = _c.ID, UserID = uid, Count = 0  });
+            MTGViewCard mvc = new MTGViewCard(_c, col);
+            cards.Add(mvc);
+        }
+
+        cards = cards.OrderBy(o => o.Card.ID).ToList();
+        SingleItem = false;
         LoadPage();
     }
 
@@ -57,7 +147,7 @@
     {
         for (int i = page * perPage; i < (page * perPage) + perPage; i++)
         {
-            cards[i].FlipVisibility();
+            cards[i].Visible = !cards[i].Visible;
         }
     }
     void NextPage()
@@ -70,7 +160,6 @@
         page++;
         LoadPage();
     }
-
     void PreviousPage()
     {
         if (page - 1 < 0)
