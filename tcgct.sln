@@ -21,6 +21,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Updaters", "Updaters", "{94
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "sandbox", "sandbox\sandbox.csproj", "{D58556C4-F1A3-465B-95D7-6C24E5AAD18C}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "tcgct-mud", "tcgct-mud\tcgct-mud.csproj", "{1AF51914-A0E0-4BE7-93CC-1E2616B60125}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,6 +49,10 @@ Global
 		{D58556C4-F1A3-465B-95D7-6C24E5AAD18C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D58556C4-F1A3-465B-95D7-6C24E5AAD18C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D58556C4-F1A3-465B-95D7-6C24E5AAD18C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1AF51914-A0E0-4BE7-93CC-1E2616B60125}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1AF51914-A0E0-4BE7-93CC-1E2616B60125}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1AF51914-A0E0-4BE7-93CC-1E2616B60125}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1AF51914-A0E0-4BE7-93CC-1E2616B60125}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

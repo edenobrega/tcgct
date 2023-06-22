@@ -1,0 +1,172 @@
+﻿@page "/mtgold/listsets"
+@inject NavigationManager NavManager
+
+<PageTitle>MTG Sets</PageTitle>
+
+@using tcgct_mtg.Models
+@using tcgct.Data.MTG
+@inject tcgct_mtg.Services.MTGService mtgset
+
+<style>
+    img{
+        max-height: 25px;
+    }
+</style>
+
+<h1>View Sets</h1>
+
+@if (sets == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <input @oninput="(ChangeEventArgs _e) => FilterValue = _e?.Value?.ToString()" />
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Shorthand</th>
+                <th>Icon</th>
+                <th>Set Type</th>
+                <th>Set Type</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var set in sets)
+            {
+                <tr style="display:@set.Display;visibility:@set.Visibility">
+                    <td><a href="/mtg/viewset/@set.Set.ID">View Set</a></td>
+                    <td>@set.Set.ID</td>
+                    <td>@set.Set.Name</td>
+                    <td>@set.Set.Shorthand</td>
+                    <td><img src="@set.Set.Icon" /></td>
+                    <td>@set.Set.Set_Type.Name</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <button class="btn btn-primary" @onclick="PreviousPage">Previous Page</button>
+    <button class="btn btn-primary" @onclick="NextPage">Next Page</button>
+    <h5>@(page)</h5>
+}
+
+@code {
+    int page = 0;
+    int perPage = 10;
+
+    private string filterValue;
+    public string FilterValue
+    {
+        get { return filterValue; }
+        set 
+        { 
+            filterValue = value;
+            if(string.IsNullOrEmpty(filterValue) || string.IsNullOrWhiteSpace(filterValue))
+            {
+                foreach (var set in sets)
+                {
+                    set.Filtered = false;
+                    set.Visible = false;
+                }
+                LoadPage();
+                return;    
+            }
+
+            foreach (var set in sets)
+            {
+                if (set.Set.Name.ToLower().Contains(filterValue.ToLower()))
+                {
+                    set.Filtered = true;
+                    set.Visible = true;
+                }
+                else
+                {
+                    set.Filtered = false;
+                    set.Visible = false;
+                }
+            }
+        }
+    }
+
+    private List<MTGViewSet>? sets;
+
+    void LoadPage()
+    {
+        for (int i = page * perPage; i < (page * perPage) + perPage; i++)
+        {
+            sets[i].Visible = !sets[i].Visible;
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        sets = mtgset.GetAllSets().Select(x => new MTGViewSet(x)).ToList();
+
+        LoadPage();
+    }
+
+    public void FilterSetType(ChangeEventArgs e)
+    {
+        if ((string)e.Value == "")
+        {
+            foreach (var set in sets)
+            {
+                set.Filtered = false;
+                if (set.Visible)
+                {
+                    set.Visible = !set.Visible;
+                }
+            }
+            page = 0;
+            LoadPage();
+            return;
+        }
+
+        foreach (var set in sets)
+        {
+            if (set.Set.Set_Type.Name == (string)e.Value)
+            {
+                if (set.Visible)
+                {
+                    continue;
+                }
+                set.Filtered = true;
+                set.Visible = !set.Visible;
+            }
+            else
+            {
+                if (!set.Visible)
+                {
+                    continue;
+                }
+                set.Filtered = false;
+                set.Visible = !set.Visible;
+            }
+        }
+    }
+
+    //int pageCount = (records + recordsPerPage - 1) / recordsPerPage;
+    void NextPage()
+    {
+        if (page + 1 > (sets.Count + perPage - 1) / perPage)
+        {
+            return;
+        }
+        LoadPage();
+        page++;
+        LoadPage();
+    }
+
+    void PreviousPage()
+    {
+        if(page - 1 < 0)
+        {
+            return;
+        }
+        LoadPage();
+        page--;
+        LoadPage();
+    }
+}

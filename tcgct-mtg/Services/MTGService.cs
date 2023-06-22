@@ -13,13 +13,14 @@ namespace tcgct_mtg.Services
 {
     public class MTGService
     {
+
+
         #region Set
         #region async
         public async Task<Set> GetSetAsync(int id)
         {
             using (var conn = new SqlConnection(configuration.connectionString))
             {
-                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(configuration.connectionString);
                 conn.Open();
                 var sql = $@"select * from [MTG].[Set] where id = @id";
                 var result = await conn.QuerySingleAsync<Set>(sql, new { id });
@@ -31,34 +32,28 @@ namespace tcgct_mtg.Services
         {
             using (var conn = new SqlConnection(configuration.connectionString))
             {
-                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(configuration.connectionString);
                 conn.Open();
                 var sql = $@"select * from [MTG].[Set] where scryfall_id = @scryfall_id";
-                var result = await conn.QuerySingleAsync<Set>(sql, new { scryfall_id });
+                var result = conn.QuerySingleAsync<Set>(sql, new { scryfall_id });
                 conn.Close();
-                return result;
+                return result.Result;
             }
         }
         public async Task<IEnumerable<Set>> GetAllSetsAsync()
         {
-            using (var conn = new SqlConnection(configuration.connectionString))
+            IEnumerable<Set> data;
+            return await Task.Run(() =>
             {
-                conn.Open();
+                using (var conn = new SqlConnection(configuration.connectionString))
+                {
+                    conn.Open();
 
-                var sql = "SELECT * FROM [MTG].[Set]";
-                var results = await conn.QueryAsync<Set>(sql);
-                conn.Close();
+                    var sql = "SELECT * FROM [MTG].[Set]";
+                    data = conn.Query<Set>(sql);
 
-                var st = GetSetTypesAsync().Result;
-                //foreach (var set_type in GetSetTypes().Result)
-                //{
-
-                //}
-
-                //this.GetSetTypes().Result.ToList().ForEach(fe => results.Where(r => r.Set_Type_id ==  fe.ID).ToList().ForEach(r2 => r2.Set_Type = fe));
-
-                return results;
-            }
+                    return data;
+                }
+            });
         }
         public async Task<int> CreateSetAsync(Set set)
         {
@@ -141,7 +136,6 @@ namespace tcgct_mtg.Services
         {
             using (var conn = new SqlConnection(configuration.connectionString))
             {
-                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(configuration.connectionString);
                 conn.Open();
                 var sql = "select * from [MTG].[Card]";
                 return await conn.QueryAsync<Card>(sql);
@@ -157,7 +151,6 @@ namespace tcgct_mtg.Services
         {
             using (var conn = new SqlConnection(configuration.connectionString))
             {
-                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(configuration.connectionString);
                 conn.Open();
                 var sql = $@"select *
                               from [MTG].[Card]
@@ -175,7 +168,6 @@ namespace tcgct_mtg.Services
         {
             using (var conn = new SqlConnection(configuration.connectionString))
             {
-                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(configuration.connectionString);
                 conn.Open();
                 var sql = @"INSERT INTO [MTG].[Card]
                                 ([name]
@@ -584,9 +576,8 @@ namespace tcgct_mtg.Services
         {
             using (var conn = new SqlConnection(configuration.connectionString))
             {
-                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(configuration.connectionString);
                 conn.Open();
-                var sql = $@"select [id], [name] from [{builder.InitialCatalog}].[MTG].[Rarity]";
+                var sql = $@"select [id], [name] from [MTG].[Rarity]";
                 var results = await conn.QueryAsync<Rarity>(sql);
                 conn.Close();
                 return results;
@@ -597,7 +588,6 @@ namespace tcgct_mtg.Services
         {
             using (var conn = new SqlConnection(configuration.connectionString))
             {
-                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(configuration.connectionString);
                 conn.Open();
                 var sql = $@"select id, name from [MTG].[Rarity] where id = @id";
                 var result = await conn.QuerySingleAsync<Rarity>(sql, new { id });
@@ -702,7 +692,6 @@ namespace tcgct_mtg.Services
         {
             using (var conn = new SqlConnection(configuration.connectionString))
             {
-                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(configuration.connectionString);
                 conn.Open();
                 var sql = $@"select [id], [name] from [MTG].[CardType] where [id] = @type_id";
                 var result = await conn.QuerySingleAsync<CardType>(sql, new { type_id });
@@ -714,7 +703,6 @@ namespace tcgct_mtg.Services
         {
             using (var conn = new SqlConnection(configuration.connectionString))
             {
-                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(configuration.connectionString);
                 conn.Open();
                 var sql = $@"select [id], [name] from [MTG].[CardType] where [name] = @type_name";
                 var result = await conn.QuerySingleAsync<CardType>(sql, new { type_name });
@@ -760,7 +748,6 @@ namespace tcgct_mtg.Services
         {
             using (var conn = new SqlConnection(configuration.connectionString))
             {
-                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(configuration.connectionString);
                 conn.Open();
                 var sql = $@"select [id], [name] from [MTG].[CardType] where [name] = @type_name";
                 var result = conn.QuerySingle<CardType>(sql, new { type_name });
@@ -806,7 +793,6 @@ namespace tcgct_mtg.Services
         {
             using (var conn = new SqlConnection(configuration.connectionString))
             {
-                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(configuration.connectionString);
                 conn.Open();
                 var sql = $@"insert into [MTG].[TypeLine] values (@CARD_ID, @TYPE_ID)";
                 await conn.ExecuteAsync(sql,new { card_id, type_id });

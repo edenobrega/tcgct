@@ -1,4 +1,4 @@
-﻿@page "/mtg/viewset/{set_id}"
+﻿@page "/mtgold/viewset/{set_id}"
 @inject tcgct_mtg.Services.MTGService mtgservice
 @inject AuthenticationStateProvider auth
 @using tcgct_mtg.Models
@@ -10,7 +10,7 @@
         max-height:250px;
     }
 </style>
-<input @onchange="(ChangeEventArgs _e) => FilterValue = _e?.Value?.ToString()"/>
+<input type="text" @onkeydown="KeyboardEventHandler" />
 <table class="table">
     <thead>
         <tr>
@@ -51,78 +51,54 @@
     int page = 0;
     int perPage = 10;
 
-    bool SingleItem;
+    string filterValue;
+
     MTGViewCard? singleItem;
 
-    private string filterValue;
-    public string FilterValue
+    private void KeyboardEventHandler(KeyboardEventArgs args)
     {
-        get { return filterValue; }
-        set
+        if (args.Key == "Backspace")
         {
-            if (SingleItem)
+            if (filterValue.Length != 0)
             {
-                char newChar = value.Last();
-                switch (newChar)
-                {
-                    case '+':
-                        singleItem.Collection.Count++;
-                        Console.WriteLine(filterValue);
-                        //filterValue = string.Concat(value.SkipLast(1));
-                        return;
-                    case '-':
-                        singleItem.Collection.Count--;
-                        Console.WriteLine(filterValue);
-
-                        //filterValue = string.Concat(value.SkipLast(1));
-                        return;
-                    case '*':
-                        return;
-                    case '/':
-                        return;
-                }
+                Console.WriteLine("is not zero");
+                filterValue = filterValue.Substring(0, filterValue.Length - 1);
             }
-            filterValue = value;
-            if (string.IsNullOrEmpty(filterValue) || string.IsNullOrWhiteSpace(filterValue))
-            {
-                foreach (var card in cards)
-                {
-                    card.Filtered = false;
-                    if (card.Visible)
-                    {
-                        card.Visible = !card.Visible;
-                    }
-                }
-                LoadPage();
-                return;
-            }
-
-            int visible = 0;
-            foreach (var card in cards)
-            {
-                if (card.Card.Collector_Number.ToLower() == filterValue.ToLower())
-                {
-                    card.Filtered = true;
-                    card.Visible = true;
-                    visible++;
-                    singleItem = card;
-                }
-                else
-                {
-                    card.Filtered = false;
-                    card.Visible = false;
-                }
-            }
-            if(visible == 1)
-            {
-                SingleItem = true;
-                return;
-            }
-            SingleItem = false;
-            singleItem = null;
+            return;
         }
+        if(singleItem != null)
+        {
+            if (args.Key == "+")
+            {
+                return;
+            }
+            if (args.Key == "-")
+            {
+                return;
+            }    
+        }
+        foreach (var card in cards)
+        {
+            if (card.Card.Collector_Number.ToLower() == filterValue.ToLower())
+            {
+                card.Filtered = true;
+                card.Visible = true;
+            }
+            else
+            {
+                card.Filtered = false;
+                card.Visible = false;
+            }
+        }
+
+
+        filterValue += args.Key;
     }
 
+    protected override async Task OnInitializedAsync()
+    {
+        
+    }
     protected override void OnInitialized()
     {
         AuthenticationState authState = auth.GetAuthenticationStateAsync().Result;
@@ -138,8 +114,7 @@
             cards.Add(mvc);
         }
 
-        cards = cards.OrderBy(o => o.Card.ID).ToList();
-        SingleItem = false;
+        cards = cards.OrderBy(o => o.Card.Collector_Number).ToList();
         LoadPage();
     }
 

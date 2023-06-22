@@ -1,0 +1,11 @@
+﻿<MudPaper Width="250px" Elevation="0" Class="py-1">
+    <MudNavMenu Margin="Margin.None" Color="Color.Error">
+        <MudNavLink Href="/dashboard" Icon="@Icons.Material.Filled.Dashboard">Dashboard</MudNavLink>
+        
+        <MudNavGroup Icon="@Icons.Material.Filled.Satellite" Title="MTG" Expanded="false">
+			<MudNavLink Match="NavLinkMatch.Prefix" Href="/mtg/dashboard" Icon="@Icons.Material.Filled.SmartToy">Dashboard</MudNavLink>
+			<MudNavLink Match="NavLinkMatch.Prefix" Href="/mtg/sets" Icon="@Icons.Material.Filled.OilBarrel">Sets</MudNavLink>
+        </MudNavGroup>
+
+    </MudNavMenu>
+</MudPaper>

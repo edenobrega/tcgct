@@ -1,0 +1,21 @@
+﻿@page "/mtg/sets"
+@using tcgct_mtg.Models;
+@inject tcgct_mtg.Services.MTGService mtgs
+
+@if(data == null)
+{
+	<h1> dog</h1>
+}
+else
+{
+	<h1>nice</h1>
+}
+
+@code {
+	IEnumerable<Set>? data;
+
+	protected override async Task OnInitializedAsync()
+	{
+		data = await mtgs.GetAllSetsAsync();
+	}
+}
