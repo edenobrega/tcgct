@@ -2,43 +2,37 @@
 @using tcgct_mtg.Models;
 @inject tcgct_mtg.Services.MTGService mtgs
 
-@if(data == null)
-{
-	<h1> dog</h1>
-}
-else
-{
-	<MudTable Items="@data" Filter="new Func<Set,bool>(FilterFunc1)">
-		<ToolBarContent>
-			<MudText>All MTG Sets</MudText>
-			<MudSpacer />
-			<MudTextField Placeholder="Search" Adornment="Adornment.Start" @bind-Value="filterValue" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium"></MudTextField>
-		</ToolBarContent>
-		<HeaderContent>
-			<MudTh>ID</MudTh>
-			<MudTh>Name</MudTh>
-			<MudTh>Shorthand</MudTh>
-			<MudTh>Icon</MudTh>
-			<MudTh>Set Type</MudTh>
-		</HeaderContent>
-		<RowTemplate>
-			<MudTd><MudLink Href=@($"mtg/set/{context.ID}")>@context.ID</MudLink></MudTd>
-			<MudTd>@context.Name</MudTd>
-			<MudTd>@context.Shorthand</MudTd>
-			<MudTd><MudImage Src="@context.Icon" Height="30"/></MudTd>
-			<MudTd>@context.Set_Type.Name</MudTd>
-		</RowTemplate>
-		<PagerContent>
-			<MudTablePager />
-		</PagerContent>
-	</MudTable>
-}
+<MudTable Items="@data" Loading="data == null" Filter="new Func<Set,bool>(FilterFunc1)">
+	<ToolBarContent>
+		<MudText>All MTG Sets</MudText>
+		<MudSpacer />
+		<MudTextField Placeholder="Search" Adornment="Adornment.Start" @bind-Value="filterValue" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium"></MudTextField>
+	</ToolBarContent>
+	<HeaderContent>
+		<MudTh>ID</MudTh>
+		<MudTh>Name</MudTh>
+		<MudTh>Shorthand</MudTh>
+		<MudTh>Icon</MudTh>
+		<MudTh>Set Type</MudTh>
+	</HeaderContent>
+	<RowTemplate>
+		<MudTd><MudLink Href=@($"mtg/sets/{context.ID}")>@context.ID</MudLink></MudTd>
+		<MudTd>@context.Name</MudTd>
+		<MudTd>@context.Shorthand</MudTd>
+		<MudTd><MudImage Src="@context.Icon" Height="30"/></MudTd>
+		<MudTd>@context.Set_Type.Name</MudTd>
+	</RowTemplate>
+	<PagerContent>
+		<MudTablePager />
+	</PagerContent>
+</MudTable>
+
 
 @code {
 	IEnumerable<Set>? data;
 	string[] columns;
 	string filterValue = "";
-	Set selectItem = null;
+
 	protected override async Task OnInitializedAsync()
 	{
 		data = await mtgs.GetAllSetsAsync();

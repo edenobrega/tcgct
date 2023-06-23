@@ -1,0 +1,75 @@
+﻿@page "/mtg/sets/{set_id}"
+@using tcgct_mtg.Models;
+@inject tcgct_mtg.Services.MTGService mtgs
+
+
+<MudTable Items="@data" Loading="data == null" Filter="new Func<Card,bool>(FilterFunc1)">
+	<ToolBarContent>
+		<MudText>Viewing set: @set_id  @cardsFiltered</MudText>
+		<MudSpacer />
+		<MudTextField Placeholder="Search" Adornment="Adornment.Start" @bind-Value="filterValue" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium"></MudTextField>
+	</ToolBarContent>
+	<HeaderContent>
+		<MudTh>Collector Number</MudTh>
+		<MudTh>Name</MudTh>
+		<MudTh>Mana Cost</MudTh>
+		<MudTh>Text</MudTh>
+		<MudTh>Flavor</MudTh>
+		@*if multiface make dropdown showing both sides*@
+		<MudTh>Image</MudTh>
+		<MudTh>Collected</MudTh>
+	</HeaderContent>
+	<RowTemplate>
+		<MudTd>@context.Collector_Number</MudTd>
+		<MudTd>@context.Name</MudTd>
+		<MudTd>@context.ManaCost</MudTd>
+		<MudTd>@context.Text</MudTd>
+		<MudTd>@context.Flavor</MudTd>
+		<MudTd><MudImage Src="@context.Image" Height="200" /></MudTd>
+		<MudTd>@context.Collected</MudTd>
+	</RowTemplate>
+	<PagerContent>
+		<MudTablePager />
+	</PagerContent>
+</MudTable>
+
+
+@code {
+	[Parameter]
+	public string set_id { get; set; }
+	public string filterValue = "";
+	IEnumerable<Card>? data;
+	int cardsFiltered = 0;
+	Card loneCard = null;
+	protected override async Task OnInitializedAsync()
+	{
+		data = await mtgs.GetSetCardsAsync(int.Parse(set_id));
+	}
+	private bool FilterFunc1(Card card) => FilterFunc(card, filterValue);
+	private bool FilterFunc(Card card, string searchString)
+	{
+		if (string.IsNullOrWhiteSpace(searchString))
+		{
+			cardsFiltered = 0;
+			return true;			
+		}
+
+		if (card.Collector_Number.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+		{
+			cardsFiltered++;
+			if(cardsFiltered == 1)
+			{
+				
+			}
+			return true;			
+		}
+
+		if (card.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+		{
+			cardsFiltered++;
+			return true;			
+		}
+
+		return false;
+	}
+}
