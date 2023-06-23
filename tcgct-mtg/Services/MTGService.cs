@@ -143,9 +143,46 @@ namespace tcgct_mtg.Services
         }
         public async Task<IEnumerable<Card>> GetSetCardsAsync(int id)
         {
-            throw new NotImplementedException();
-            List<Rarity> rarities = GetRaritiesAsync().Result.ToList();
-            Set set = GetSetAsync(id).Result;
+            return await Task.Run(() => 
+            { 
+                List<Rarity> rarities = GetRarities().ToList();
+                Set set = GetSet(id);
+                Card[] cards;
+				using (var conn = new SqlConnection(configuration.connectionString))
+				{
+					conn.Open();
+					var sql = @"select c.[id]
+	                               ,co.[Count] as [Collected]
+                                  ,c.[name]
+                                  ,c.[mana_cost]
+                                  ,c.[text]
+                                  ,c.[flavor]
+                                  ,c.[artist]
+                                  ,c.[collector_number]
+                                  ,c.[power]
+                                  ,c.[toughness]
+                                  ,c.[card_set_id]
+                                  ,c.[scryfall_id]
+                                  ,c.[converted_cost]
+                                  ,c.[image]
+                                  ,c.[image_flipped]
+                                  ,c.[oracle_id]
+                                  ,c.[rarity_id]
+                                  ,c.[multi_face]
+                              from [tcgct].[MTG].[Card] as c
+                              full outer join mtg.[Collection] as co on c.id = co.CardID
+                              where c.card_set_id = @id";
+					cards = conn.Query<Card>(sql, new { id }).ToArray();
+                    foreach (var card in cards)
+                    {
+                        card.Set = set;
+                        card.Rarity = rarities.Single(s => s.ID == card.Rarity_ID);
+                    }
+                    return cards;
+				}
+			});
+
+
         } 
         public async Task<Card> GetCardAsync(int id)
         {
