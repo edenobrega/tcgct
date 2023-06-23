@@ -642,15 +642,20 @@ namespace tcgct_mtg.Services
 
         #region Set Types
         #region async
-        public async Task<IEnumerable<SetType>> GetSetTypesAsync()
-        {
-            using (var conn = new SqlConnection(configuration.connectionString))
-            {
-                conn.Open();
-                var sql = $@"select * from [MTG].[SetType]";
-                var results = await conn.QueryAsync<SetType>(sql);
-                return results;
-            }
+        public async Task<IEnumerable<SetType>> GetAllSetTypesAsync()
+		{
+            return await Task.Run(() => 
+            { 
+			    using (var conn = new SqlConnection(configuration.connectionString))
+                {
+                    conn.Open();
+                    var sql = $@"select * from [MTG].[SetType]";
+                    var results = conn.Query<SetType>(sql);
+                    return results;
+                }            
+            });
+
+
         }
         public async Task<int> CreateSetTypeAsync(string name)
         {

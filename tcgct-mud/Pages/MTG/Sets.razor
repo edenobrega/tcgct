@@ -8,14 +8,58 @@
 }
 else
 {
-	<h1>nice</h1>
+	<MudTable Items="@data" Filter="new Func<Set,bool>(FilterFunc1)">
+		<ToolBarContent>
+			<MudText>All MTG Sets</MudText>
+			<MudSpacer />
+			<MudTextField Placeholder="Search" Adornment="Adornment.Start" @bind-Value="filterValue" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium"></MudTextField>
+		</ToolBarContent>
+		<HeaderContent>
+			<MudTh>ID</MudTh>
+			<MudTh>Name</MudTh>
+			<MudTh>Shorthand</MudTh>
+			<MudTh>Icon</MudTh>
+			<MudTh>Set Type</MudTh>
+		</HeaderContent>
+		<RowTemplate>
+			<MudTd><MudLink Href=@($"mtg/set/{context.ID}")>@context.ID</MudLink></MudTd>
+			<MudTd>@context.Name</MudTd>
+			<MudTd>@context.Shorthand</MudTd>
+			<MudTd><MudImage Src="@context.Icon" Height="30"/></MudTd>
+			<MudTd>@context.Set_Type.Name</MudTd>
+		</RowTemplate>
+		<PagerContent>
+			<MudTablePager />
+		</PagerContent>
+	</MudTable>
 }
 
 @code {
 	IEnumerable<Set>? data;
-
+	string[] columns;
+	string filterValue = "";
+	Set selectItem = null;
 	protected override async Task OnInitializedAsync()
 	{
 		data = await mtgs.GetAllSetsAsync();
+		IEnumerable<SetType> setTypes = await mtgs.GetAllSetTypesAsync();
+		data.ToList().ForEach(fe =>
+		{
+			fe.Set_Type = setTypes.Single(s => s.ID == fe.Set_Type_id);		
+		});
+	}
+
+	private bool FilterFunc1(Set set) => FilterFunc(set, filterValue);
+	private bool FilterFunc(Set set, string searchString)
+	{
+		if (string.IsNullOrWhiteSpace(searchString))
+			return true;
+		if (set.Shorthand.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+			return true;
+		if (set.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+			return true;
+		if (set.Set_Type.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+			return true;
+		return false;
 	}
 }
