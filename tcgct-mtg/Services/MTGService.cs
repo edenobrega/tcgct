@@ -168,17 +168,43 @@ namespace tcgct_mtg.Services
                                   ,c.[image_flipped]
                                   ,c.[oracle_id]
                                   ,c.[rarity_id]
-                                  ,c.[multi_face]
+                                  ,c.[multi_face] as [MultiFace]
                               from [tcgct].[MTG].[Card] as c
                               full outer join mtg.[Collection] as co on c.id = co.CardID
                               where c.card_set_id = @id";
 					cards = conn.Query<Card>(sql, new { id }).ToArray();
+
+                    int[] multiface_ids = cards.Where(s => s.MultiFace).Select(s => s.ID).ToArray();
+                    sql = @"SELECT [ID]
+                              ,[CardID]
+                              ,[Object]
+                              ,[Name]
+                              ,[Image]
+                              ,[Mana_Cost]
+                              ,[Oracle_Text]
+                              ,[ConvertedCost]
+                              ,[FlavourText]
+                              ,[Layout]
+                              ,[Loyalty]
+                              ,[OracleID]
+                              ,[Power]
+                              ,[Toughness]
+                          FROM [tcgct].[MTG].[CardFace]
+                          where CardID in @multiface_ids";
+                    //CardFace[] cardFaces = conn.Query<CardFace>(sql, new { multiface_ids }).ToArray();
+
                     foreach (var card in cards)
                     {
                         card.Set = set;
                         card.Rarity = rarities.Single(s => s.ID == card.Rarity_ID);
-                    }
-                    return cards;
+                        if (card.MultiFace)
+                        {
+                            card.Faces = GetCardFaces(card.ID).ToArray();
+                        }
+                        
+                    }           
+                    
+					return cards;
 				}
 			});
 
@@ -461,7 +487,21 @@ namespace tcgct_mtg.Services
             using (var conn = new SqlConnection(configuration.connectionString))
             {
                 conn.Open();
-                var sql = "select * from [MTG].[CardFace] where CardID = @ID";
+                var sql = @"SELECT [ID]
+                              ,[CardID]
+                              ,[Object]
+                              ,[Name]
+                              ,[Image]
+                              ,[Mana_Cost] as [ManaCost]
+                              ,[Oracle_Text] as [OracleText]
+                              ,[ConvertedCost]
+                              ,[FlavourText]
+                              ,[Layout]
+                              ,[Loyalty]
+                              ,[OracleID]
+                              ,[Power]
+                              ,[Toughness]
+                          FROM [tcgct].[MTG].[CardFace] where CardID = @ID";
                 return conn.Query<CardFace>(sql, new { ID = id });
             }
         }

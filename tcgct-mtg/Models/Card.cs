@@ -27,6 +27,7 @@ namespace tcgct_mtg.Models
         public int Rarity_ID { get; set; }
         public Rarity Rarity { get; set; }
         public bool MultiFace { get; set; }
+        public CardFace[] Faces { get; set; }
         public CardTypeLine TypeLine { get; set; }
         public int Collected { get; set; }
     }
