@@ -1,9 +1,10 @@
 ﻿@page "/mtg/sets/{set_id}"
 @using tcgct_mtg.Models;
+@using tcgct_mud.Data.MTG;
 @inject tcgct_mtg.Services.MTGService mtgs
 
 
-<MudTable Items="@data" Loading="data == null" Filter="new Func<Card,bool>(FilterFunc1)">
+<MudTable Items="@data" Loading="data == null" Filter="new Func<CardHTML,bool>(FilterFunc1)">
 	<ToolBarContent>
 		<MudText>Viewing set: @set_id  @cardsFiltered</MudText>
 		<MudSpacer />
@@ -15,19 +16,58 @@
 		<MudTh>Mana Cost</MudTh>
 		<MudTh>Text</MudTh>
 		<MudTh>Flavor</MudTh>
-		@*if multiface make dropdown showing both sides*@
-		<MudTh>Image</MudTh>
+		<MudTh>Image / Show Faces</MudTh>	
 		<MudTh>Collected</MudTh>
 	</HeaderContent>
 	<RowTemplate>
-		<MudTd>@context.Collector_Number</MudTd>
-		<MudTd>@context.Name</MudTd>
-		<MudTd>@context.ManaCost</MudTd>
-		<MudTd>@context.Text</MudTd>
-		<MudTd>@context.Flavor</MudTd>
-		<MudTd><MudImage Src="@context.Image" Height="200" /></MudTd>
-		<MudTd>@context.Collected</MudTd>
+		<MudTd>@context.Card.Collector_Number</MudTd>
+		<MudTd>@context.Card.Name</MudTd>
+		<MudTd>@context.Card.ManaCost</MudTd>
+		<MudTd>@context.Card.Text</MudTd>
+		<MudTd>@context.Card.Flavor</MudTd>
+		@if (context.Card.MultiFace)
+		{
+			<MudTd><MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="@(() => ShowFaces(context.Card.Collector_Number))">@(context.HTMLValues.Show ? "Hide" : "Show")</MudButton></MudTd>
+		}
+		else
+		{
+			<MudTd><MudImage Src="@context.Card.Image" Height="200" /></MudTd>
+		}
+
+		<MudTd>@context.Card.Collected</MudTd>
 	</RowTemplate>
+	<ChildRowContent>
+		@if (context.HTMLValues.Show)
+		{
+			<MudTr>
+				<td colspan="7">
+					<MudCard Elevation="0">
+						<MudCardHeader>
+							<CardHeaderContent>
+								<MudText Align="Align.Center" Typo="Typo.body1">Card Faces for <strong>@context.Card.Name</strong></MudText>
+							</CardHeaderContent>
+						</MudCardHeader>
+						<MudCardContent Class="pl-16 pr-16 pb-16">
+							<MudTable Items="@context.Card.Faces" Context="faceContext" Hover="true" Breakpoint="Breakpoint.Sm" Elevation="0">
+								<HeaderContent>
+									<MudTh>Name</MudTh>
+									<MudTh>Mana Cost</MudTh>
+									<MudTh>Text</MudTh>
+									<MudTh>Image</MudTh>
+								</HeaderContent>
+								<RowTemplate>
+									<MudTd>@faceContext.Name</MudTd>
+									<MudTd>@faceContext.ManaCost</MudTd>
+									<MudTd>@faceContext.OracleText</MudTd>
+									<MudTd><MudImage Src="@faceContext.Image" Height="200" /></MudTd>
+								</RowTemplate>
+							</MudTable>
+						</MudCardContent>
+					</MudCard>
+				</td>
+			</MudTr>
+		}
+	</ChildRowContent>
 	<PagerContent>
 		<MudTablePager />
 	</PagerContent>
@@ -38,15 +78,21 @@
 	[Parameter]
 	public string set_id { get; set; }
 	public string filterValue = "";
-	IEnumerable<Card>? data;
+	List<CardHTML>? data;
 	int cardsFiltered = 0;
-	Card loneCard = null;
+	CardHTML loneCard = null;
 	protected override async Task OnInitializedAsync()
 	{
-		data = await mtgs.GetSetCardsAsync(int.Parse(set_id));
+		var _data = await mtgs.GetSetCardsAsync(int.Parse(set_id));
+		data = new List<CardHTML>();
+		_data.ToList().ForEach(fe =>
+		{
+			data.Add(new CardHTML(fe));
+		});
+		
 	}
-	private bool FilterFunc1(Card card) => FilterFunc(card, filterValue);
-	private bool FilterFunc(Card card, string searchString)
+	private bool FilterFunc1(CardHTML card) => FilterFunc(card, filterValue);
+	private bool FilterFunc(CardHTML card, string searchString)
 	{
 		if (string.IsNullOrWhiteSpace(searchString))
 		{
@@ -54,22 +100,28 @@
 			return true;			
 		}
 
-		if (card.Collector_Number.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+		if (card.Card.Collector_Number.Contains(searchString, StringComparison.OrdinalIgnoreCase))
 		{
 			cardsFiltered++;
 			if(cardsFiltered == 1)
 			{
-				
+
 			}
 			return true;			
 		}
 
-		if (card.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+		if (card.Card.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
 		{
 			cardsFiltered++;
 			return true;			
 		}
 
 		return false;
+	}
+
+	private void ShowFaces(string collectors_number)
+	{
+		CardHTML temp = data.Single(s => s.Card.Collector_Number ==  collectors_number);
+		temp.HTMLValues.Show = !temp.HTMLValues.Show;
 	}
 }
