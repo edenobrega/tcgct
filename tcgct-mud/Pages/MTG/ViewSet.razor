@@ -4,11 +4,13 @@
 @inject tcgct_mtg.Services.MTGService mtgs
 
 
-<MudTable Items="@data" Loading="data == null" Filter="new Func<CardHTML,bool>(FilterFunc1)">
+<MudTable Items="@data" Loading="data == null" @ref="mudTable" Filter="new Func<CardHTML,bool>(FilterFuncBase)">
 	<ToolBarContent>
-		<MudText>Viewing set: @set_id  @cardsFiltered</MudText>
+		<MudText>Viewing set: @set_id</MudText>
 		<MudSpacer />
-		<MudTextField Placeholder="Search" Adornment="Adornment.Start" @bind-Value="filterValue" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium"></MudTextField>
+		<MudButton Variant="Variant.Outlined" OnClick="SaveChanges()">Save</MudButton>
+		<MudSpacer />
+		<MudTextField ReadOnly="true" Immediate="true" Placeholder="@filterValue" Adornment="Adornment.Start" Value="filterValue" OnKeyDown="DownHandler" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium"></MudTextField>
 	</ToolBarContent>
 	<HeaderContent>
 		<MudTh>Collector Number</MudTh>
@@ -24,7 +26,7 @@
 		<MudTd>@context.Card.Name</MudTd>
 		<MudTd>@context.Card.ManaCost</MudTd>
 		<MudTd>@context.Card.Text</MudTd>
-		<MudTd>@context.Card.Flavor</MudTd>
+		<MudTd><i>@context.Card.Flavor</i></MudTd>
 		@if (context.Card.MultiFace)
 		{
 			<MudTd><MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="@(() => ShowFaces(context.Card.Collector_Number))">@(context.HTMLValues.Show ? "Hide" : "Show")</MudButton></MudTd>
@@ -47,7 +49,7 @@
 								<MudText Align="Align.Center" Typo="Typo.body1">Card Faces for <strong>@context.Card.Name</strong></MudText>
 							</CardHeaderContent>
 						</MudCardHeader>
-						<MudCardContent Class="pl-16 pr-16 pb-16">
+						<MudCardContent Style="padding-left:400px;">
 							<MudTable Items="@context.Card.Faces" Context="faceContext" Hover="true" Breakpoint="Breakpoint.Sm" Elevation="0">
 								<HeaderContent>
 									<MudTh>Name</MudTh>
@@ -72,14 +74,31 @@
 		<MudTablePager />
 	</PagerContent>
 </MudTable>
+<div class="d-flex flex-wrap mt-4">
+	<MudSwitch @bind-Checked="@quickEdit" Color="Color.Primary">Quick Edit</MudSwitch>
+</div>
 
 
 @code {
 	[Parameter]
 	public string set_id { get; set; }
-	public string filterValue = "";
+	MudTable<CardHTML>? mudTable;
+	bool quickEdit;
+	public string _filterValue = "";
+	public string filterValue 
+	{
+		get
+		{
+			return _filterValue;
+		}
+		set
+		{
+			_filterValue = value;
+		}
+	}
+
+
 	List<CardHTML>? data;
-	int cardsFiltered = 0;
 	CardHTML loneCard = null;
 	protected override async Task OnInitializedAsync()
 	{
@@ -89,30 +108,30 @@
 		{
 			data.Add(new CardHTML(fe));
 		});
-		
 	}
-	private bool FilterFunc1(CardHTML card) => FilterFunc(card, filterValue);
-	private bool FilterFunc(CardHTML card, string searchString)
+
+	private bool FilterFuncBase(CardHTML card) => FilterFunc(card, filterValue);
+	private bool FilterFunc(CardHTML card, string value)
 	{
-		if (string.IsNullOrWhiteSpace(searchString))
+		if (string.IsNullOrWhiteSpace(value))
 		{
-			cardsFiltered = 0;
 			return true;			
 		}
-
-		if (card.Card.Collector_Number.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+		if (quickEdit)
 		{
-			cardsFiltered++;
-			if(cardsFiltered == 1)
+			if (card.Card.Collector_Number == value)
 			{
-
+				return true;
 			}
+			return false;
+		}
+		if (card.Card.Collector_Number.Contains(value, StringComparison.OrdinalIgnoreCase))
+		{
 			return true;			
 		}
 
-		if (card.Card.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+		if (card.Card.Name.Contains(value, StringComparison.OrdinalIgnoreCase))
 		{
-			cardsFiltered++;
 			return true;			
 		}
 
@@ -124,4 +143,53 @@
 		CardHTML temp = data.Single(s => s.Card.Collector_Number ==  collectors_number);
 		temp.HTMLValues.Show = !temp.HTMLValues.Show;
 	}
+
+	string[] invalidQuickEdit = new string[]
+	{
+		"+",
+		"-",
+		".",
+		"backspace",
+		"enter"
+	};
+	private void DownHandler(KeyboardEventArgs args)
+	{
+		if (args.Key == "Backspace")
+		{
+			if (filterValue.Length == 0)
+			{
+				return;
+			}
+			filterValue = filterValue.Substring(0, filterValue.Length - 1);
+			return;
+		}
+		if(mudTable.GetFilteredItemsCount() == 1)
+		{
+			if (args.Key == "+")
+			{
+				mudTable.FilteredItems.First().Card.Collected++;
+				return;
+			}
+			if (args.Key == "-")
+			{
+				if (mudTable.FilteredItems.First().Card.Collected == 0)
+				{
+					return;
+				}
+				mudTable.FilteredItems.First().Card.Collected--;
+				return;
+			}
+			if(args.Key == ".")
+			{
+				filterValue = "";
+				return;
+			}
+		}
+		if(args.Key.Length > 1 || invalidQuickEdit.Contains(args.Key))
+		{
+			return;
+		}
+		filterValue += args.Key;
+	}
+
 }
