@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace tcgct_mtg
 {
-    static public class configuration
+    static internal class configuration
     {
         public const string connectionString = "Server=localhost\\SQLEXPRESS;Database=tcgct;Trusted_Connection=True;";
     }

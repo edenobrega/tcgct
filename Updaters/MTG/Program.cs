@@ -131,6 +131,7 @@ namespace MTG
 
             if (multithread)
             {
+                // todo: dont insert, just put everything into lists then insert when done, multithreading is funky
                 List<Thread> threads = new List<Thread>();
                 int v = parsed.Count / 4;
                 List<APICard> q1 = parsed.Take(v).ToList();

@@ -2,13 +2,18 @@
 @using tcgct_mtg.Models;
 @using tcgct_mud.Data.MTG;
 @inject tcgct_mtg.Services.MTGService mtgs
+@inject NavigationManager NavigationManager
 
+@if (showSuccess)
+{
+	<MudAlert Severity="Severity.Success" ShowCloseIcon="true" CloseIconClicked="(() => showSuccess = false )">Successfully updated collection!</MudAlert>
+}
 
-<MudTable Items="@data" Loading="data == null" @ref="mudTable" Filter="new Func<CardHTML,bool>(FilterFuncBase)">
+<MudTable Items="@data" Loading="loading" @ref="mudTable" Filter="new Func<CardHTML,bool>(FilterFuncBase)">
 	<ToolBarContent>
 		<MudText>Viewing set: @set_id</MudText>
 		<MudSpacer />
-		<MudButton Variant="Variant.Outlined" OnClick="SaveChanges()">Save</MudButton>
+		<MudButton Variant="Variant.Outlined" OnClick="SaveChanges">Save</MudButton>
 		<MudSpacer />
 		<MudTextField ReadOnly="true" Immediate="true" Placeholder="@filterValue" Adornment="Adornment.Start" Value="filterValue" OnKeyDown="DownHandler" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium"></MudTextField>
 	</ToolBarContent>
@@ -22,21 +27,23 @@
 		<MudTh>Collected</MudTh>
 	</HeaderContent>
 	<RowTemplate>
-		<MudTd>@context.Card.Collector_Number</MudTd>
-		<MudTd>@context.Card.Name</MudTd>
-		<MudTd>@context.Card.ManaCost</MudTd>
-		<MudTd>@context.Card.Text</MudTd>
-		<MudTd><i>@context.Card.Flavor</i></MudTd>
-		@if (context.Card.MultiFace)
+		@if (!loading)
 		{
-			<MudTd><MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="@(() => ShowFaces(context.Card.Collector_Number))">@(context.HTMLValues.Show ? "Hide" : "Show")</MudButton></MudTd>
+			<MudTd>@context.Card.Collector_Number</MudTd>
+			<MudTd>@context.Card.Name</MudTd>
+			<MudTd>@context.Card.ManaCost</MudTd>
+			<MudTd>@context.Card.Text</MudTd>
+			<MudTd><i>@context.Card.Flavor</i></MudTd>
+			@if (context.Card.MultiFace)
+			{
+				<MudTd><MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="@(() => ShowFaces(context.Card.Collector_Number))">@(context.HTMLValues.Show ? "Hide" : "Show")</MudButton></MudTd>
+			}
+			else
+			{
+				<MudTd><MudImage Src="@context.Card.Image" Height="200" /></MudTd>
+			}
+			<MudTd>@context.Card.Collected</MudTd>			
 		}
-		else
-		{
-			<MudTd><MudImage Src="@context.Card.Image" Height="200" /></MudTd>
-		}
-
-		<MudTd>@context.Card.Collected</MudTd>
 	</RowTemplate>
 	<ChildRowContent>
 		@if (context.HTMLValues.Show)
@@ -97,6 +104,8 @@
 		}
 	}
 
+	bool loading = true;
+	bool showSuccess = false;
 
 	List<CardHTML>? data;
 	CardHTML loneCard = null;
@@ -108,6 +117,7 @@
 		{
 			data.Add(new CardHTML(fe));
 		});
+		loading = false;
 	}
 
 	private bool FilterFuncBase(CardHTML card) => FilterFunc(card, filterValue);
@@ -163,27 +173,30 @@
 			filterValue = filterValue.Substring(0, filterValue.Length - 1);
 			return;
 		}
-		if(mudTable.GetFilteredItemsCount() == 1)
+		if (quickEdit)
 		{
-			if (args.Key == "+")
+			if(mudTable.GetFilteredItemsCount() == 1)
 			{
-				mudTable.FilteredItems.First().Card.Collected++;
-				return;
-			}
-			if (args.Key == "-")
-			{
-				if (mudTable.FilteredItems.First().Card.Collected == 0)
+				if (args.Key == "+")
 				{
+					mudTable.FilteredItems.First().Card.Collected++;
 					return;
 				}
-				mudTable.FilteredItems.First().Card.Collected--;
-				return;
-			}
-			if(args.Key == ".")
-			{
-				filterValue = "";
-				return;
-			}
+				if (args.Key == "-")
+				{
+					if (mudTable.FilteredItems.First().Card.Collected == 0)
+					{
+						return;
+					}
+					mudTable.FilteredItems.First().Card.Collected--;
+					return;
+				}
+				if(args.Key == ".")
+				{
+					filterValue = "";
+					return;
+				}
+			}			
 		}
 		if(args.Key.Length > 1 || invalidQuickEdit.Contains(args.Key))
 		{
@@ -192,4 +205,12 @@
 		filterValue += args.Key;
 	}
 
+	private void SaveChanges()
+	{
+		loading = true;
+		List<Collection> collection = data.Select(s => new Collection{ CardID = s.Card.ID, UserID = "1", Count = s.Card.Collected  }).ToList();
+		mtgs.UpdateCollected(collection, "1");
+		loading = false;
+		showSuccess = true;
+	}
 }

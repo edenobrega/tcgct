@@ -13,8 +13,6 @@ namespace tcgct_mtg.Services
 {
     public class MTGService
     {
-
-
         #region Set
         #region async
         public async Task<Set> GetSetAsync(int id)
@@ -191,7 +189,6 @@ namespace tcgct_mtg.Services
                               ,[Toughness]
                           FROM [tcgct].[MTG].[CardFace]
                           where CardID in @multiface_ids";
-                    //CardFace[] cardFaces = conn.Query<CardFace>(sql, new { multiface_ids }).ToArray();
 
                     foreach (var card in cards)
                     {
@@ -201,14 +198,11 @@ namespace tcgct_mtg.Services
                         {
                             card.Faces = GetCardFaces(card.ID).ToArray();
                         }
-                        
                     }           
                     
 					return cards;
 				}
 			});
-
-
         } 
         public async Task<Card> GetCardAsync(int id)
         {
@@ -979,9 +973,8 @@ namespace tcgct_mtg.Services
                 if(item.Count == 0)
                 {
                     delete.Add(item);
-                    continue;
                 }
-                if(oldCollection.Exists(oc => oc.CardID == item.CardID && oc.UserID == item.UserID))
+                else if(oldCollection.Exists(oc => oc.CardID == item.CardID && oc.UserID == item.UserID))
                 {
                     var sing = oldCollection.Single(oc => oc.CardID == item.CardID && oc.UserID == item.UserID);
                     if (sing.Count != item.Count)
@@ -1015,6 +1008,7 @@ namespace tcgct_mtg.Services
                     conn.Execute(sql, new { item.CardID, item.UserID, item.Count });
                 }
             }
+
         }
 
         public IEnumerable<Collection> GetCollectedSet(string UserID, int SetID)
