@@ -25,6 +25,11 @@
 		<MudTh>Flavor</MudTh>
 		<MudTh>Image / Show Faces</MudTh>	
 		<MudTh>Collected</MudTh>
+		@if (!quickEdit)
+		{
+			<MudTh>Add / Remove</MudTh>			
+		}
+
 	</HeaderContent>
 	<RowTemplate>
 		@if (!loading)
@@ -42,7 +47,12 @@
 			{
 				<MudTd><MudImage Src="@context.Card.Image" Height="200" /></MudTd>
 			}
-			<MudTd>@context.Card.Collected</MudTd>			
+			<MudTd>@context.Card.Collected</MudTd>	
+			@if (!quickEdit)
+			{
+
+				<MudTd><MudIconButton Color="Color.Success" Icon="@Icons.Material.Filled.ExposurePlus1" OnClick="@(() => context.Card.Collected++)"></MudIconButton><MudIconButton Color="Color.Error" Icon="@Icons.Material.Filled.ExposureNeg1" OnClick="@(() => {if(context.Card.Collected != 0)context.Card.Collected--;})"></MudIconButton></MudTd>
+			}
 		}
 	</RowTemplate>
 	<ChildRowContent>
