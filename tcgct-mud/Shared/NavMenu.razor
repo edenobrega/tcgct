@@ -1,10 +1,11 @@
 ﻿
 <MudNavMenu Margin="Margin.None" Color="Color.Error">
-    <MudNavLink Href="/dashboard" Icon="@Icons.Material.Filled.Dashboard">Dashboard</MudNavLink>
+    <MudNavLink Href="/dashboard" Icon="@Icons.Material.Filled.Dashboard" IconColor="Color.Info">Dashboard</MudNavLink>
         
-    <MudNavGroup Icon="@Icons.Material.Filled.Satellite" Title="MTG" Expanded="false">
-		<MudNavLink Match="NavLinkMatch.Prefix" Href="/mtg/dashboard" Icon="@Icons.Material.Filled.SmartToy">Dashboard</MudNavLink>
-		<MudNavLink Match="NavLinkMatch.Prefix" Href="/mtg/sets" Icon="@Icons.Material.Filled.OilBarrel">Sets</MudNavLink>
+    <MudNavGroup Icon="@Icons.Material.Filled.Satellite" IconColor="Color.Error" Title="MTG" Expanded="false">
+		<MudNavLink IconColor="Color.Tertiary" Match="NavLinkMatch.Prefix" Href="/mtg/dashboard" Icon="@Icons.Material.Filled.Analytics">Dashboard</MudNavLink>
+		<MudNavLink IconColor="Color.Primary" Match="NavLinkMatch.Prefix" Href="/mtg/sets" Icon="@Icons.Material.Filled.OilBarrel">All Sets</MudNavLink>
+		<MudNavLink IconColor="Color.Secondary" Match="NavLinkMatch.Prefix" Href="/mtg/sets_collecting" Icon="@Icons.Material.Filled.Anchor">Collecting Sets</MudNavLink>
+		<MudNavLink IconColor="Color.Warning" Match="NavLinkMatch.Prefix" Href="/mtg/sets_collecting" Icon="@Icons.Material.Filled.PushPin">Pinned Sets</MudNavLink>
     </MudNavGroup>
-
 </MudNavMenu>
