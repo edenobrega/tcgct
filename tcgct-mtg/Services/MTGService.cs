@@ -17,14 +17,18 @@ namespace tcgct_mtg.Services
         #region async
         public async Task<Set> GetSetAsync(int id)
         {
-            using (var conn = new SqlConnection(configuration.connectionString))
+            return await Task.Run(() =>
             {
-                conn.Open();
-                var sql = $@"select * from [MTG].[Set] where id = @id";
-                var result = await conn.QuerySingleAsync<Set>(sql, new { id });
-                conn.Close();
-                return result;
-            }
+                using (var conn = new SqlConnection(configuration.connectionString))
+                {
+                    conn.Open();
+                    var sql = $@"select * from [MTG].[Set] where id = @id";
+                    var result = conn.QuerySingle<Set>(sql, new { id });
+                    conn.Close();
+                    return result;
+                }
+            });
+
         }
         public async Task<Set> GetSetAsync(string scryfall_id)
         {
@@ -55,22 +59,46 @@ namespace tcgct_mtg.Services
         }
         public async Task<int> CreateSetAsync(Set set)
         {
-            using (var conn = new SqlConnection(configuration.connectionString))
-            {
-                conn.Open();
-                var sql = "insert into [MTG].[Set]([Name], shorthand, icon, search_uri, scryfall_id, set_type_id) output inserted.id values(@NAME, @SHORTHAND, @ICON, @SEARCH_URI, @SCRYFALL_ID, @SET_TYPE_ID)";
-                return await conn.QuerySingleAsync<int>(sql, new
+            return await Task.Run(() =>
+            { 
+                using (var conn = new SqlConnection(configuration.connectionString))
                 {
-                    set.Name,
-                    set.Shorthand,
-                    set.Icon,
-                    set.Search_Uri,
-                    set.Scryfall_id,
-                    set.Set_Type_id
-                });
-            }
+                    conn.Open();
+                    var sql = "insert into [MTG].[Set]([Name], shorthand, icon, search_uri, scryfall_id, set_type_id) output inserted.id values(@NAME, @SHORTHAND, @ICON, @SEARCH_URI, @SCRYFALL_ID, @SET_TYPE_ID)";
+                    return conn.QuerySingle<int>(sql, new
+                    {
+                        set.Name,
+                        set.Shorthand,
+                        set.Icon,
+                        set.Search_Uri,
+                        set.Scryfall_id,
+                        set.Set_Type_id
+                    });
+                }
+            });
+
+        }
+        public async Task<IEnumerable<Set>> GetCollectingSetsAsync(string UserID)
+        {
+            return await Task.Run(() => 
+            {
+                return GetCollectingSets(UserID);
+            });
         }
         #endregion
+
+        public IEnumerable<Set> GetCollectingSets(string UserID)
+        {
+			using (var conn = new SqlConnection(configuration.connectionString))
+			{
+				string sql = @"select distinct s.*
+                                   from [tcgct].[MTG].[Collection] as co
+                                   join [MTG].[Card] as c on c.id = co.CardID
+                                   join [MTG].[Set] as s on s.id = c.card_set_id
+                                   where co.UserID = @UID";
+				return conn.Query<Set>(sql, new { UID = UserID });
+			}
+		}
 
         #region sync
         public Set GetSet(int id)

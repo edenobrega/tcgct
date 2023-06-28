@@ -1,4 +1,5 @@
 ﻿@page "/mtg/sets"
+@page "/mtg/sets_collecting/{user_id}"
 @using tcgct_mtg.Models;
 @inject tcgct_mtg.Services.MTGService mtgs
 
@@ -29,18 +30,33 @@
 
 
 @code {
+	[Parameter]
+	public string? user_id { get; set; }
 	IEnumerable<Set>? data;
 	string[] columns;
 	string filterValue = "";
 
 	protected override async Task OnInitializedAsync()
 	{
-		data = await mtgs.GetAllSetsAsync();
-		IEnumerable<SetType> setTypes = await mtgs.GetAllSetTypesAsync();
-		data.ToList().ForEach(fe =>
+		if(user_id != null)
 		{
-			fe.Set_Type = setTypes.Single(s => s.ID == fe.Set_Type_id);		
-		});
+			data = await mtgs.GetCollectingSetsAsync(user_id);
+			IEnumerable<SetType> setTypes = await mtgs.GetAllSetTypesAsync();
+			data.ToList().ForEach(fe =>
+			{
+				fe.Set_Type = setTypes.Single(s => s.ID == fe.Set_Type_id);
+			});
+		}
+		else
+		{
+			data = await mtgs.GetAllSetsAsync();
+			IEnumerable<SetType> setTypes = await mtgs.GetAllSetTypesAsync();
+			data.ToList().ForEach(fe =>
+			{
+				fe.Set_Type = setTypes.Single(s => s.ID == fe.Set_Type_id);		
+			});			
+		}
+
 	}
 
 	private bool FilterFunc1(Set set) => FilterFunc(set, filterValue);
