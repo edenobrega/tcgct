@@ -1,4 +1,5 @@
-﻿@page "/mtg/sets/all"
+﻿@page "/mtg/sets/pinned"
+
 @using tcgct_mtg.Models;
 @inject tcgct_mtg.Services.MTGService mtgs
 
@@ -20,9 +21,9 @@
 		<MudTd><MudLink Href=@($"mtg/sets/{context.ID}")>@context.ID</MudLink></MudTd>
 		<MudTd>@context.Name</MudTd>
 		<MudTd>@context.Shorthand</MudTd>
-		<MudTd><MudImage Src="@context.Icon" Height="30"/></MudTd>
+		<MudTd><MudImage Src="@context.Icon" Height="30" /></MudTd>
 		<MudTd>@context.Set_Type.Name</MudTd>
-		<MudTd><MudIconButton Icon="@Icons.Material.Filled.PushPin" Color="context.Pinned ? Color.Error : Color.Success" OnClick="@(() => UpdatePinned(context))" aria-label="pin"></MudIconButton></MudTd>
+		<MudTd><MudIconButton Icon="@Icons.Material.Filled.PushPin" Color="Color.Error" OnClick="@(() => DeletePinned(context.ID))" aria-label="pin"></MudIconButton></MudTd>
 	</RowTemplate>
 	<PagerContent>
 		<MudTablePager />
@@ -39,13 +40,11 @@
 
 	protected override async Task OnInitializedAsync()
 	{
-		data = await mtgs.GetAllSetsAsync();
+		data = await mtgs.GetUserPinnedSetsAsync("1");
 		IEnumerable<SetType> setTypes = await mtgs.GetAllSetTypesAsync();
-		IEnumerable<PinnedSet> pins = await mtgs.GetPinnedSetsAsync("1"); 
 		data.ToList().ForEach(fe =>
 		{
 			fe.Set_Type = setTypes.Single(s => s.ID == fe.Set_Type_id);
-			fe.Pinned = pins.Any(s => s.SetID == fe.ID);
 		});
 	}
 
@@ -63,15 +62,9 @@
 		return false;
 	}
 
-	private async Task UpdatePinned(Set set)
+	private async Task DeletePinned(int id)
 	{
-		if (set.Pinned)
-		{
-			await mtgs.DeletePinnedSetAsync("1", set.ID);
-			set.Pinned = false;
-			return;
-		}
-		await mtgs.CreatePinnedSetAsync("1", set.ID);
-		set.Pinned = true;
+		await mtgs.DeletePinnedSetAsync("1", id);
+		data = data.Where(w => w.ID != id);
 	}
 }

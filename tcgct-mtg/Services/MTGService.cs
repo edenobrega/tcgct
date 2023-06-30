@@ -11,6 +11,7 @@ using System.Runtime.InteropServices;
 
 namespace tcgct_mtg.Services
 {
+    // investigate/todo: move away from having async and sync methods, or just fix the async methods to not hand the app when not using task.run
     public class MTGService
     {
         #region Set
@@ -19,62 +20,30 @@ namespace tcgct_mtg.Services
         {
             return await Task.Run(() =>
             {
-                using (var conn = new SqlConnection(configuration.connectionString))
-                {
-                    conn.Open();
-                    var sql = $@"select * from [MTG].[Set] where id = @id";
-                    var result = conn.QuerySingle<Set>(sql, new { id });
-                    conn.Close();
-                    return result;
-                }
+                return GetSet(id);
             });
 
         }
         public async Task<Set> GetSetAsync(string scryfall_id)
         {
-            using (var conn = new SqlConnection(configuration.connectionString))
+            return await Task.Run(() => 
             {
-                conn.Open();
-                var sql = $@"select * from [MTG].[Set] where scryfall_id = @scryfall_id";
-                var result = conn.QuerySingleAsync<Set>(sql, new { scryfall_id });
-                conn.Close();
-                return result.Result;
-            }
+                return GetSet(scryfall_id);
+            });
+
         }
         public async Task<IEnumerable<Set>> GetAllSetsAsync()
         {
-            IEnumerable<Set> data;
             return await Task.Run(() =>
             {
-                using (var conn = new SqlConnection(configuration.connectionString))
-                {
-                    conn.Open();
-
-                    var sql = "SELECT * FROM [MTG].[Set]";
-                    data = conn.Query<Set>(sql);
-
-                    return data;
-                }
+                return GetAllSets();
             });
         }
         public async Task<int> CreateSetAsync(Set set)
         {
             return await Task.Run(() =>
-            { 
-                using (var conn = new SqlConnection(configuration.connectionString))
-                {
-                    conn.Open();
-                    var sql = "insert into [MTG].[Set]([Name], shorthand, icon, search_uri, scryfall_id, set_type_id) output inserted.id values(@NAME, @SHORTHAND, @ICON, @SEARCH_URI, @SCRYFALL_ID, @SET_TYPE_ID)";
-                    return conn.QuerySingle<int>(sql, new
-                    {
-                        set.Name,
-                        set.Shorthand,
-                        set.Icon,
-                        set.Search_Uri,
-                        set.Scryfall_id,
-                        set.Set_Type_id
-                    });
-                }
+            {
+                return CreateSet(set);
             });
 
         }
@@ -85,22 +54,38 @@ namespace tcgct_mtg.Services
                 return GetCollectingSets(UserID);
             });
         }
-        #endregion
+		public async Task<IEnumerable<Set>> GetUserPinnedSetsAsync(string UserID)
+		{
+            return await Task.Run(() =>
+            {
+                return GetUserPinnedSets(UserID);
+            });
+		}
 
-        public IEnumerable<Set> GetCollectingSets(string UserID)
+		#endregion
+
+		#region sync
+		public IEnumerable<Set> GetCollectingSets(string UserID)
         {
 			using (var conn = new SqlConnection(configuration.connectionString))
 			{
+                IEnumerable<Set> sets;
 				string sql = @"select distinct s.*
                                    from [tcgct].[MTG].[Collection] as co
                                    join [MTG].[Card] as c on c.id = co.CardID
                                    join [MTG].[Set] as s on s.id = c.card_set_id
                                    where co.UserID = @UID";
-				return conn.Query<Set>(sql, new { UID = UserID });
+                sets = conn.Query<Set>(sql, new { UID = UserID });
+                IEnumerable<SetType> setTypes = GetSetTypes();
+
+                sets.ToList().ForEach(fe =>
+                {
+                    fe.Set_Type = setTypes.Single(s => s.ID == fe.Set_Type_id);
+                });
+
+                return sets;
 			}
 		}
-
-        #region sync
         public Set GetSet(int id)
         {
             using (var conn = new SqlConnection(configuration.connectionString))
@@ -108,7 +93,9 @@ namespace tcgct_mtg.Services
                 conn.Open();
                 var sql = $@"select * from [MTG].[Set] where id = @id";
                 var result = conn.QuerySingle<Set>(sql, new { id });
-                return result;
+
+                result.Set_Type = GetSetType(result.Set_Type_id);
+				return result;
             }
         }
         public Set GetSet(string scryfall_id)
@@ -127,7 +114,7 @@ namespace tcgct_mtg.Services
             {
                 conn.Open();
 
-                var sql = "SELECT * FROM [MTG].[Set]";
+                var sql = "select * from [MTG].[Set]";
                 var results = conn.Query<Set>(sql);
                 conn.Close();
 
@@ -153,12 +140,81 @@ namespace tcgct_mtg.Services
                 });
             }
         }
+        public IEnumerable<Set> GetUserPinnedSets(string UserID)
+        {
+			using (var conn = new SqlConnection(configuration.connectionString))
+			{
+				conn.Open();
+				var sql = @"select s.* 
+                            from [MTG].[Set] as s
+                            join mtg.PinnedSet as ps on ps.SetID = s.id
+                            where UserID = @UserID";
+				return conn.Query<Set>(sql, new{ UserID });
+			}
+		}
         #endregion
         #endregion
 
-        #region Cards
+        #region Pinned Sets
         #region async
-        public async Task<IEnumerable<Card>> GetAllCardsAsync()
+        public async Task<IEnumerable<PinnedSet>> GetPinnedSetsAsync(string UserID)
+        {
+            return await Task.Run(() =>
+            {
+                return GetPinnedSets(UserID);
+            });
+        }
+		public async Task DeletePinnedSetAsync(string UserID, int SetID)
+		{
+            await Task.Run(() => 
+            {
+                DeletePinnedSet(UserID, SetID);
+            });
+		}
+		public async Task CreatePinnedSetAsync(string UserID, int SetID)
+		{
+            await Task.Run(() =>
+            {
+                CreatePinnedSet(UserID, SetID);
+            });
+		}
+		#endregion
+
+		#region sync
+		public void DeletePinnedSet(string UserID, int SetID)
+        {
+			using (var conn = new SqlConnection(configuration.connectionString))
+			{
+				conn.Open();
+				var sql = "delete from [MTG].[PinnedSet] where SetID = @SetID and UserID = @UserID";
+				conn.Execute(sql, new { SetID, UserID });
+			}
+		}
+		public void CreatePinnedSet(string UserID, int SetID)
+		{
+			using (var conn = new SqlConnection(configuration.connectionString))
+			{
+				conn.Open();
+				var sql = "insert into [MTG].[PinnedSet] (SetID, UserID) values (@SetID, @UserID)";
+                conn.Execute(sql, new { SetID, UserID });
+			}
+		}
+		public IEnumerable<PinnedSet> GetPinnedSets(string UserID)
+        {
+			using (var conn = new SqlConnection(configuration.connectionString))
+			{
+				conn.Open();
+				var sql = "select SetID from [MTG].[PinnedSet] where UserID = @UserID";
+                return conn.Query<PinnedSet>(sql, new { UserID });
+			}
+		}
+        #endregion
+
+        #endregion
+
+		#region Cards
+		#region async
+		public async Task<IEnumerable<Card>> GetAllCardsAsync()
         {
             using (var conn = new SqlConnection(configuration.connectionString))
             {
@@ -768,6 +824,16 @@ namespace tcgct_mtg.Services
         #endregion
 
         #region sync
+        public SetType GetSetType(int id)
+        {
+			using (var conn = new SqlConnection(configuration.connectionString))
+			{
+				conn.Open();
+				var sql = $@"select * from [MTG].[SetType] where id = @id";
+				var result = conn.QuerySingle<SetType>(sql, new { id });
+				return result;
+			}
+		}
         public IEnumerable<SetType> GetSetTypes()
         {
             using (var conn = new SqlConnection(configuration.connectionString))

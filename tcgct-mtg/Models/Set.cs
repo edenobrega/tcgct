@@ -13,5 +13,6 @@ namespace tcgct_mtg.Models
         public string Scryfall_id { get; set; }
         public int Set_Type_id { get; set; }
         public SetType Set_Type { get; set; }
+        public bool Pinned { get; set; }
     }
 }
