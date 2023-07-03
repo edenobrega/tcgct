@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
 using Dapper;
+using tcgct_mtg.Models.Helpers;
 
 namespace tcgct_mtg.Models
 {
@@ -13,6 +14,7 @@ namespace tcgct_mtg.Models
         public string Scryfall_id { get; set; }
         public int Set_Type_id { get; set; }
         public SetType Set_Type { get; set; }
+        public CollectedData CollectedData { get; set; }
         public bool Pinned { get; set; }
     }
 }

@@ -14,6 +14,8 @@
 		<MudTh>Shorthand</MudTh>
 		<MudTh>Icon</MudTh>
 		<MudTh>Set Type</MudTh>
+		<MudTh>Card Sets Collected [TODO: INFO HOVER OVER HERE]</MudTh>
+		<MudTh>Total Cards</MudTh>
 	</HeaderContent>
 	<RowTemplate>
 		<MudTd><MudLink Href=@($"mtg/sets/{context.ID}")>@context.ID</MudLink></MudTd>
@@ -21,6 +23,8 @@
 		<MudTd>@context.Shorthand</MudTd>
 		<MudTd><MudImage Src="@context.Icon" Height="30"/></MudTd>
 		<MudTd>@context.Set_Type.Name</MudTd>
+		<MudTd>@context.CollectedData.CollectedCards</MudTd>
+		<MudTd>@context.CollectedData.TotalCards</MudTd>
 	</RowTemplate>
 	<PagerContent>
 		<MudTablePager />
@@ -35,7 +39,12 @@
 
 	protected override async Task OnInitializedAsync()
 	{
-		data = await mtgs.GetCollectingSetsAsync("1");
+		string userID = "1";
+		data = await mtgs.GetCollectingSetsAsync(userID);
+		if(userID != "")
+		{
+			data = await mtgs.PopulateSetCollectedAsync(data, userID);
+		}
 	}
 
 	private bool FilterFunc1(Set set) => FilterFunc(set, filterValue);

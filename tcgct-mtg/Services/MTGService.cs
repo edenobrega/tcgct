@@ -8,6 +8,7 @@ using tcgct_mtg.Models;
 using Dapper;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.InteropServices;
+using tcgct_mtg.Models.Helpers;
 
 namespace tcgct_mtg.Services
 {
@@ -37,6 +38,13 @@ namespace tcgct_mtg.Services
             return await Task.Run(() =>
             {
                 return GetAllSets();
+            });
+        }        
+        public async Task<IEnumerable<Set>> GetAllSetsAsync(string UserID)
+        {
+            return await Task.Run(() =>
+            {
+                return GetAllSets(UserID);
             });
         }
         public async Task<int> CreateSetAsync(Set set)
@@ -77,7 +85,6 @@ namespace tcgct_mtg.Services
                                    where co.UserID = @UID";
                 sets = conn.Query<Set>(sql, new { UID = UserID });
                 IEnumerable<SetType> setTypes = GetSetTypes();
-
                 sets.ToList().ForEach(fe =>
                 {
                     fe.Set_Type = setTypes.Single(s => s.ID == fe.Set_Type_id);
@@ -93,7 +100,7 @@ namespace tcgct_mtg.Services
                 conn.Open();
                 var sql = $@"select * from [MTG].[Set] where id = @id";
                 var result = conn.QuerySingle<Set>(sql, new { id });
-
+                conn.Close();
                 result.Set_Type = GetSetType(result.Set_Type_id);
 				return result;
             }
@@ -108,7 +115,7 @@ namespace tcgct_mtg.Services
                 return result;
             }
         }
-        public IEnumerable<Set> GetAllSets()
+        public IEnumerable<Set> GetAllSets(string? UserID = null)
         {
             using (var conn = new SqlConnection(configuration.connectionString))
             {
@@ -118,11 +125,36 @@ namespace tcgct_mtg.Services
                 var results = conn.Query<Set>(sql);
                 conn.Close();
 
-                this.GetSetTypes().ToList().ForEach(fe => results.Where(r => r.Set_Type_id == fe.ID).ToList().ForEach(r2 => r2.Set_Type = fe));
+                IEnumerable<SetType> setTypes = GetSetTypes();
 
-                return results;
+				results.ToList().ForEach(fe =>
+				{
+					fe.Set_Type = setTypes.Single(s => s.ID == fe.Set_Type_id);
+				});
+				return results;
             }
         }
+        public IEnumerable<Set> GetUserPinnedSets(string UserID)
+        {
+			using (var conn = new SqlConnection(configuration.connectionString))
+			{
+				conn.Open();
+				var sql = @"select s.* 
+                            from [MTG].[Set] as s
+                            join mtg.PinnedSet as ps on ps.SetID = s.id
+                            where UserID = @UserID";
+                var results = conn.Query<Set>(sql, new{ UserID });
+
+                var st = GetSetTypes();
+
+                results.ToList().ForEach(fe => 
+                {
+                    fe.Set_Type = st.Single(s => s.ID == fe.Set_Type_id);
+                });
+
+                return results;
+			}
+		}
         public int CreateSet(Set set)
         {
             using (var conn = new SqlConnection(configuration.connectionString))
@@ -139,21 +171,9 @@ namespace tcgct_mtg.Services
                     set.Set_Type_id
                 });
             }
-        }
-        public IEnumerable<Set> GetUserPinnedSets(string UserID)
-        {
-			using (var conn = new SqlConnection(configuration.connectionString))
-			{
-				conn.Open();
-				var sql = @"select s.* 
-                            from [MTG].[Set] as s
-                            join mtg.PinnedSet as ps on ps.SetID = s.id
-                            where UserID = @UserID";
-				return conn.Query<Set>(sql, new{ UserID });
-			}
-		}
+        }       
         #endregion
-        #endregion
+		#endregion
 
         #region Pinned Sets
         #region async
@@ -209,7 +229,6 @@ namespace tcgct_mtg.Services
 			}
 		}
         #endregion
-
         #endregion
 
 		#region Cards
@@ -1050,12 +1069,22 @@ namespace tcgct_mtg.Services
                 return new CardTypeLine(typeLines);
             }
         }
-        #endregion
-        #endregion
+		#endregion
+		#endregion
 
-        #region Collected
-        #region sync 
-        public void UpdateCollected(List<Collection> newCollection, string UserID)
+		#region Collected
+		#region async
+		public async Task<IEnumerable<Set>> PopulateSetCollectedAsync(IEnumerable<Set> Data, string UserID)
+        {
+            return await Task.Run(() => 
+            {
+                return PopulateSetCollected(Data, UserID);
+            });
+        }
+		#endregion
+
+		#region sync 
+		public void UpdateCollected(List<Collection> newCollection, string UserID)
         {
             var oldCollection = GetCollectionDynamic(newCollection.Select(s => s.CardID), UserID).ToList();
             List<Collection> update = new List<Collection>();
@@ -1104,7 +1133,6 @@ namespace tcgct_mtg.Services
             }
 
         }
-
         public IEnumerable<Collection> GetCollectedSet(string UserID, int SetID)
         {
             using (var conn = new SqlConnection(configuration.connectionString))
@@ -1122,7 +1150,6 @@ namespace tcgct_mtg.Services
             }
 
         }
-
         public IEnumerable<Collection> GetCollectionDynamic(IEnumerable<int> CardIDs, string UserID)
         {
             using (var conn = new SqlConnection(configuration.connectionString))
@@ -1136,7 +1163,48 @@ namespace tcgct_mtg.Services
                 return conn.Query<Collection>(sql, new { UserID ,CardIDs });
             }
         }
+		public IEnumerable<CollectedData> GetCollectedSetData(IEnumerable<int> SetIDs, string UserID)
+        {
+			using (var conn = new SqlConnection(configuration.connectionString))
+			{
+				conn.Open();
+				var sql = @"select s.id as [SetID],
+                            (select count(1)
+                            from mtg.[Collection] as co
+                            join mtg.[Card] as c on co.CardID = c.id
+                            where c.card_set_id = s.id and co.[Count] >= 4 and co.UserID = @UserID) as [CollectedCards],
+                            (select count(1) from mtg.Card as c where c.card_set_id = s.id) as [TotalCards]
+                            from mtg.[Set] as s
+                            where s.id in @SetIDs";
+				return conn.Query<CollectedData>(sql, new { SetIDs, UserID });
+			}
+		}
+		public IEnumerable<CollectedData> GetCollectedSetData(string UserID)
+		{
+			using (var conn = new SqlConnection(configuration.connectionString))
+			{
+				conn.Open();
+                var sql = @"select s.id as [SetID],
+                            (select count(1)
+                            from mtg.[Collection] as co
+                            join mtg.[Card] as c on co.CardID = c.id
+                            where c.card_set_id = s.id and co.[Count] >= 4 and co.UserID = @UserID),
+                            (select count(1) from mtg.Card as c where c.card_set_id = s.id)
+                            from mtg.[Set] as s";
+				return conn.Query<CollectedData>(sql, new { UserID });
+			}
+		}
+		public IEnumerable<Set> PopulateSetCollected(IEnumerable<Set> Data, string UserID)
+        {
+            IEnumerable<CollectedData> csd = GetCollectedSetData(Data.Select(s => s.ID), UserID);
+            csd.ToList().ForEach(fe => 
+            {
+                Data.Single(s => s.ID == fe.SetID).CollectedData = fe;
+            });
+            return Data;
+        }
         #endregion
-        #endregion
-    }
+		#endregion
+
+	}
 }
