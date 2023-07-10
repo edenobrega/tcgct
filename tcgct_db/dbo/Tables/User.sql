@@ -1,0 +1,10 @@
+CREATE TABLE [dbo].[User] (
+    [Name] VARCHAR (100) NOT NULL,
+    [ID]   INT           IDENTITY (1, 1) NOT NULL
+);
+GO
+
+ALTER TABLE [dbo].[User]
+    ADD CONSTRAINT [PK_User] PRIMARY KEY CLUSTERED ([ID] ASC);
+GO
+
