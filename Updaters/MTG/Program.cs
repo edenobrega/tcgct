@@ -1,10 +1,9 @@
-﻿using Microsoft.VisualBasic.FileIO;
-using MTG.Classes;
+﻿using MTG.Classes;
 using MTG.Classes.Base;
 using MTG.Classes.Response;
 using Newtonsoft.Json;
 using RestSharp;
-using System.Threading.Channels;
+
 using tcgct_mtg.Models;
 using tcgct_mtg.Services;
 
