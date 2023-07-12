@@ -406,3 +406,4 @@ single.json
 Updaters/MTG/Data/single_related.json
 tcgct-mud/Pages/Test.razor
 /tcgct_db/tcgct_db.sqlproj
+/tcgct_db
