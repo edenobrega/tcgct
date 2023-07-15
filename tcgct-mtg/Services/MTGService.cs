@@ -273,7 +273,6 @@ namespace tcgct_mtg.Services
         #region sync
         public IEnumerable<Card> GetMissingCards(int SetID, string UserID)
         {
-            // todo: finish
 			using (var conn = new SqlConnection(configuration.connectionString))
 			{
 				conn.Open();
@@ -284,13 +283,15 @@ namespace tcgct_mtg.Services
 				var results = conn.Query<Card>(sql, new { SetID, UserID }).ToList();
 				List<Rarity> rarities = GetRarities().ToList();
 				Set set = GetSet(SetID);
+                List<Collection> collected = GetCollectedSet(UserID, SetID, true).ToList();
 				results.ForEach(fe =>
 				{
 					fe.Set = set;
 					fe.Rarity = rarities.Single(s => s.ID == fe.Rarity_ID);
 					fe.TypeLine = GetCardTypeLine(fe.ID);
-                    //fe.Collected
-				});
+                    fe.Collected = collected.Single(s => s.CardID == fe.ID).Count;
+
+                });
 				return results;
 			}
 		}
@@ -918,19 +919,33 @@ namespace tcgct_mtg.Services
         /// <param name="UserID"></param>
         /// <param name="SetID"></param>
         /// <returns></returns>
-        public IEnumerable<Collection> GetCollectedSet(string UserID, int SetID)
+        public IEnumerable<Collection> GetCollectedSet(string UserID, int SetID, bool IncludeMissing)
         {
+            string sql = "";
             using (var conn = new SqlConnection(configuration.connectionString))
             {
                 conn.Open();
-                string sql = @"select col.CardID
-	                                  ,s.id as SetID
-	                                  ,col.[Count]
-                                      ,col.UserID
-                                from [tcgct].[MTG].[Collection] col
-                                inner join MTG.[Card] c on c.id = col.CardID
-                                inner join MTG.[Set] s on s.id = c.card_set_id
-                                where col.UserID = @UserID and c.card_set_id = @SetID";
+                if (IncludeMissing)
+                {
+                    sql = @"select ISNULL(co.CardID, c.id) as [SetID], 
+                                   ISNULL(co.UserID, @UserID) as [UserID], 
+                                   ISNULL(co.[Count], 0) as [Count]
+                            from mtg.Card as c
+                            left join mtg.Collection as co on co.CardID = c.id and co.UserID = @UserID
+                            where c.card_set_id = @SetID";
+                }
+                else
+                {
+                    sql = @"select col.CardID
+	                                ,s.id as SetID
+	                                ,col.[Count]
+                                    ,col.UserID
+                            from [tcgct].[MTG].[Collection] col
+                            inner join MTG.[Card] c on c.id = col.CardID
+                            inner join MTG.[Set] s on s.id = c.card_set_id
+                            where col.UserID = @UserID and c.card_set_id = @SetID";
+                }
+
                 return conn.Query<Collection>(sql, new { UserID, SetID });
             }
         }

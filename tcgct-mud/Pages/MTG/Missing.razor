@@ -3,14 +3,107 @@
 @using tcgct_mud.Data.MTG;
 @inject tcgct_mtg.Services.MTGService mtgs
 
-<h3>Missing</h3>
+<MudTable Items="@data" Loading="loading" @ref="mudTable" Filter="new Func<CardHTML,bool>(FilterFuncBase)" LoadingProgressColor="Color.Info">
+	<ToolBarContent>
+		<MudText>Viewing set: @mtgs.GetSet(int.Parse(set_id)).Name</MudText>
+		<MudSpacer />
+		<MudSpacer />
+		<MudTextField ReadOnly="true" Immediate="true" Placeholder="@filterValue" Adornment="Adornment.Start" Value="filterValue" OnKeyDown="DownHandler" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium"></MudTextField>
+	</ToolBarContent>
+	<HeaderContent>
+		<MudTh>Collector Number</MudTh>
+		<MudTh>Name</MudTh>
+		<MudTh>Mana Cost</MudTh>
+		<MudTh>Text</MudTh>
+		<MudTh>Flavor</MudTh>
+		<MudTh>Image / Show Faces</MudTh>
+		<MudTh>Collected</MudTh>
+
+	</HeaderContent>
+	<RowTemplate>
+		@if (!loading)
+		{
+			<MudTd>@context.Card.Collector_Number</MudTd>
+			<MudTd>@context.Card.Name</MudTd>
+			<MudTd>@context.Card.ManaCost</MudTd>
+			<MudTd>@context.Card.Text</MudTd>
+			<MudTd><i>@context.Card.Flavor</i></MudTd>
+			@if (context.Card.MultiFace)
+			{
+				<MudTd><MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="@(() => ShowFaces(context.Card.Collector_Number))">@(context.HTMLValues.Show ? "Hide" : "Show")</MudButton></MudTd>
+			}
+			else
+			{
+				<MudTd><MudImage Src="@context.Card.Image" Height="200" /></MudTd>
+			}
+			<MudTd>@context.Card.Collected</MudTd>
+		}
+	</RowTemplate>
+	<ChildRowContent>
+		@if (context.HTMLValues.Show)
+		{
+			<MudTr>
+				<td colspan="7">
+					<MudCard Elevation="0">
+						<MudCardHeader>
+							<CardHeaderContent>
+								<MudText Align="Align.Center" Typo="Typo.body1">Card Faces for <strong>@context.Card.Name</strong></MudText>
+							</CardHeaderContent>
+						</MudCardHeader>
+						<MudCardContent Style="padding-left:400px;">
+							<MudTable Items="@context.Card.Faces" Context="faceContext" Hover="true" Breakpoint="Breakpoint.Sm" Elevation="0">
+								<HeaderContent>
+									<MudTh>Name</MudTh>
+									<MudTh>Mana Cost</MudTh>
+									<MudTh>Text</MudTh>
+									<MudTh>Image</MudTh>
+								</HeaderContent>
+								<RowTemplate>
+									<MudTd>@faceContext.Name</MudTd>
+									<MudTd>@faceContext.ManaCost</MudTd>
+									<MudTd>@faceContext.OracleText</MudTd>
+									<MudTd><MudImage Src="@faceContext.Image" Height="200" /></MudTd>
+								</RowTemplate>
+							</MudTable>
+						</MudCardContent>
+					</MudCard>
+				</td>
+			</MudTr>
+		}
+	</ChildRowContent>
+	<PagerContent>
+		<MudTablePager />
+	</PagerContent>
+</MudTable>
+
 
 @code {
 	[Parameter]
 	public string set_id { get; set; }
 
+	MudTable<CardHTML>? mudTable;
+
+	public string _filterValue = "";
+	public string filterValue
+	{
+		get
+		{
+			return _filterValue;
+		}
+		set
+		{
+			_filterValue = value;
+		}
+	}
+
+	bool loading;
+
+
+	List<CardHTML>? data;
+	CardHTML loneCard = null;
 	protected override async Task OnInitializedAsync()
 	{
+		loading = true;
 		var _data = await mtgs.GetSetCardsAsync(int.Parse(set_id));
 		data = new List<CardHTML>();
 		_data.ToList().ForEach(fe =>
@@ -18,5 +111,58 @@
 			data.Add(new CardHTML(fe));
 		});
 		loading = false;
+	}
+
+	private bool FilterFuncBase(CardHTML card) => FilterFunc(card, filterValue);
+	private bool FilterFunc(CardHTML card, string value)
+	{
+		if (string.IsNullOrWhiteSpace(value))
+		{
+			return true;
+		}
+		if (card.Card.Collector_Number.Contains(value, StringComparison.OrdinalIgnoreCase))
+		{
+			return true;
+		}
+
+		if (card.Card.Name.Contains(value, StringComparison.OrdinalIgnoreCase))
+		{
+			return true;
+		}
+
+		return false;
+	}
+
+	private void ShowFaces(string collectors_number)
+	{
+		CardHTML temp = data.Single(s => s.Card.Collector_Number == collectors_number);
+		temp.HTMLValues.Show = !temp.HTMLValues.Show;
+	}
+
+	string[] invalidQuickEdit = new string[]
+	{
+		"+",
+		"-",
+		".",
+		"backspace",
+		"enter"
+	};
+	private void DownHandler(KeyboardEventArgs args)
+	{
+		if (args.Key == "Backspace")
+		{
+			if (filterValue.Length == 0)
+			{
+				return;
+			}
+			filterValue = filterValue.Substring(0, filterValue.Length - 1);
+			return;
+		}
+
+		if (args.Key.Length > 1 || invalidQuickEdit.Contains(args.Key))
+		{
+			return;
+		}
+		filterValue += args.Key;
 	}
 }

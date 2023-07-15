@@ -8,27 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Remove="Pages\MTG\Missing.razor" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="MudBlazor" Version="6.4.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\tcgct-mtg\tcgct-mtg.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <UpToDateCheckInput Remove="Pages\MTG\Missing.razor" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <_ContentIncludedByDefault Remove="Pages\MTG\Missing.razor" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="Pages\MTG\Missing.razor" />
   </ItemGroup>
 
 </Project>

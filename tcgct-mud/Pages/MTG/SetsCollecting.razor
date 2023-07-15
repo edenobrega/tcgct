@@ -10,6 +10,7 @@
 	</ToolBarContent>
 	<HeaderContent>
 		<MudTh>ID</MudTh>
+		<MudTh>View Missing</MudTh>
 		<MudTh>Name</MudTh>
 		<MudTh>Shorthand</MudTh>
 		<MudTh>Icon</MudTh>
@@ -19,6 +20,7 @@
 	</HeaderContent>
 	<RowTemplate>
 		<MudTd><MudLink Href=@($"mtg/sets/{context.ID}")>@context.ID</MudLink></MudTd>
+		<MudTd><MudLink Href=@($"mtg/sets/missing/{context.ID}")>View</MudLink></MudTd>
 		<MudTd>@context.Name</MudTd>
 		<MudTd>@context.Shorthand</MudTd>
 		<MudTd><MudImage Src="@context.Icon" Height="30"/></MudTd>
