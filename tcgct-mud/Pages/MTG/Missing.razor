@@ -1,0 +1,22 @@
+﻿@page "/mtg/sets/missing/{set_id}"
+@using tcgct_mtg.Models;
+@using tcgct_mud.Data.MTG;
+@inject tcgct_mtg.Services.MTGService mtgs
+
+<h3>Missing</h3>
+
+@code {
+	[Parameter]
+	public string set_id { get; set; }
+
+	protected override async Task OnInitializedAsync()
+	{
+		var _data = await mtgs.GetSetCardsAsync(int.Parse(set_id));
+		data = new List<CardHTML>();
+		_data.ToList().ForEach(fe =>
+		{
+			data.Add(new CardHTML(fe));
+		});
+		loading = false;
+	}
+}

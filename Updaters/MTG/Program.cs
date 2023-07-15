@@ -38,7 +38,7 @@ namespace MTG
             bad_cards.ForEach(fe => { parsed.Remove(fe); });
 
             sets = mtgservice.GetAllSets().ToList();
-            settypes = mtgservice.GetSetTypes().ToList();
+            settypes = mtgservice.GetAllSetTypes().ToList();
             cards = mtgservice.GetAllCards().ToList();
             rarities = mtgservice.GetRarities().ToList();
             cardtypes = mtgservice.GetAllCardTypes().ToList();

@@ -2,7 +2,6 @@
 @using tcgct_mtg.Models;
 @using tcgct_mud.Data.MTG;
 @inject tcgct_mtg.Services.MTGService mtgs
-@inject NavigationManager NavigationManager
 
 @if (showSuccess)
 {
@@ -11,7 +10,7 @@
 
 <MudTable Items="@data" Loading="loading" @ref="mudTable" Filter="new Func<CardHTML,bool>(FilterFuncBase)">
 	<ToolBarContent>
-		<MudText>Viewing set: @set_id</MudText>
+		<MudText>Viewing set: @mtgs.GetSet(int.Parse(set_id)).Name</MudText>
 		<MudSpacer />
 		<MudButton Variant="Variant.Outlined" OnClick="SaveChanges">Save</MudButton>
 		<MudSpacer />

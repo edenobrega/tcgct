@@ -84,7 +84,7 @@ namespace tcgct_mtg.Services
                                    join [MTG].[Set] as s on s.id = c.card_set_id
                                    where co.UserID = @UID";
                 sets = conn.Query<Set>(sql, new { UID = UserID });
-                IEnumerable<SetType> setTypes = GetSetTypes();
+                IEnumerable<SetType> setTypes = GetAllSetTypes();
                 sets.ToList().ForEach(fe =>
                 {
                     fe.Set_Type = setTypes.Single(s => s.ID == fe.Set_Type_id);
@@ -125,7 +125,7 @@ namespace tcgct_mtg.Services
                 var results = conn.Query<Set>(sql);
                 conn.Close();
 
-                IEnumerable<SetType> setTypes = GetSetTypes();
+                IEnumerable<SetType> setTypes = GetAllSetTypes();
 
 				results.ToList().ForEach(fe =>
 				{
@@ -145,7 +145,7 @@ namespace tcgct_mtg.Services
                             where UserID = @UserID";
                 var results = conn.Query<Set>(sql, new{ UserID });
 
-                var st = GetSetTypes();
+                var st = GetAllSetTypes();
 
                 results.ToList().ForEach(fe => 
                 {
@@ -233,161 +233,67 @@ namespace tcgct_mtg.Services
 
 		#region Cards
 		#region async
-		public async Task<IEnumerable<Card>> GetAllCardsAsync()
-        {
-            using (var conn = new SqlConnection(configuration.connectionString))
-            {
-                conn.Open();
-                var sql = "select * from [MTG].[Card]";
-                return await conn.QueryAsync<Card>(sql);
-            }
-        }
-        public async Task<IEnumerable<Card>> GetSetCardsAsync(int id)
+        public async Task<IEnumerable<Card>> GetMissingCardsAsync(int SetID, string UserID)
         {
             return await Task.Run(() => 
             { 
-                List<Rarity> rarities = GetRarities().ToList();
-                Set set = GetSet(id);
-                Card[] cards;
-				using (var conn = new SqlConnection(configuration.connectionString))
-				{
-					conn.Open();
-					var sql = @"select c.[id]
-	                               ,co.[Count] as [Collected]
-                                  ,c.[name]
-                                  ,c.[mana_cost]
-                                  ,c.[text]
-                                  ,c.[flavor]
-                                  ,c.[artist]
-                                  ,c.[collector_number]
-                                  ,c.[power]
-                                  ,c.[toughness]
-                                  ,c.[card_set_id]
-                                  ,c.[scryfall_id]
-                                  ,c.[converted_cost]
-                                  ,c.[image]
-                                  ,c.[image_flipped]
-                                  ,c.[oracle_id]
-                                  ,c.[rarity_id]
-                                  ,c.[multi_face] as [MultiFace]
-                              from [tcgct].[MTG].[Card] as c
-                              full outer join mtg.[Collection] as co on c.id = co.CardID
-                              where c.card_set_id = @id";
-					cards = conn.Query<Card>(sql, new { id }).ToArray();
-
-                    int[] multiface_ids = cards.Where(s => s.MultiFace).Select(s => s.ID).ToArray();
-                    sql = @"SELECT [ID]
-                              ,[CardID]
-                              ,[Object]
-                              ,[Name]
-                              ,[Image]
-                              ,[Mana_Cost]
-                              ,[Oracle_Text]
-                              ,[ConvertedCost]
-                              ,[FlavourText]
-                              ,[Layout]
-                              ,[Loyalty]
-                              ,[OracleID]
-                              ,[Power]
-                              ,[Toughness]
-                          FROM [tcgct].[MTG].[CardFace]
-                          where CardID in @multiface_ids";
-
-                    foreach (var card in cards)
-                    {
-                        card.Set = set;
-                        card.Rarity = rarities.Single(s => s.ID == card.Rarity_ID);
-                        if (card.MultiFace)
-                        {
-                            card.Faces = GetCardFaces(card.ID).ToArray();
-                        }
-                    }           
-                    
-					return cards;
-				}
-			});
+                return GetMissingCards(SetID, UserID);
+            });
+        }
+		public async Task<IEnumerable<Card>> GetAllCardsAsync()
+        {
+            return await Task.Run(() =>
+            {
+                return GetAllCards();
+            });
+        }
+        public async Task<IEnumerable<Card>> GetSetCardsAsync(int id)
+        {
+            return await Task.Run(() =>
+            {
+                return GetSetCards(id);
+            });
         } 
         public async Task<Card> GetCardAsync(int id)
         {
-            using (var conn = new SqlConnection(configuration.connectionString))
+            return await Task.Run(() =>
             {
-                conn.Open();
-                var sql = $@"select *
-                              from [MTG].[Card]
-                              where [id] = @id";
-                var result = await conn.QuerySingleAsync<Card>(sql, new { id });
-                conn.Close();
-
-                result.Rarity = await this.GetRarityAsync(result.Rarity_ID);
-                result.Set = await this.GetSetAsync(result.Card_Set_ID);
-                result.TypeLine = await this.GetCardTypeLineAsync(id);
-                return result;
-            }
+                return GetCard(id);
+            });
         }
         public async Task<int> CreateCardAsync(Card card)
         {
-            using (var conn = new SqlConnection(configuration.connectionString))
+            return await Task.Run(() =>
             {
-                conn.Open();
-                var sql = @"INSERT INTO [MTG].[Card]
-                                ([name]
-                                ,[mana_cost]
-                                ,[text]
-                                ,[flavor]
-                                ,[artist]
-                                ,[collector_number]
-                                ,[power]
-                                ,[toughness]
-                                ,[card_set_id]
-                                ,[scryfall_id]
-                                ,[converted_cost]
-                                ,[image]
-                                ,[image_flipped]
-                                ,[oracle_id]
-                                ,[rarity_id]
-                                ,[multi_face])
-	                        OUTPUT inserted.id
-                            VALUES
-                                (@name
-                                ,@manacost
-                                ,@text
-                                ,@flavor
-                                ,@artist
-                                ,@collector_number
-                                ,@power
-                                ,@toughness
-                                ,@card_set_id
-                                ,@scryfall_id
-                                ,@convertedcost
-                                ,@image
-                                ,@imageflipped
-                                ,@oracle_id
-                                ,@rarity_id
-                                ,@multiface)";
-                return await conn.QuerySingleAsync<int>(sql, new
-                {
-                    card.Name,
-                    card.ManaCost,
-                    card.Text,
-                    card.Flavor,
-                    card.Artist,
-                    card.Collector_Number,
-                    card.Power,
-                    card.Toughness,
-                    card.Card_Set_ID,
-                    card.Scryfall_ID,
-                    card.ConvertedCost,
-                    card.Image,
-                    card.ImageFlipped,
-                    card.Oracle_ID,
-                    card.Rarity_ID,
-                    card.MultiFace
-                });
-            }
+                return CreateCard(card);
+            });
         }
         #endregion
 
         #region sync
+        public IEnumerable<Card> GetMissingCards(int SetID, string UserID)
+        {
+            // todo: finish
+			using (var conn = new SqlConnection(configuration.connectionString))
+			{
+				conn.Open();
+				var sql = @"select c.*
+                            from mtg.Card as c
+                            left join mtg.Collection as co on co.CardID = c.id and co.[Count] < 4 and co.UserID = @UserID
+                            where c.card_set_id = @SetID";
+				var results = conn.Query<Card>(sql, new { SetID, UserID }).ToList();
+				List<Rarity> rarities = GetRarities().ToList();
+				Set set = GetSet(SetID);
+				results.ForEach(fe =>
+				{
+					fe.Set = set;
+					fe.Rarity = rarities.Single(s => s.ID == fe.Rarity_ID);
+					fe.TypeLine = GetCardTypeLine(fe.ID);
+                    //fe.Collected
+				});
+				return results;
+			}
+		}
         public IEnumerable<Card> GetAllCards()
         {
             using (var conn = new SqlConnection(configuration.connectionString))
@@ -500,72 +406,24 @@ namespace tcgct_mtg.Services
         #region async
         public async Task<IEnumerable<CardFace>> GetAllCardFacesAsync()
         {
-            using (var conn = new SqlConnection(configuration.connectionString))
+            return await Task.Run(() => 
             {
-                conn.Open();
-                var sql = "select * from [MTG].[CardFace]";
-                return await conn.QueryAsync<CardFace>(sql);
-            }
+                return GetAllCardFaces();
+            });
         }
         public async Task<IEnumerable<CardFace>> GetCardFacesAsync(int id)
         {
-            using (var conn = new SqlConnection(configuration.connectionString))
+            return await Task.Run(() =>
             {
-                conn.Open();
-                var sql = "select * from [MTG].[CardFace] where CardID = @ID";
-                return await conn.QueryAsync<CardFace>(sql, new { ID = id });
-            }
+                return GetCardFaces(id);
+            });
         }
         public async Task<int> CreateCardFaceAsync(CardFace card)
         {
-            using (var conn = new SqlConnection(configuration.connectionString))
+            return await Task.Run(() =>
             {
-                string sql = @"INSERT INTO [MTG].[CardFace]([CardID]
-                              ,[Object]
-                              ,[Name]
-                              ,[Image]
-                              ,[Mana_Cost]
-                              ,[Oracle_Text]
-                              ,[ConvertedCost]
-                              ,[FlavourText]
-                              ,[Layout]
-                              ,[Loyalty]
-                              ,[OracleID]
-                              ,[Power]
-                              ,[Toughness])
-                        OUTPUT inserted.ID
-                        VALUES(
-                               @CardID
-                              ,@Object
-                              ,@Name
-                              ,@Image
-                              ,@ManaCost
-                              ,@OracleText
-                              ,@ConvertedCost
-                              ,@FlavourText
-                              ,@Layout
-                              ,@Loyalty
-                              ,@OracleID
-                              ,@Power
-                              ,@Toughness)";
-
-                return await conn.QuerySingleAsync<int>(sql, new
-                {
-                    card.CardID,
-                    card.Object,
-                    card.Name,
-                    card.Image,
-                    card.ManaCost,
-                    card.OracleText,
-                    card.ConvertedCost,
-                    card.FlavourText,
-                    card.Layout,
-                    card.Loyalty,
-                    card.OracleID,
-                    card.Power,
-                    card.Toughness
-                });
-            }
+                return CreateCardFace(card);
+            });
         }
         #endregion
 
@@ -660,43 +518,18 @@ namespace tcgct_mtg.Services
         #region async
         public async Task<IEnumerable<CardPart>> GetAllCardPartsAsync()
         {
-            using (var conn = new SqlConnection(configuration.connectionString))
+            return await Task.Run(() =>
             {
-                conn.Open();
-                var sql = "select * from [MTG].[CardPart]";
-                var results = await conn.QueryAsync<CardPart>(sql);
-                return results;
-            }
+                return GetAllCardParts();
+            });
         }
 
         public async Task<int> CreateCardPartAsync(CardPart cardPart)
         {
-            using (var conn = new SqlConnection(configuration.connectionString))
+            return await Task.Run(() =>
             {
-                conn.Open();
-                var sql = @"INSERT INTO [MTG].[CardPart]
-                                   ([CardID]
-                                   ,[Object]
-                                   ,[Component]
-                                   ,[Name]
-                                   ,[RelatedCardID])
-                             OUTPUT inserted.ID
-                             VALUES
-                                   (@CardID,
-                                   @Object,
-                                   @Component,
-                                   @Name,
-                                   @RelatedCardID)";
-                var result = await conn.QuerySingleAsync<int>(sql, new
-                {
-                    cardPart.CardID,
-                    cardPart.Object,
-                    cardPart.Component,
-                    cardPart.Name,
-                    cardPart.RelatedCardID
-                });
-                return result;
-            }
+                return CreateCardPart(cardPart);
+            });
         }
         #endregion
 
@@ -748,35 +581,24 @@ namespace tcgct_mtg.Services
         #region async
         public async Task<IEnumerable<Rarity>> GetRaritiesAsync()
         {
-            using (var conn = new SqlConnection(configuration.connectionString))
+            return await Task.Run(() => 
             {
-                conn.Open();
-                var sql = $@"select [id], [name] from [MTG].[Rarity]";
-                var results = await conn.QueryAsync<Rarity>(sql);
-                conn.Close();
-                return results;
-            }
-
+                return GetRarities();
+            });
         }
         public async Task<Rarity> GetRarityAsync(int id)
         {
-            using (var conn = new SqlConnection(configuration.connectionString))
+            return await Task.Run(() =>
             {
-                conn.Open();
-                var sql = $@"select id, name from [MTG].[Rarity] where id = @id";
-                var result = await conn.QuerySingleAsync<Rarity>(sql, new { id });
-                conn.Close();
-                return result;
-            }
+                return GetRarity(id);
+            });
         }
         public async Task<int> CreateRarityAsync(string name)
         {
-            using (var conn = new SqlConnection(configuration.connectionString))
+            return await Task.Run(() =>
             {
-                conn.Open();
-                string sql = "insert into [MTG].[Rarity]([Name]) output INSERTED.id values (@NAME)";
-                return await conn.QuerySingleAsync<int>(sql, new { name });
-            }
+                return CreateRarity(name);
+            });
         }
         #endregion
 
@@ -816,29 +638,26 @@ namespace tcgct_mtg.Services
 
         #region Set Types
         #region async
+        public async Task<SetType> GetSetTypeAsync(int id)
+        {
+            return await Task.Run(() =>
+            {
+                return GetSetType(id);
+            });
+        }
         public async Task<IEnumerable<SetType>> GetAllSetTypesAsync()
 		{
             return await Task.Run(() => 
-            { 
-			    using (var conn = new SqlConnection(configuration.connectionString))
-                {
-                    conn.Open();
-                    var sql = $@"select * from [MTG].[SetType]";
-                    var results = conn.Query<SetType>(sql);
-                    return results;
-                }            
+            {
+                return GetAllSetTypes();
             });
-
-
         }
         public async Task<int> CreateSetTypeAsync(string name)
         {
-            using (var conn = new SqlConnection(configuration.connectionString))
-            {
-                conn.Open();
-                string sql = "insert into [MTG].[SetType]([Name]) output INSERTED.id values (@NAME)";
-                return await conn.QuerySingleAsync<int>(sql, new { name });
-            }
+            return await Task.Run(() => 
+            { 
+                return CreateSetType(name);
+            });
         }
         #endregion
 
@@ -853,7 +672,7 @@ namespace tcgct_mtg.Services
 				return result;
 			}
 		}
-        public IEnumerable<SetType> GetSetTypes()
+        public IEnumerable<SetType> GetAllSetTypes()
         {
             using (var conn = new SqlConnection(configuration.connectionString))
             {
@@ -879,46 +698,35 @@ namespace tcgct_mtg.Services
         #region async
         public async Task<CardType> GetCardTypeAsync(int type_id)
         {
-            using (var conn = new SqlConnection(configuration.connectionString))
+            return await Task.Run(() =>
             {
-                conn.Open();
-                var sql = $@"select [id], [name] from [MTG].[CardType] where [id] = @type_id";
-                var result = await conn.QuerySingleAsync<CardType>(sql, new { type_id });
-                return result;
-            }
+                return GetCardType(type_id);
+            });
         }
 
         public async Task<CardType> GetCardTypeAsync(string type_name)
         {
-            using (var conn = new SqlConnection(configuration.connectionString))
-            {
-                conn.Open();
-                var sql = $@"select [id], [name] from [MTG].[CardType] where [name] = @type_name";
-                var result = await conn.QuerySingleAsync<CardType>(sql, new { type_name });
-                return result;
-            }
-        }
+			return await Task.Run(() =>
+			{
+                return GetCardType(type_name);
+			});
+		}
 
         public async Task<IEnumerable<CardType>> GetAllCardTypesAsync()
         {
-            using (var conn = new SqlConnection(configuration.connectionString))
-            {
-                conn.Open();
-                var sql = $@"select * from [MTG].[CardType]";
-                var results = await conn.QueryAsync<CardType>(sql);
-                return results;
-            }
-        }
+			return await Task.Run(() =>
+			{
+                return GetAllCardTypes();
+			});
+		}
 
         public async Task<int> CreateCardTypeAsync(string name)
         {
-            using (var conn = new SqlConnection(configuration.connectionString))
-            {
-                conn.Open();
-                var sql = $@"insert into [MTG].[CardType] output inserted.id values (@NAME)";
-                return await conn.QuerySingleAsync<int>(sql, new { name });
-            }
-        }
+			return await Task.Run(() =>
+			{
+                return CreateCardType(name);
+			});
+		}
         #endregion
 
         #region sync
@@ -980,50 +788,20 @@ namespace tcgct_mtg.Services
         #region async
         public async void CreateTypeLineAsync(int type_id, int card_id)
         {
-            using (var conn = new SqlConnection(configuration.connectionString))
-            {
-                conn.Open();
-                var sql = $@"insert into [MTG].[TypeLine] values (@CARD_ID, @TYPE_ID)";
-                await conn.ExecuteAsync(sql,new { card_id, type_id });
-                conn.Close();
-            }
-        }
+            // todo: return id
+			await Task.Run(() =>
+			{
+                CreateTypeLine(type_id, card_id);
+			});
+		}
 
         public async Task<CardTypeLine> GetCardTypeLineAsync(int card_id)
         {
-            return await Task.Run<CardTypeLine>(() => 
-            { 
-                using (var conn = new SqlConnection(configuration.connectionString))
-                {
-                    conn.Open();
-                    var sql = $@"select tl.id as [ID], tl.[type_id] as [TypeID], ct.[name] 
-                                 from [MTG].[TypeLine] as tl
-                                 inner join [MTG].[CardType] as ct on ct.id = tl.[type_id]
-                                 where card_id = @card_id";
-                    var results = conn.Query<TypeLineSQL>(sql, new { card_id });
-
-                    conn.Close();
-                    List<TypeLine> typeLines = new List<TypeLine>();
-                    foreach (var item in results)
-                    {
-                        typeLines.Add(new TypeLine
-                        {
-                            ID = item.id,
-                            CardID = card_id,
-                            TypeID = item.type_id,
-                            Type = new CardType 
-                            { 
-                                ID = item.type_id,
-                                Name = item.name 
-                            }
-                        });
-                    }
-
-                    return new CardTypeLine(typeLines);
-                }            
-            });
-
-        }
+			return await Task.Run(() =>
+			{
+                return GetCardTypeLine(card_id);
+			});
+		}
         #endregion
 
         #region sync
@@ -1040,6 +818,7 @@ namespace tcgct_mtg.Services
 
         public CardTypeLine GetCardTypeLine(int card_id)
         {
+            // todo: investigate why i did this like this?
             using (var conn = new SqlConnection(configuration.connectionString))
             {
                 conn.Open();
@@ -1133,6 +912,12 @@ namespace tcgct_mtg.Services
             }
 
         }
+        /// <summary>
+        /// Collection data for certain set
+        /// </summary>
+        /// <param name="UserID"></param>
+        /// <param name="SetID"></param>
+        /// <returns></returns>
         public IEnumerable<Collection> GetCollectedSet(string UserID, int SetID)
         {
             using (var conn = new SqlConnection(configuration.connectionString))
@@ -1148,8 +933,13 @@ namespace tcgct_mtg.Services
                                 where col.UserID = @UserID and c.card_set_id = @SetID";
                 return conn.Query<Collection>(sql, new { UserID, SetID });
             }
-
         }
+        /// <summary>
+        /// Get collection data for certain cards
+        /// </summary>
+        /// <param name="CardIDs"></param>
+        /// <param name="UserID"></param>
+        /// <returns></returns>
         public IEnumerable<Collection> GetCollectionDynamic(IEnumerable<int> CardIDs, string UserID)
         {
             using (var conn = new SqlConnection(configuration.connectionString))
@@ -1163,7 +953,13 @@ namespace tcgct_mtg.Services
                 return conn.Query<Collection>(sql, new { UserID ,CardIDs });
             }
         }
-		public IEnumerable<CollectedData> GetCollectedSetData(IEnumerable<int> SetIDs, string UserID)
+		/// <summary>
+        /// Get set collection data for specific sets
+        /// </summary>
+        /// <param name="SetIDs"></param>
+        /// <param name="UserID"></param>
+        /// <returns></returns>
+        public IEnumerable<CollectedData> GetCollectedSetData(IEnumerable<int> SetIDs, string UserID)
         {
 			using (var conn = new SqlConnection(configuration.connectionString))
 			{
@@ -1179,7 +975,12 @@ namespace tcgct_mtg.Services
 				return conn.Query<CollectedData>(sql, new { SetIDs, UserID });
 			}
 		}
-		public IEnumerable<CollectedData> GetCollectedSetData(string UserID)
+		/// <summary>
+        /// Gets ammount of collected cards for a user for every set
+        /// </summary>
+        /// <param name="UserID"></param>
+        /// <returns></returns>
+        public IEnumerable<CollectedData> GetCollectedSetData(string UserID)
 		{
 			using (var conn = new SqlConnection(configuration.connectionString))
 			{
@@ -1203,6 +1004,19 @@ namespace tcgct_mtg.Services
             });
             return Data;
         }
+        public IEnumerable<Collection> GetMissingCollection(string UserID, int SetID)
+        {
+			using (var conn = new SqlConnection(configuration.connectionString))
+			{
+				conn.Open();
+				var sql = @"select c.id as [CardID], ISNULL(co.UserID, @UserID) , ISNULL(co.[Count], 0) as [Count]
+                            from mtg.Card as c
+                            join mtg.[Set] as s on s.id = c.card_set_id
+                            left join mtg.Collection as co on co.CardID = c.id and co.UserID = @UserID
+                            where c.card_set_id = @SetID and (co.[Count] is null or co.[Count] < 4)";
+				return conn.Query<Collection>(sql, new { UserID, SetID });
+			}
+		}
         #endregion
 		#endregion
 
