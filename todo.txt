@@ -1,0 +1,37 @@
+Implement user logins
+	implement other stuff first, have a static for current user for now
+
+system for storing users config
+configurations
+	config what is classified as a "completed set" 
+		e.g. having atleast 1 card, or having 4
+		set if duplicate cards are counted as the same, as some sets have the same card twice but different frame etc
+
+simplify sql library?
+implement unit testing for library
+
+export 
+	missing files
+	export collection
+
+search all cards
+
+choose what to filter by on tables
+
+have the loading screens actually load on tables
+
+custom sets
+
+databasebuilder
+	build db from project
+	push data to db from sql files
+	have script to update those files directly from db, just use backups?
+	have the builder implemented in unit testing to test the data in a empty db
+
+dashboard data
+
+drafting page
+	have a room with where other users can be invited to draft
+	host selects a set, an officla one or custom set, or just all cards
+	all players will draft from this
+	will save drafted cards and all players can view what they drafted whenever
