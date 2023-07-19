@@ -1,7 +1,7 @@
 namespace tcgct_mtg_tests
 {
 	[TestClass]
-	public class UnitTest1
+	public class Rarity
 	{
 		[TestMethod]
 		public void TestMethod1()

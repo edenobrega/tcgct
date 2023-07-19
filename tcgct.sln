@@ -3,14 +3,12 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33205.214
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "tcgct-mtg", "tcgct-mtg\tcgct-mtg.csproj", "{0BE5AD49-5B6F-42A9-8521-39FBFF81EBA5}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "tcgct-admin", "tcgct-admin\tcgct-admin.csproj", "{BFF6B735-89A9-474E-AADF-ACC95D0A4329}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{85F45ED4-6F78-4FEC-B2CC-E53279B6194D}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
-		create_tables.sql = create_tables.sql
+		todo.txt = todo.txt
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MTG", "Updaters\MTG\MTG.csproj", "{0AB3B51B-DE21-491E-AE63-805383B1B535}"
@@ -21,13 +19,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "sandbox", "sandbox\sandbox.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "tcgct-mud", "tcgct-mud\tcgct-mud.csproj", "{1AF51914-A0E0-4BE7-93CC-1E2616B60125}"
 EndProject
-Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "tcgct_db", "tcgct_db\tcgct_db.sqlproj", "{C089C7B9-F556-4EE3-8479-34E2E879EDD7}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DatabaseBuilder", "DatabaseBuilder\DatabaseBuilder.csproj", "{7BCD0DB8-C8C5-499A-B979-AA506E68F644}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Database", "Database", "{A93DDC12-616E-415A-A161-D5D5F4D58C49}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tcgct-mtg-tests", "tcgct-mtg-tests\tcgct-mtg-tests.csproj", "{788187CF-4376-469A-AB3B-473C4C7DF863}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "tcgct-mtg-tests", "tcgct-mtg-tests\tcgct-mtg-tests.csproj", "{788187CF-4376-469A-AB3B-473C4C7DF863}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "tcgct-mtg", "tcgct-mtg\tcgct-mtg.csproj", "{B0328E1F-44DE-4C5A-A423-D3022F599DE8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,10 +33,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{0BE5AD49-5B6F-42A9-8521-39FBFF81EBA5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0BE5AD49-5B6F-42A9-8521-39FBFF81EBA5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0BE5AD49-5B6F-42A9-8521-39FBFF81EBA5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0BE5AD49-5B6F-42A9-8521-39FBFF81EBA5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{BFF6B735-89A9-474E-AADF-ACC95D0A4329}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BFF6B735-89A9-474E-AADF-ACC95D0A4329}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BFF6B735-89A9-474E-AADF-ACC95D0A4329}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -55,12 +49,6 @@ Global
 		{1AF51914-A0E0-4BE7-93CC-1E2616B60125}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1AF51914-A0E0-4BE7-93CC-1E2616B60125}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1AF51914-A0E0-4BE7-93CC-1E2616B60125}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C089C7B9-F556-4EE3-8479-34E2E879EDD7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C089C7B9-F556-4EE3-8479-34E2E879EDD7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C089C7B9-F556-4EE3-8479-34E2E879EDD7}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
-		{C089C7B9-F556-4EE3-8479-34E2E879EDD7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C089C7B9-F556-4EE3-8479-34E2E879EDD7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C089C7B9-F556-4EE3-8479-34E2E879EDD7}.Release|Any CPU.Deploy.0 = Release|Any CPU
 		{7BCD0DB8-C8C5-499A-B979-AA506E68F644}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7BCD0DB8-C8C5-499A-B979-AA506E68F644}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7BCD0DB8-C8C5-499A-B979-AA506E68F644}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -69,13 +57,16 @@ Global
 		{788187CF-4376-469A-AB3B-473C4C7DF863}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{788187CF-4376-469A-AB3B-473C4C7DF863}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{788187CF-4376-469A-AB3B-473C4C7DF863}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B0328E1F-44DE-4C5A-A423-D3022F599DE8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B0328E1F-44DE-4C5A-A423-D3022F599DE8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B0328E1F-44DE-4C5A-A423-D3022F599DE8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B0328E1F-44DE-4C5A-A423-D3022F599DE8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{0AB3B51B-DE21-491E-AE63-805383B1B535} = {94DD27A5-7A9E-485E-9015-CBE3060553D6}
-		{C089C7B9-F556-4EE3-8479-34E2E879EDD7} = {A93DDC12-616E-415A-A161-D5D5F4D58C49}
 		{7BCD0DB8-C8C5-499A-B979-AA506E68F644} = {A93DDC12-616E-415A-A161-D5D5F4D58C49}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution

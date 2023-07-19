@@ -11,8 +11,4 @@
     <PackageReference Include="MudBlazor" Version="6.4.1" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\tcgct-mtg\tcgct-mtg.csproj" />
-  </ItemGroup>
-
 </Project>

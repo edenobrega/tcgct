@@ -1,13 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using tcgct_mtg.Models;
 using Dapper;
-using System.ComponentModel.DataAnnotations;
-using System.Runtime.InteropServices;
 using tcgct_mtg.Models.Helpers;
 
 namespace tcgct_mtg.Services
