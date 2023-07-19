@@ -17,4 +17,8 @@
     <Folder Include="Data\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\tcgct-mtg\tcgct-mtg.csproj" />
+  </ItemGroup>
+
 </Project>

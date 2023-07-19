@@ -548,21 +548,18 @@ namespace tcgct_mtg.Services
                                    ([CardID]
                                    ,[Object]
                                    ,[Component]
-                                   ,[Name]
                                    ,[RelatedCardID])
                              OUTPUT inserted.ID
                              VALUES
                                    (@CardID,
                                    @Object,
                                    @Component,
-                                   @Name,
                                    @RelatedCardID)";
                 var result = conn.QuerySingle<int>(sql, new
                 {
                     cardPart.CardID,
                     cardPart.Object,
                     cardPart.Component,
-                    cardPart.Name,
                     cardPart.RelatedCardID
                 });
                 return result;
