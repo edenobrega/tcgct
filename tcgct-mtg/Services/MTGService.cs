@@ -773,16 +773,17 @@ namespace tcgct_mtg.Services
             public int id { get; set; }
             public int type_id { get; set; }
             public string name { get; set; }
+            public int order { get; set; }
         }
         #endregion
 
         #region async
-        public async void CreateTypeLineAsync(int type_id, int card_id)
+        public async void CreateTypeLineAsync(int type_id, int card_id, int order)
         {
             // todo: return id
 			await Task.Run(() =>
 			{
-                CreateTypeLine(type_id, card_id);
+                CreateTypeLine(type_id, card_id, order);
 			});
 		}
 
@@ -796,13 +797,13 @@ namespace tcgct_mtg.Services
         #endregion
 
         #region sync
-        public void CreateTypeLine(int type_id, int card_id)
+        public void CreateTypeLine(int type_id, int card_id, int order)
         {
             using (var conn = new SqlConnection(configuration.connectionString))
             {
                 conn.Open();
-                var sql = $@"insert into [MTG].[TypeLine] values (@CARD_ID, @TYPE_ID)";
-                conn.ExecuteAsync(sql, new { card_id, type_id });
+                var sql = $@"insert into [MTG].[TypeLine] values (@CARD_ID, @TYPE_ID, @ORDER)";
+                conn.Execute(sql, new { card_id, type_id, order });
                 conn.Close();
             }
         }
@@ -813,7 +814,7 @@ namespace tcgct_mtg.Services
             using (var conn = new SqlConnection(configuration.connectionString))
             {
                 conn.Open();
-                var sql = $@"select tl.id as [ID], tl.[type_id] as [TypeID], ct.[name] 
+                var sql = $@"select tl.[type_id] as [TypeID], ct.[name], tl.[order] 
                                 from [MTG].[TypeLine] as tl
                                 inner join [MTG].[CardType] as ct on ct.id = tl.[type_id]
                                 where card_id = @card_id";
@@ -825,9 +826,9 @@ namespace tcgct_mtg.Services
                 {
                     typeLines.Add(new TypeLine
                     {
-                        ID = item.id,
                         CardID = card_id,
                         TypeID = item.type_id,
+                        Order = item.order,
                         Type = new CardType
                         {
                             ID = item.type_id,

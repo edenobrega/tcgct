@@ -22,35 +22,39 @@ namespace MTG
         // TODO: replace above with dictionary <IDENTIFYABLE INFO, OBJ> and see if its faster
         static void Main(string[] args)
         {
+            Logger.ShouldLog = true;
+
             mtgservice = new MTGService();
             tcgct_mtg.configuration.ConfigureConnectionString("Server=localhost\\SQLEXPRESS;Database=tcgct_test;Trusted_Connection=True;");
+			Logger.Log("Info", "Loading cards from json");
+			var parsed = JsonConvert.DeserializeObject<APICard[]>(File.ReadAllText(@"D:\Programming\tcgct-new\tcgct\Updaters\MTG\Data\default-cards-20230722091336.json"))
+                    .Where(w => w.lang == "en").ToArray();
 
-			List<APICard> bad_cards = new List<APICard>();
-            var parsed = JsonConvert.DeserializeObject<List<APICard>>(File.ReadAllText(@"D:\Programming\tcgct-new\tcgct\Updaters\MTG\Data\bulkcards.json"));
-            foreach (var item in parsed)
-            {
-                if(item.lang != "en")
-                {
-                    bad_cards.Add(item);
-                }
-                
-            }
-            bad_cards.ForEach(fe => { parsed.Remove(fe); });
-
+            Logger.Log("Info", "Getting existing sets");
             sets = mtgservice.GetAllSets().ToList();
-            settypes = mtgservice.GetAllSetTypes().ToList();
-            cards = mtgservice.GetAllCards().ToList();
-            rarities = mtgservice.GetRarities().ToList();
-            cardtypes = mtgservice.GetAllCardTypes().ToList();
-            cardfaces = mtgservice.GetAllCardFaces().ToList();
-            cardparts = mtgservice.GetAllCardParts().ToList();
+			Logger.Log("Info", "Getting existing set types");
+			settypes = mtgservice.GetAllSetTypes().ToList();
+            Logger.Log("Info", "Getting existing cards");
+			cards = mtgservice.GetAllCards().ToList();
+            Logger.Log("Info", "Getting existing rarities");
+			rarities = mtgservice.GetRarities().ToList();
+            Logger.Log("Info", "Getting existing card types");
+			cardtypes = mtgservice.GetAllCardTypes().ToList();
+            Logger.Log("Info", "Getting exisiting card faces");
+			cardfaces = mtgservice.GetAllCardFaces().ToList();
+            Logger.Log("Info", "Getting existing card parts");
+			cardparts = mtgservice.GetAllCardParts().ToList();
 
-            var all_sets = HttpHelpers.GetAllSets();
+			Logger.Log("Info", "Getting all sets from scryfall");
+			var all_sets = HttpHelpers.GetAllSets();
             if (all_sets.has_more)
             {
+                Logger.Log("Error", "Extra pages, not accounted for in loader");
                 throw new Exception("extra pages, not accounted for in loader");
             }
-            foreach (var _set in all_sets.data)
+			Logger.Log("Info", "Request successful");
+			Logger.Log("Info", "Populating Sets table");
+			foreach (var _set in all_sets.data)
             {
 				int _si = -1;   // set id
 				int _sti = -1;  // set type id
@@ -94,25 +98,35 @@ namespace MTG
 					sets.Add(set);
 				}
 			}
+			
+            Logger.Log("Info", "Populating Card Types table");
+			// Update card types
+			// todo: refactor
+			// perhaps first join all strings together, then split, then loop through that
+			HashSet<string> _tempCardTypes = new HashSet<string>();
+			parsed.ToList().ForEach(fe =>
+			{
+				if (fe.type_line != null)
+				{
+					_tempCardTypes.UnionWith(fe.type_line.ToUpper().Split(' '));
+				}
+			});
+            
+			var missing_card_types = _tempCardTypes.Except(cardtypes.Select(s => s.Name.ToUpper()));
 
-            // Update card types
-            // todo: refactor
-            // perhaps first join all strings together, then split, then loop through that
-            parsed.ToList().ForEach(fe =>fe.type_line?.Split(' ').ToList().ForEach(t =>
+            foreach (var item in missing_card_types)
             {
-                if (!cardtypes.Exists(e => e.Name == t))
-                {
-                    int ct = mtgservice.CreateCardType(t);
-                    cardtypes.Add(new CardType
-                    {
-                        ID = ct,
-                        Name = t.Trim()
-                    });
-                }
-            }));
+				int ct = mtgservice.CreateCardType(item.Trim());
+				cardtypes.Add(new CardType
+				{
+					ID = ct,
+					Name = item.Trim()
+				});
+			}
 
-            // Update rarity
-            parsed.ToList().Select(s => s.rarity).Distinct().ToList().ForEach(fe =>
+			Logger.Log("Info", "Populating Rarity table");
+			// Update rarity
+			parsed.ToList().Select(s => s.rarity).Distinct().ToList().ForEach(fe =>
             {
                 if(!rarities.Exists(e => e.Name == fe))
                 {
@@ -125,13 +139,12 @@ namespace MTG
                 }
             });
 
-
-
-            foreach (var card in parsed)
+			Logger.Log("Info", "Populating Cards table");
+			foreach (var card in parsed)
             {
                 if(card.lang != "en")
                 {
-                    Console.WriteLine($"None english card skipped Name:{card.card_name}, ID:{card.card_id}");
+					Logger.Log("Warning", $"Non english card skipped Name:{card.card_name}, ID:{card.card_id}");
                     continue;
                 }
                 if (cards.Exists(e => e.Scryfall_ID == card.card_id))
@@ -200,9 +213,9 @@ namespace MTG
                     }
                 }
             }
-
-            // Update card parts
-            foreach (var card in parsed.Where(w => w.all_parts != null).ToList())
+			Logger.Log("Info", "Populating Card Parts table");
+			// Update card parts
+			foreach (var card in parsed.Where(w => w.all_parts != null).ToList())
             {
                 Card? _c = null;
                 foreach (var part in card.all_parts)
@@ -240,9 +253,10 @@ namespace MTG
                     cardparts.Add(cpa);
                 }
             }
-
+			
+            Logger.Log("Info", "Updating Type Line table");
             // Update type lines
-            foreach (var card in parsed)
+			foreach (var card in parsed)
             {
                 if (string.IsNullOrEmpty(card.type_line))
                 {
@@ -251,17 +265,19 @@ namespace MTG
 
                 int _ci = cards.Single(s => s.Scryfall_ID == card.card_id).ID;
                 List<TypeLine> _ts = mtgservice.GetCardTypeLine(_ci).TypeLines;
-                foreach (var _type in card.type_line.Split(' '))
+                int _order = 1;
+                var types_split = card.type_line.Split(' ');
+                foreach (var _type in types_split)
                 {
                     if (_ts.Exists(e => e.Type.Name == _type))
                     {
                         continue;
                     }
-                    int _cti = cardtypes.Single(s => s.Name == _type).ID;
-                    mtgservice.CreateTypeLine(_cti, _ci);
+                    int _cti = cardtypes.Single(s => s.Name == _type.ToUpper()).ID;
+                    mtgservice.CreateTypeLine(_cti, _ci, _order);
+                    _order++;
                 }
             }
-            
         }
     }
 

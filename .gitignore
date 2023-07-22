@@ -403,7 +403,7 @@ bulkcards.json
 single.json
 /sandbox/sandbox.csproj
 /sandbox
-Updaters/MTG/Data/single_related.json
+/Updaters/MTG/Data
 tcgct-mud/Pages/Test.razor
 /tcgct_db/tcgct_db.sqlproj
 /tcgct_db

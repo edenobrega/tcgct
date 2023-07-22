@@ -8,9 +8,9 @@ namespace tcgct_mtg.Models
 {
     public class TypeLine
     {
-        public int ID { get; set; }
         public int CardID { get; set; }
         public int TypeID { get; set; }
+        public int Order { get; set; }
         public CardType Type { get; set; }
     }
 }

@@ -16,4 +16,8 @@
     <PackageReference Include="Microsoft.Data.SqlClient" Version="2.1.4" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Database\MTG\Keys\" />
+  </ItemGroup>
+
 </Project>
