@@ -45,7 +45,6 @@
 	protected override async Task OnInitializedAsync()
 	{
 		string userID = "1";
-		data = await mtgs.GetAllSetsAsync("1");
 		data = await mtgs.GetUserPinnedSetsAsync("1");
 		IEnumerable<SetType> setTypes = await mtgs.GetAllSetTypesAsync();
 		data.ToList().ForEach(fe =>

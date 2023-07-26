@@ -33,13 +33,6 @@ namespace tcgct_mtg.Services
                 return GetAllSets();
             });
         }        
-        public async Task<IEnumerable<Set>> GetAllSetsAsync(string UserID)
-        {
-            return await Task.Run(() =>
-            {
-                return GetAllSets(UserID);
-            });
-        }
         public async Task<int> CreateSetAsync(Set set)
         {
             return await Task.Run(() =>
@@ -55,14 +48,6 @@ namespace tcgct_mtg.Services
                 return GetCollectingSets(UserID);
             });
         }
-		public async Task<IEnumerable<Set>> GetUserPinnedSetsAsync(string UserID)
-		{
-            return await Task.Run(() =>
-            {
-                return GetUserPinnedSets(UserID);
-            });
-		}
-
 		#endregion
 
 		#region sync
@@ -72,7 +57,7 @@ namespace tcgct_mtg.Services
 			{
                 IEnumerable<Set> sets;
 				string sql = @"select distinct s.*
-                                   from [tcgct].[MTG].[Collection] as co
+                                   from [MTG].[Collection] as co
                                    join [MTG].[Card] as c on c.id = co.CardID
                                    join [MTG].[Set] as s on s.id = c.card_set_id
                                    where co.UserID = @UID";
@@ -108,7 +93,7 @@ namespace tcgct_mtg.Services
                 return result;
             }
         }
-        public IEnumerable<Set> GetAllSets(string? UserID = null)
+        public IEnumerable<Set> GetAllSets()
         {
             using (var conn = new SqlConnection(configuration.connectionString))
             {
@@ -127,27 +112,6 @@ namespace tcgct_mtg.Services
 				return results;
             }
         }
-        public IEnumerable<Set> GetUserPinnedSets(string UserID)
-        {
-			using (var conn = new SqlConnection(configuration.connectionString))
-			{
-				conn.Open();
-				var sql = @"select s.* 
-                            from [MTG].[Set] as s
-                            join mtg.PinnedSet as ps on ps.SetID = s.id
-                            where UserID = @UserID";
-                var results = conn.Query<Set>(sql, new{ UserID });
-
-                var st = GetAllSetTypes();
-
-                results.ToList().ForEach(fe => 
-                {
-                    fe.Set_Type = st.Single(s => s.ID == fe.Set_Type_id);
-                });
-
-                return results;
-			}
-		}
         public int CreateSet(Set set)
         {
             using (var conn = new SqlConnection(configuration.connectionString))
@@ -169,6 +133,7 @@ namespace tcgct_mtg.Services
 		#endregion
 
         #region Pinned Sets
+        // TODO: Should have method to get just the ID's of pinned sets
         #region async
         public async Task<IEnumerable<PinnedSet>> GetPinnedSetsAsync(string UserID)
         {
@@ -191,9 +156,37 @@ namespace tcgct_mtg.Services
                 CreatePinnedSet(UserID, SetID);
             });
 		}
+		public async Task<IEnumerable<Set>> GetUserPinnedSetsAsync(string UserID)
+		{
+			return await Task.Run(() =>
+			{
+				return GetUserPinnedSets(UserID);
+			});
+		}
 		#endregion
 
 		#region sync
+		public IEnumerable<Set> GetUserPinnedSets(string UserID)
+        {
+			using (var conn = new SqlConnection(configuration.connectionString))
+			{
+				conn.Open();
+				var sql = @"select s.* 
+                            from [MTG].[Set] as s
+                            join mtg.PinnedSet as ps on ps.SetID = s.id
+                            where UserID = @UserID";
+                var results = conn.Query<Set>(sql, new{ UserID });
+
+                var st = GetAllSetTypes();
+
+                results.ToList().ForEach(fe => 
+                {
+                    fe.Set_Type = st.Single(s => s.ID == fe.Set_Type_id);
+                });
+
+                return results;
+			}
+		}
 		public void DeletePinnedSet(string UserID, int SetID)
         {
 			using (var conn = new SqlConnection(configuration.connectionString))
@@ -450,7 +443,7 @@ namespace tcgct_mtg.Services
                               ,[OracleID]
                               ,[Power]
                               ,[Toughness]
-                          FROM [tcgct].[MTG].[CardFace] where CardID = @ID";
+                          FROM [MTG].[CardFace] where CardID = @ID";
                 return conn.Query<CardFace>(sql, new { ID = id });
             }
         }
@@ -931,7 +924,7 @@ namespace tcgct_mtg.Services
 	                                ,s.id as SetID
 	                                ,col.[Count]
                                     ,col.UserID
-                            from [tcgct].[MTG].[Collection] col
+                            from [MTG].[Collection] col
                             inner join MTG.[Card] c on c.id = col.CardID
                             inner join MTG.[Set] s on s.id = c.card_set_id
                             where col.UserID = @UserID and c.card_set_id = @SetID";
@@ -954,7 +947,7 @@ namespace tcgct_mtg.Services
                 string sql = @"select [CardID]
                                      ,[Count]
                                      ,[UserID]
-                              from [tcgct].[MTG].[Collection]
+                              from [MTG].[Collection]
                               where UserID = @UserID and CardID in @CardIDs";
                 return conn.Query<Collection>(sql, new { UserID ,CardIDs });
             }

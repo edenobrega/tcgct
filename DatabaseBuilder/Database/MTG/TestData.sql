@@ -1,5 +1,5 @@
 ﻿insert into MTG.[SetType] values ('Default Test Set Type')
-insert into MTG.[Set] values ('Default Test Set', 'DTS', 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/Circled_plus.svg/1200px-Circled_plus.svg.png', 'Test search uri', 1, 'set_1')
+insert into MTG.[Set] values ('Default Test Set', 'DTS', 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/Circled_plus.svg/1200px-Circled_plus.svg.png', 'Test search uri', 1, '00001abcdedf')
 insert into MTG.[CardType] values ('—'), ('One'), ('Two'), ('Three'), ('//')
 insert into MTG.[Rarity] values ('Normal'), ('Uncommon')
 insert into MTG.[Card] values 
@@ -25,3 +25,7 @@ insert into MTG.[TypeLine] VALUES
 (2, 1, 1),
 (2, 1, 2),
 (5, 1, 1)
+
+insert into MTG.[Collection](CardID, UserID, [Count]) values
+(1,'0000000001',1),
+(2,'0000000001',4)
