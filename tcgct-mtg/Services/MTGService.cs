@@ -836,6 +836,8 @@ namespace tcgct_mtg.Services
 		#endregion
 		#endregion
 
+        // TODO: Pass in the data then it gets returned with the data properties filled,
+        //          e.g., you pass a list of sets and it comes back with collected data
 		#region Collected
 		#region async
 		public async Task<IEnumerable<Set>> PopulateSetCollectedAsync(IEnumerable<Set> Data, string UserID)
