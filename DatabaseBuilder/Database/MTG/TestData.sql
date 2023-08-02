@@ -29,3 +29,6 @@ insert into MTG.[TypeLine] VALUES
 insert into MTG.[Collection](CardID, UserID, [Count]) values
 (1,'0000000001',1),
 (2,'0000000001',4)
+
+insert into MTG.[PinnedSet] values
+(1, '0000000001')

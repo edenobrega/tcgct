@@ -15,6 +15,7 @@ namespace tcgct_mtg_tests
 	public class Initialize
 	{
 		public const string DB_NAME = "tcgct_unittest_db";
+		public const string USER_ID = "0000000001";
 		internal static MTGService service;
 		[AssemblyInitialize]
 		public static void TestsInitialize(TestContext testContext)
