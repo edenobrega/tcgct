@@ -8,6 +8,7 @@ namespace tcgct_mtg.Services
     // investigate/todo: move away from having async and sync methods, or just fix the async methods to not hand the app when not using task.run
     public class MTGService
     {
+        // done
         #region Set
         #region async
         public async Task<Set> GetSetAsync(int id)
@@ -160,13 +161,18 @@ namespace tcgct_mtg.Services
 		{
 			return await Task.Run(() =>
 			{
-				return GetUserPinnedSets(UserID);
+				return GetSetsPinned(UserID);
 			});
 		}
 		#endregion
 
 		#region sync
-		public IEnumerable<Set> GetUserPinnedSets(string UserID)
+        /// <summary>
+        /// Gets the Set type
+        /// </summary>
+        /// <param name="UserID"></param>
+        /// <returns></returns>
+		public IEnumerable<Set> GetSetsPinned(string UserID)
         {
 			using (var conn = new SqlConnection(configuration.connectionString))
 			{
@@ -205,12 +211,17 @@ namespace tcgct_mtg.Services
                 conn.Execute(sql, new { SetID, UserID });
 			}
 		}
-		public IEnumerable<PinnedSet> GetPinnedSets(string UserID)
+		/// <summary>
+        /// Gets the SQL type
+        /// </summary>
+        /// <param name="UserID"></param>
+        /// <returns></returns>
+        public IEnumerable<PinnedSet> GetPinnedSets(string UserID)
         {
 			using (var conn = new SqlConnection(configuration.connectionString))
 			{
 				conn.Open();
-				var sql = "select SetID from [MTG].[PinnedSet] where UserID = @UserID";
+				var sql = "select SetID, UserID from [MTG].[PinnedSet] where UserID = @UserID";
                 return conn.Query<PinnedSet>(sql, new { UserID });
 			}
 		}
@@ -561,6 +572,7 @@ namespace tcgct_mtg.Services
         #endregion
         #endregion
 
+        // done
         #region Rarity
         #region async
         public async Task<IEnumerable<Rarity>> GetRaritiesAsync()

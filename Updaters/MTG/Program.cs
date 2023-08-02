@@ -12,9 +12,9 @@ namespace MTG
     internal class Program
     {
         static MTGService mtgservice;
-        static List<Set> sets;
+        static Dictionary<string, Set> sets;
         static List<SetType> settypes;
-        static List<Card> cards;
+        static Dictionary<string, Card> cards;
         static List<Rarity> rarities;
         static List<CardType> cardtypes;
         static List<tcgct_mtg.Models.CardFace> cardfaces;
@@ -25,17 +25,17 @@ namespace MTG
             Logger.ShouldLog = true;
 
             mtgservice = new MTGService();
-            tcgct_mtg.configuration.ConfigureConnectionString("Server=localhost\\SQLEXPRESS;Database=tcgct_test;Trusted_Connection=True;");
+            tcgct_mtg.configuration.ConfigureConnectionString("Server=localhost\\SQLEXPRESS;Database=tcgct_load_test;Trusted_Connection=True;");
 			Logger.Log("Info", "Loading cards from json");
 			var parsed = JsonConvert.DeserializeObject<APICard[]>(File.ReadAllText(@"D:\Programming\tcgct-new\tcgct\Updaters\MTG\Data\default-cards-20230722091336.json"))
                     .Where(w => w.lang == "en").ToArray();
 
             Logger.Log("Info", "Getting existing sets");
-            sets = mtgservice.GetAllSets().ToList();
+            sets = mtgservice.GetAllSets().ToDictionary(k => k.Scryfall_id, v => v);
 			Logger.Log("Info", "Getting existing set types");
 			settypes = mtgservice.GetAllSetTypes().ToList();
             Logger.Log("Info", "Getting existing cards");
-			cards = mtgservice.GetAllCards().ToList();
+			cards = mtgservice.GetAllCards().ToDictionary(k => k.Scryfall_ID, v => v);
             Logger.Log("Info", "Getting existing rarities");
 			rarities = mtgservice.GetRarities().ToList();
             Logger.Log("Info", "Getting existing card types");
@@ -58,7 +58,7 @@ namespace MTG
             {
 				int _si = -1;   // set id
 				int _sti = -1;  // set type id
-				if (sets.Exists(e => e.Shorthand == _set.code))
+				if (sets.ContainsKey(_set.id))
                 {
                     continue;
                 }
@@ -78,7 +78,7 @@ namespace MTG
 					};
 					_si = mtgservice.CreateSet(set);
                     set.ID = _si;
-					sets.Add(set);
+                    sets[set.Scryfall_id] = set;
 				}
 				else
 				{
@@ -95,7 +95,7 @@ namespace MTG
 					};
 					_si = mtgservice.CreateSet(set);
 					set.ID = _si;
-					sets.Add(set);
+                    sets[set.Scryfall_id] = set;
 				}
 			}
 			
@@ -147,13 +147,15 @@ namespace MTG
 					Logger.Log("Warning", $"Non english card skipped Name:{card.card_name}, ID:{card.card_id}");
                     continue;
                 }
-                if (cards.Exists(e => e.Scryfall_ID == card.card_id))
+
+                if (cards.ContainsKey(card.card_id))
                 {
                     // todo: perhaps should check if any of the properties have changed then update?
                     continue;
                 }
 
-                Set _set = sets.Single(s => s.Scryfall_id == card.set_id);
+                //Set _set = sets.Single(s => s.Scryfall_id == card.set_id);
+                Set _set = sets[card.set_id];
                 Rarity _rarity = rarities.Single(r => r.Name == card.rarity);
                 if(card.oracle_id == null)
                 {
@@ -182,7 +184,7 @@ namespace MTG
 
                 int _ci = mtgservice.CreateCard(_card);
                 _card.ID = _ci;
-                cards.Add(_card);
+                cards[_card.Scryfall_ID] = _card;
 
                 if(_card.MultiFace)
                 {
@@ -227,7 +229,7 @@ namespace MTG
 
                     if(_c == null)
                     {
-                        _c = cards.Single(s => s.Scryfall_ID == card.card_id);
+                        _c = cards[card.card_id];
                     }
                     tcgct_mtg.Models.CardPart cpa;
                     try
@@ -237,7 +239,8 @@ namespace MTG
                             Object = part.@object,
                             Component = part.component,
                             Name = part.name,
-                            RelatedCardID = cards.Single(s => s.Scryfall_ID == part.uri.Segments[2]).ID,
+                            //RelatedCardID = cards.Single(s => s.Scryfall_ID == part.uri.Segments[2]).ID,
+                            RelatedCardID = cards[part.uri.Segments[2]].ID,
                             CardID = _c.ID
                         };
                     }
@@ -263,7 +266,7 @@ namespace MTG
                     continue;
                 }
 
-                int _ci = cards.Single(s => s.Scryfall_ID == card.card_id).ID;
+                int _ci = cards[card.card_id].ID;
                 List<TypeLine> _ts = mtgservice.GetCardTypeLine(_ci).TypeLines;
                 int _order = 1;
                 var types_split = card.type_line.Split(' ');
