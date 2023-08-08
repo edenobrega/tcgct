@@ -1,7 +1,9 @@
 ﻿@page "/mtg/sets/{set_id}"
-@using tcgct_mtg.Models;
+@using tcgct_services_framework.MTG.Models;
 @using tcgct_mud.Data.MTG;
-@inject tcgct_mtg.Services.MTGService mtgs
+@using tcgct_services_framework;
+@using tcgct_services_interfaces.MTG;
+@inject IMTGService mtgs
 
 @if (showSuccess)
 {

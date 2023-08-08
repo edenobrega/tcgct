@@ -16,13 +16,13 @@ namespace tcgct_mtg_tests
 	{
 		public const string DB_NAME = "tcgct_unittest_db";
 		public const string USER_ID = "0000000001";
-		internal static MTGService service;
+		internal static MTGSqlService service;
 		[AssemblyInitialize]
 		public static void TestsInitialize(TestContext testContext)
 		{
 			DatabaseBuilder.DatabaseBuilder.BuildTestDB(DB_NAME);
 			configuration.ConfigureConnectionString($"Server=localhost\\SQLEXPRESS;Database={DB_NAME};Trusted_Connection=True;");
-			service = new MTGService();
+			service = new MTGSqlService();
 		}
 
 		[AssemblyCleanup]

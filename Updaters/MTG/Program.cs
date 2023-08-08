@@ -3,39 +3,39 @@ using MTG.Classes.Base;
 using MTG.Classes.Response;
 using Newtonsoft.Json;
 using RestSharp;
-
-using tcgct_mtg.Models;
 using tcgct_mtg.Services;
+using tcgct_services_framework.MTG.Models;
+using tcgct_services_interfaces.MTG;
 
 namespace MTG
 {
     internal class Program
     {
-        static MTGService mtgservice;
+        static IMTGService mtgservice;
         static Dictionary<string, Set> sets;
         static List<SetType> settypes;
         static Dictionary<string, Card> cards;
         static List<Rarity> rarities;
         static List<CardType> cardtypes;
-        static List<tcgct_mtg.Models.CardFace> cardfaces;
-        static List<tcgct_mtg.Models.CardPart> cardparts;
+        static List<tcgct_services_framework.MTG.Models.CardFace> cardfaces;
+        static List<tcgct_services_framework.MTG.Models.CardPart> cardparts;
         // TODO: replace above with dictionary <IDENTIFYABLE INFO, OBJ> and see if its faster
         static void Main(string[] args)
         {
             Logger.ShouldLog = true;
 
-            mtgservice = new MTGService();
+            mtgservice = new MTGSqlService();
             tcgct_mtg.configuration.ConfigureConnectionString("Server=localhost\\SQLEXPRESS;Database=tcgct_load_test;Trusted_Connection=True;");
 			Logger.Log("Info", "Loading cards from json");
 			var parsed = JsonConvert.DeserializeObject<APICard[]>(File.ReadAllText(@"D:\Programming\tcgct-new\tcgct\Updaters\MTG\Data\default-cards-20230722091336.json"))
                     .Where(w => w.lang == "en").ToArray();
 
             Logger.Log("Info", "Getting existing sets");
-            sets = mtgservice.GetAllSets().ToDictionary(k => k.Scryfall_id, v => v);
+            sets = mtgservice.GetAllSets().ToDictionary(k => k.Source_id, v => v);
 			Logger.Log("Info", "Getting existing set types");
 			settypes = mtgservice.GetAllSetTypes().ToList();
             Logger.Log("Info", "Getting existing cards");
-			cards = mtgservice.GetAllCards().ToDictionary(k => k.Scryfall_ID, v => v);
+			cards = mtgservice.GetAllCards().ToDictionary(k => k.Source_ID, v => v);
             Logger.Log("Info", "Getting existing rarities");
 			rarities = mtgservice.GetRarities().ToList();
             Logger.Log("Info", "Getting existing card types");
@@ -72,13 +72,13 @@ namespace MTG
 						Shorthand = _set.code,
 						Icon = _set.icon_svg_uri,
 						Search_Uri = _set.search_uri,
-						Scryfall_id = _set.id,
+						Source_id = _set.id,
 						Set_Type_id = _sti
 
 					};
 					_si = mtgservice.CreateSet(set);
                     set.ID = _si;
-                    sets[set.Scryfall_id] = set;
+                    sets[set.Source_id] = set;
 				}
 				else
 				{
@@ -89,13 +89,13 @@ namespace MTG
 						Shorthand = _set.code,
 						Icon = _set.icon_svg_uri,
 						Search_Uri = _set.search_uri,
-						Scryfall_id = _set.id,
+						Source_id = _set.id,
 						Set_Type_id = _sti
 
 					};
 					_si = mtgservice.CreateSet(set);
 					set.ID = _si;
-                    sets[set.Scryfall_id] = set;
+                    sets[set.Source_id] = set;
 				}
 			}
 			
@@ -172,7 +172,7 @@ namespace MTG
                     Power = card.power,
                     Toughness = card.toughness,
                     Card_Set_ID = _set.ID,
-                    Scryfall_ID = card.card_id,
+                    Source_ID = card.card_id,
                     ConvertedCost = card.cmc,
                     Image = card.image_uris?.normal,
                     Oracle_ID = card.oracle_id,
@@ -184,14 +184,14 @@ namespace MTG
 
                 int _ci = mtgservice.CreateCard(_card);
                 _card.ID = _ci;
-                cards[_card.Scryfall_ID] = _card;
+                cards[_card.Source_ID] = _card;
 
                 if(_card.MultiFace)
                 {
                     foreach (var face in card.card_faces)
                     {
-                        // todo: Some are two of the same face? maybe just drop all if something exists
-                        tcgct_mtg.Models.CardFace _cf = new tcgct_mtg.Models.CardFace
+						// todo: Some are two of the same face? maybe just drop all if something exists
+						tcgct_services_framework.MTG.Models.CardFace _cf = new tcgct_services_framework.MTG.Models.CardFace
                         {
                             CardID = _ci,
                             Card = _card,
@@ -222,7 +222,7 @@ namespace MTG
                 Card? _c = null;
                 foreach (var part in card.all_parts)
                 {
-                    if (cardparts.Exists(e => e.Card?.Scryfall_ID == card.card_id))
+                    if (cardparts.Exists(e => e.Card?.Source_ID == card.card_id))
                     {
                         continue;
                     }
@@ -231,10 +231,10 @@ namespace MTG
                     {
                         _c = cards[card.card_id];
                     }
-                    tcgct_mtg.Models.CardPart cpa;
+					tcgct_services_framework.MTG.Models.CardPart cpa;
                     try
                     {
-                        cpa = new tcgct_mtg.Models.CardPart
+                        cpa = new tcgct_services_framework.MTG.Models.CardPart
                         {
                             Object = part.@object,
                             Component = part.component,

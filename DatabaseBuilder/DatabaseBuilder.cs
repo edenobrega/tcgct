@@ -67,8 +67,10 @@ namespace DatabaseBuilder
                 conn.Execute(bsql);
                 bsql = File.ReadAllText(".\\database\\mtg\\Table\\CardPart.sql");
                 conn.Execute(bsql);
-                // Stored Procedures
-                bsql = File.ReadAllText(".\\database\\mtg\\StoredProcedure\\TableCounts.sql");
+				bsql = File.ReadAllText(".\\database\\mtg\\Table\\Information.sql");
+				conn.Execute(bsql);
+				// Stored Procedures
+				bsql = File.ReadAllText(".\\database\\mtg\\StoredProcedure\\TableCounts.sql");
                 conn.Execute(bsql);
             }
         }

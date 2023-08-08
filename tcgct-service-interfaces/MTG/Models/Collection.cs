@@ -4,11 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace tcgct_mtg.Models
+namespace tcgct_services_framework.MTG.Models
 {
-	public class PinnedSet
-	{
-        public int SetID { get; set; }
+    public class Collection
+    {
+        public int CardID { get; set; }
         public string UserID { get; set; }
+        public int Count { get; set; }
     }
 }

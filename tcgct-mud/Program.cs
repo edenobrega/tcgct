@@ -1,7 +1,6 @@
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
 using MudBlazor.Services;
 using tcgct_mtg.Services;
+using tcgct_services_interfaces.MTG;
 
 namespace tcgct_mud
 {
@@ -15,7 +14,7 @@ namespace tcgct_mud
             builder.Services.AddRazorPages();
             builder.Services.AddServerSideBlazor();
             builder.Services.AddMudServices();
-            builder.Services.AddScoped<MTGService>();
+            builder.Services.AddScoped<IMTGService, MTGSqlService>();
             //builder.Configuration
             var app = builder.Build();
 

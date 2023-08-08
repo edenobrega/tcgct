@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace tcgct_mtg.Models
+namespace tcgct_services_framework.MTG.Models
 {
     public class Card
     {
@@ -19,7 +19,7 @@ namespace tcgct_mtg.Models
         public string Toughness { get; set; }
         public int Card_Set_ID { get; set; }
         public Set Set { get; set; }
-        public string Scryfall_ID { get; set; }
+        public string Source_ID { get; set; }
         public float ConvertedCost { get; set; }
         public string Image { get; set; }
         public string ImageFlipped { get; set; }

@@ -19,6 +19,9 @@
     <None Update="Database\MTG\StoredProcedure\TableCounts.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Database\MTG\Table\Information.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Database\MTG\Table\Card.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

@@ -1,4 +1,4 @@
-﻿using tcgct_mtg.Models;
+﻿using tcgct_services_framework.MTG.Models;
 
 namespace tcgct_mud.Data.MTG
 {

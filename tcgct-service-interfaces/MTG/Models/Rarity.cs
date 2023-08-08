@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace tcgct_mtg.Models
+namespace tcgct_services_framework.MTG.Models
 {
-    public class CardType
+    public  class Rarity
     {
         public int ID { get; set; }
         public string Name { get; set; }

@@ -1,8 +1,6 @@
-﻿using Microsoft.Data.SqlClient;
-using Dapper;
-using tcgct_mtg.Models.Helpers;
+﻿using tcgct_services_framework.MTG.Models.Helpers;
 
-namespace tcgct_mtg.Models
+namespace tcgct_services_framework.MTG.Models
 {
     public class Set
     {
@@ -11,7 +9,7 @@ namespace tcgct_mtg.Models
         public string Shorthand { get; set; }
         public string Icon { get; set; }
         public string Search_Uri { get; set; }
-        public string Scryfall_id { get; set; }
+        public string Source_id { get; set; }
         public int Set_Type_id { get; set; }
         public SetType Set_Type { get; set; }
         public CollectedData CollectedData { get; set; }

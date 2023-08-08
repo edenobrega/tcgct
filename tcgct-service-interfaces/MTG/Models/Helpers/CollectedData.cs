@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace tcgct_mtg.Models.Helpers
+namespace tcgct_services_framework.MTG.Models.Helpers
 {
 	public class CollectedData
 	{

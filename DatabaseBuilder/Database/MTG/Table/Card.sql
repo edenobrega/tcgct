@@ -9,7 +9,7 @@
     [power]            NVARCHAR (10) NULL,
     [toughness]        NVARCHAR (10) NULL,
     [card_set_id]      BIGINT        NOT NULL,
-    [scryfall_id]      NVARCHAR (36) NOT NULL,
+    [source_id]        NVARCHAR (36) NOT NULL,
     [converted_cost]   INT           NULL,
     [image]            VARCHAR (MAX) NULL,
     [image_flipped]    VARCHAR (MAX) NULL,
