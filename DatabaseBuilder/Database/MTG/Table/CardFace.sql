@@ -14,7 +14,6 @@
     [Power]         VARCHAR (MAX) NULL,
     [Toughness]     VARCHAR (MAX) NULL,
     CONSTRAINT [PK_CardFace] PRIMARY KEY CLUSTERED ([ID] ASC),
-    CONSTRAINT [FK_CardFace_Card] FOREIGN KEY ([CardID]) REFERENCES [MTG].[Card] ([id]),
-    CONSTRAINT [FK_CardFace_CardFace] FOREIGN KEY ([ID]) REFERENCES [MTG].[CardFace] ([ID])
+    CONSTRAINT [FK_CardFace_Card] FOREIGN KEY ([CardID]) REFERENCES [MTG].[Card] ([id])
 );
 

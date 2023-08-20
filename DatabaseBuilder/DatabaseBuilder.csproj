@@ -37,6 +37,9 @@
     <None Update="Database\MTG\Table\Collection.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Database\MTG\Table\MTGCollectionLog.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Database\MTG\Table\PinnedSet.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

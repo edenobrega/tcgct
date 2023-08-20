@@ -20,4 +20,3 @@
     CONSTRAINT [collection_mtg_card_card_set_id_bb0fe297_fk_collection_mtg_set_id] FOREIGN KEY ([card_set_id]) REFERENCES [MTG].[Set] ([id]),
     CONSTRAINT [collection_mtg_card_rarity_id_5835b005_fk_collection_mtg_rarity_id] FOREIGN KEY ([rarity_id]) REFERENCES [MTG].[Rarity] ([id])
 );
-
