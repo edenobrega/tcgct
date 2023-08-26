@@ -25,7 +25,7 @@ namespace MTG
             Logger.ShouldLog = true;
 
             mtgservice = new MTGSqlService();
-            tcgct_mtg.configuration.ConfigureConnectionString("Server=localhost\\SQLEXPRESS;Database=tcgct_load_test;Trusted_Connection=True;");
+            tcgct_mtg.configuration.ConfigureConnectionString("Server=localhost\\SQLEXPRESS;Database=tcgct_dev;Trusted_Connection=True;");
 			Logger.Log("Info", "Loading cards from json");
 			var parsed = JsonConvert.DeserializeObject<APICard[]>(File.ReadAllText(@"D:\Programming\tcgct-new\tcgct\Updaters\MTG\Data\default-cards-20230722091336.json"))
                     .Where(w => w.lang == "en").ToArray();

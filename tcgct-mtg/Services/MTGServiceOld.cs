@@ -16,7 +16,6 @@
 //            {
 //                return GetSet(id);
 //            });
-
 //        }
 //        public async Task<Set> GetSetAsync(string Source_ID)
 //        {
@@ -124,7 +123,7 @@
 //                    set.Shorthand,
 //                    set.Icon,
 //                    set.Search_Uri,
-//                    set.Source_ID,
+//                    set.Source_id,
 //                    set.Set_Type_id
 //                });
 //            }
@@ -616,7 +615,6 @@
 //                var results = conn.Query<Rarity>(sql);
 //                return results;
 //            }
-
 //        }
 //        public Rarity GetRarity(int id)
 //        {
@@ -916,7 +914,6 @@
 //                    conn.Execute(sql, new { item.CardID, item.UserID, item.Count });
 //                }
 //            }
-
 //        }
 //        /// <summary>
 //        /// Collection data for certain set

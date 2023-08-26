@@ -1,19 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using tcgct_service_interfaces.Attributes;
 
 namespace tcgct_services_framework.MTG.Models
 {
     public class Card
     {
+        [DbID]
         public int ID { get; set; }
+        [CardName]
         public string Name { get; set; }
         public string ManaCost { get; set; }
         public string Text { get; set; }
         public string Flavor { get; set; }
         public string Artist { get; set; }
+        [CardID]
         public string Collector_Number { get; set; }
         public string Power { get; set; }
         public string Toughness { get; set; }

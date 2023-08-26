@@ -112,7 +112,6 @@ namespace DatabaseBuilder
 
 				foreach (var item in tables)
 				{
-                    Console.WriteLine(item.TableName);
                     conn.Execute(item.Query);
 				}
 

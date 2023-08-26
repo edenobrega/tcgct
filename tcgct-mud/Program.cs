@@ -9,12 +9,12 @@ namespace tcgct_mud
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
             // Add services to the container.
             builder.Services.AddRazorPages();
             builder.Services.AddServerSideBlazor();
             builder.Services.AddMudServices();
-            builder.Services.AddScoped<IMTGService, MTGSqlService>();
+            //builder.Services.AddScoped<IMTGService, MTGSqlService>();
+            builder.Services.AddScoped<IMTGService>(di => new MTGSqlService(builder.Configuration.GetSection("ConnectionStrings")["MainDB"]));
             //builder.Configuration
             var app = builder.Build();
 

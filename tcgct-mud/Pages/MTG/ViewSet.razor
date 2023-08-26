@@ -1,101 +1,127 @@
 ﻿@page "/mtg/sets/{set_id}"
+@using tcgct_mud.Data;
 @using tcgct_services_framework.MTG.Models;
 @using tcgct_mud.Data.MTG;
 @using tcgct_services_framework;
 @using tcgct_services_interfaces.MTG;
+@using Components
 @inject IMTGService mtgs
+@inject IDialogService DialogService
 
-@if (showSuccess)
+@if(data == null)
 {
-	<MudAlert Severity="Severity.Success" ShowCloseIcon="true" CloseIconClicked="(() => showSuccess = false )">Successfully updated collection!</MudAlert>
+	<h1>Loading . . .</h1>
 }
+else
+{
+	<MudStack>
+		<MudPaper>
+			<MudToolBar Class="pa-3">
+				<MudSwitch @bind-Checked="@quickEdit" Class="mr-5" Color="Color.Primary">Quick Edit</MudSwitch>
+				<MudButton Variant="Variant.Outlined" Color="Color.Info" @onclick="OpenLog">Show Log</MudButton>
 
-<MudTable Items="@data" Loading="loading" @ref="mudTable" Filter="new Func<CardHTML,bool>(FilterFuncBase)">
-	<ToolBarContent>
-		<MudText>Viewing set: @mtgs.GetSet(int.Parse(set_id)).Name</MudText>
-		<MudSpacer />
-		<MudButton Variant="Variant.Outlined" OnClick="SaveChanges">Save</MudButton>
-		<MudSpacer />
-		<MudTextField ReadOnly="true" Immediate="true" Placeholder="@filterValue" Adornment="Adornment.Start" Value="filterValue" OnKeyDown="DownHandler" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium"></MudTextField>
-	</ToolBarContent>
-	<HeaderContent>
-		<MudTh>Collector Number</MudTh>
-		<MudTh>Name</MudTh>
-		<MudTh>Mana Cost</MudTh>
-		<MudTh>Text</MudTh>
-		<MudTh>Flavor</MudTh>
-		<MudTh>Image / Show Faces</MudTh>	
-		<MudTh>Collected</MudTh>
-		@if (!quickEdit)
+				<MudSpacer />
+				<MudButton Variant="Variant.Outlined" Color="Color.Success"  OnClick="SaveChanges">Save</MudButton>
+			</MudToolBar>
+		</MudPaper>
+
+
+		@if (messages.Count != 0)
 		{
-			<MudTh>Add / Remove</MudTh>			
+			<MudPaper Class="pa-3">
+				@foreach (var message in messages)
+				{
+					<MudAlert Severity="message.Severity" ShowCloseIcon="true" CloseIconClicked="(() => messages.Remove(message))">@message.Text</MudAlert>
+				}
+			</MudPaper>
 		}
 
-	</HeaderContent>
-	<RowTemplate>
-		@if (!loading)
-		{
-			<MudTd>@context.Card.Collector_Number</MudTd>
-			<MudTd>@context.Card.Name</MudTd>
-			<MudTd>@context.Card.ManaCost</MudTd>
-			<MudTd>@context.Card.Text</MudTd>
-			<MudTd><i>@context.Card.Flavor</i></MudTd>
-			@if (context.Card.MultiFace)
-			{
-				<MudTd><MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="@(() => ShowFaces(context.Card.Collector_Number))">@(context.HTMLValues.Show ? "Hide" : "Show")</MudButton></MudTd>
-			}
-			else
-			{
-				<MudTd><MudImage Src="@context.Card.Image" Height="200" /></MudTd>
-			}
-			<MudTd>@context.Card.Collected</MudTd>	
-			@if (!quickEdit)
-			{
+		<MudPaper Class="pa-3">
+			<MudTable Items="@data" Loading="loading" @ref="mudTable" Filter="new Func<CardHTML,bool>(FilterFuncBase)">
+				<ToolBarContent>
+					<MudText>Viewing set: @mtgs.GetSet(int.Parse(set_id)).Name</MudText>
+					<MudSpacer />
+					<MudTextField ReadOnly="true" Immediate="true" Placeholder="@filterValue" Adornment="Adornment.Start" Value="filterValue" OnKeyDown="DownHandler" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium"></MudTextField>
+				</ToolBarContent>
+				<HeaderContent>
+					<MudTh>Collector Number</MudTh>
+					<MudTh>Name</MudTh>
+					<MudTh>Mana Cost</MudTh>
+					<MudTh>Text</MudTh>
+					<MudTh>Flavor</MudTh>
+					<MudTh>Image / Show Faces</MudTh>
+					<MudTh>Collected</MudTh>
+					@if (!quickEdit)
+					{
+						<MudTh>Add / Remove</MudTh>
+					}
+				</HeaderContent>
+				<RowTemplate>
+					@if (!loading)
+					{
+						<MudTd>@context.Card.Collector_Number</MudTd>
+						<MudTd>@context.Card.Name</MudTd>
+						<MudTd>@context.Card.ManaCost</MudTd>
+						<MudTd>@context.Card.Text</MudTd>
+						<MudTd><i>@context.Card.Flavor</i></MudTd>
+						@if (context.Card.MultiFace)
+						{
+							<MudTd><MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="@(() => ShowFaces(context.Card.Collector_Number))">@(context.HTMLValues.Show ? "Hide" : "Show")</MudButton></MudTd>
+						}
+						else
+						{
+							<MudTd><MudImage Src="@context.Card.Image" Height="200" /></MudTd>
+						}
+						<MudTd>@context.Card.Collected</MudTd>
+						@if (!quickEdit)
+						{
 
-				<MudTd><MudIconButton Color="Color.Success" Icon="@Icons.Material.Filled.ExposurePlus1" OnClick="@(() => context.Card.Collected++)"></MudIconButton><MudIconButton Color="Color.Error" Icon="@Icons.Material.Filled.ExposureNeg1" OnClick="@(() => {if(context.Card.Collected != 0)context.Card.Collected--;})"></MudIconButton></MudTd>
-			}
-		}
-	</RowTemplate>
-	<ChildRowContent>
-		@if (context.HTMLValues.Show)
-		{
-			<MudTr>
-				<td colspan="7">
-					<MudCard Elevation="0">
-						<MudCardHeader>
-							<CardHeaderContent>
-								<MudText Align="Align.Center" Typo="Typo.body1">Card Faces for <strong>@context.Card.Name</strong></MudText>
-							</CardHeaderContent>
-						</MudCardHeader>
-						<MudCardContent Style="padding-left:400px;">
-							<MudTable Items="@context.Card.Faces" Context="faceContext" Hover="true" Breakpoint="Breakpoint.Sm" Elevation="0">
-								<HeaderContent>
-									<MudTh>Name</MudTh>
-									<MudTh>Mana Cost</MudTh>
-									<MudTh>Text</MudTh>
-									<MudTh>Image</MudTh>
-								</HeaderContent>
-								<RowTemplate>
-									<MudTd>@faceContext.Name</MudTd>
-									<MudTd>@faceContext.ManaCost</MudTd>
-									<MudTd>@faceContext.OracleText</MudTd>
-									<MudTd><MudImage Src="@faceContext.Image" Height="200" /></MudTd>
-								</RowTemplate>
-							</MudTable>
-						</MudCardContent>
-					</MudCard>
-				</td>
-			</MudTr>
-		}
-	</ChildRowContent>
-	<PagerContent>
-		<MudTablePager />
-	</PagerContent>
-</MudTable>
-<div class="d-flex flex-wrap mt-4">
-	<MudSwitch @bind-Checked="@quickEdit" Color="Color.Primary">Quick Edit</MudSwitch>
-</div>
-
+							<MudTd>
+								<MudIconButton Color="Color.Success" Icon="@Icons.Material.Filled.ExposurePlus1" OnClick="@(() => AddCard(context.Card))"></MudIconButton>
+								<MudIconButton Color="Color.Error" Icon="@Icons.Material.Filled.ExposureNeg1" OnClick="@(() => RemoveCard(context.Card))"></MudIconButton>
+							</MudTd>
+						}
+					}
+				</RowTemplate>
+				<ChildRowContent>
+					@if (context.HTMLValues.Show)
+					{
+						<MudTr>
+							<td colspan="7">
+								<MudCard Elevation="0">
+									<MudCardHeader>
+										<CardHeaderContent>
+											<MudText Align="Align.Center" Typo="Typo.body1">Card Faces for <strong>@context.Card.Name</strong></MudText>
+										</CardHeaderContent>
+									</MudCardHeader>
+									<MudCardContent Style="padding-left:400px;">
+										<MudTable Items="@context.Card.Faces" Context="faceContext" Hover="true" Breakpoint="Breakpoint.Sm" Elevation="0">
+											<HeaderContent>
+												<MudTh>Name</MudTh>
+												<MudTh>Mana Cost</MudTh>
+												<MudTh>Text</MudTh>
+												<MudTh>Image</MudTh>
+											</HeaderContent>
+											<RowTemplate>
+												<MudTd>@faceContext.Name</MudTd>
+												<MudTd>@faceContext.ManaCost</MudTd>
+												<MudTd>@faceContext.OracleText</MudTd>
+												<MudTd><MudImage Src="@faceContext.Image" Height="200" /></MudTd>
+											</RowTemplate>
+										</MudTable>
+									</MudCardContent>
+								</MudCard>
+							</td>
+						</MudTr>
+					}
+				</ChildRowContent>
+				<PagerContent>
+					<MudTablePager />
+				</PagerContent>
+			</MudTable>
+		</MudPaper>
+	</MudStack>
+}
 
 @code {
 	[Parameter]
@@ -117,19 +143,45 @@
 	}
 
 	bool loading = true;
-	bool showSuccess = false;
+	List<Message> messages;
+
+	List<EditLog<Card>> log;
 
 	List<CardHTML>? data;
 	CardHTML loneCard = null;
 	protected override async Task OnInitializedAsync()
 	{
 		var _data = await mtgs.GetSetCardsAsync(int.Parse(set_id));
+		// todo: change to dictionary
 		data = new List<CardHTML>();
 		_data.ToList().ForEach(fe =>
 		{
 			data.Add(new CardHTML(fe));
 		});
+		log = new List<EditLog<Card>>();
+		messages = new List<Message>();
 		loading = false;
+	}
+
+	public void AddCard(Card card)
+	{
+		card.Collected++;
+		log.Add(new EditLog<Card> 
+			{ 
+				Card = card,
+				Increment = true,
+				QuickEdit = quickEdit,
+				ChangeAmount = 1,
+				Time = TimeOnly.FromDateTime(DateTime.Now)
+			});
+	}
+	public void RemoveCard(Card card)
+	{
+		if (card.Collected != 0)
+		{
+			card.Collected--; 			
+			log.Add(new EditLog<Card> { Card = card, Increment = false, QuickEdit = quickEdit, ChangeAmount = 1, Time = TimeOnly.FromDateTime(DateTime.Now) });
+		}
 	}
 
 	private bool FilterFuncBase(CardHTML card) => FilterFunc(card, filterValue);
@@ -191,16 +243,12 @@
 			{
 				if (args.Key == "+")
 				{
-					mudTable.FilteredItems.First().Card.Collected++;
+					AddCard(mudTable.FilteredItems.First().Card);
 					return;
 				}
 				if (args.Key == "-")
 				{
-					if (mudTable.FilteredItems.First().Card.Collected == 0)
-					{
-						return;
-					}
-					mudTable.FilteredItems.First().Card.Collected--;
+					RemoveCard(mudTable.FilteredItems.First().Card);
 					return;
 				}
 				if(args.Key == ".")
@@ -223,6 +271,13 @@
 		List<Collection> collection = data.Select(s => new Collection{ CardID = s.Card.ID, UserID = "1", Count = s.Card.Collected  }).ToList();
 		mtgs.UpdateCollected(collection, "1");
 		loading = false;
-		showSuccess = true;
+		messages.Add(new Message( Severity.Success, "Sucessfully updated collection!" ));
+	}
+
+	private void OpenLog()
+	{
+		var parameters = new DialogParameters { { "Log", log } };
+
+		DialogService.Show<EditLogDialog<Card>>("Edit Log", parameters);
 	}
 }

@@ -1,0 +1,39 @@
+﻿@typeparam T
+@using Data
+
+<MudDialog>
+    <DialogContent>
+        <MudSimpleTable Hover="true" Dense="true" FixedHeader="true" Style="height:300px;">
+            <tr>
+                <th>Time</th>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Quick Edit?</th>
+                <th>Increment?</th>
+                <th>Change Ammount</th>
+            </tr>    
+
+            @foreach (var item in Log)
+            {
+                <tr>
+                    <td>@item.Time.Hour:@item.Time.Minute:@item.Time.Second:@item.Time.Millisecond</td>
+                    <td>@item.CardID</td>
+                    <td>@item.CardName</td>
+                    <td>@item.QuickEdit</td>
+                    <td>@item.Increment</td>
+                    <td>@item.ChangeAmount</td>
+                </tr>
+            }
+        </MudSimpleTable>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" OnClick="Close">Close</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    [Parameter] public List<EditLog<T>> Log { get; set; }
+    void Close() => MudDialog.Close(DialogResult.Ok(true));
+}
+
