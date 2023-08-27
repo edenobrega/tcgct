@@ -1,5 +1,7 @@
 ﻿using Dapper;
 using Microsoft.Data.SqlClient;
+using Microsoft.IdentityModel.Logging;
+using tcgct_service_interfaces.Generic;
 using tcgct_services_framework.MTG.Models;
 using tcgct_services_framework.MTG.Models.Helpers;
 using tcgct_services_interfaces.MTG;
@@ -13,6 +15,7 @@ namespace tcgct_mtg.Services
 		{
 			this.ConnectionString = connectionString;
         }
+
 		#region async
 		public async Task CreatePinnedSetAsync(string UserID, int SetID)
 		{
@@ -56,11 +59,11 @@ namespace tcgct_mtg.Services
 				return GetSet(id);
 			});
 		}
-		public async Task<IEnumerable<Card>> GetSetCardsAsync(int id)
+		public async Task<IEnumerable<Card>> GetSetCardsAsync(int id, string? user_id = null)
 		{
 			return await Task.Run(() =>
 			{
-				return GetSetCards(id);
+				return GetSetCards(id, user_id);
 			});
 		}
 		public async Task<IEnumerable<Set>> PopulateSetCollectedAsync(IEnumerable<Set> Data, string UserID)
@@ -463,13 +466,16 @@ namespace tcgct_mtg.Services
 				return result;
 			}
 		}
-		public IEnumerable<Card> GetSetCards(int id)
+		public IEnumerable<Card> GetSetCards(int id, string? user_id)
 		{
 			using (var conn = new SqlConnection(ConnectionString))
 			{
 				conn.Open();
-				var sql = "select * from [MTG].[Card] where card_set_id=@id";
-				var results = conn.Query<Card>(sql, new { id }).ToList();
+				var sql = @"select c.*, co.[Count] as Collected
+							from mtg.Card as c
+							left join mtg.Collection as co on co.CardID = c.id and co.UserID = @user_id
+							where c.card_set_id = @id";
+				var results = conn.Query<Card>(sql, new { id, user_id }).ToList();
 				List<Rarity> rarities = GetRarities().ToList();
 				Set set = GetSet(id);
 				results.ForEach(fe =>
@@ -527,8 +533,9 @@ namespace tcgct_mtg.Services
 				return conn.Query<CollectedData>(sql, new { SetIDs, UserID });
 			}
 		}
-		public void UpdateCollected(List<Collection> newCollection, string UserID)
+		public void UpdateCollected(List<Collection> newCollection, string UserID, List<EditLog<Card>>? logs = null)
 		{
+			// todo: turn this into a merge query
 			var oldCollection = GetCollectionDynamic(newCollection.Select(s => s.CardID), UserID).ToList();
 			List<Collection> update = new List<Collection>();
 			List<Collection> delete = new List<Collection>();
@@ -553,6 +560,7 @@ namespace tcgct_mtg.Services
 					insert.Add(item);
 				}
 			}
+
 			using (var conn = new SqlConnection(ConnectionString))
 			{
 				string sql;
@@ -572,6 +580,20 @@ namespace tcgct_mtg.Services
 				{
 					sql = "insert into [MTG].[Collection] values (@CardID, @UserID, @Count)";
 					conn.Execute(sql, new { item.CardID, item.UserID, item.Count });
+				}
+				if(logs is not null)
+				{
+					foreach (var log in logs)
+					{
+						sql = "insert into [MTG].[CollectionLog] values (@Time, @Change, @CardID, @UserID)";
+						conn.Execute(sql, new 
+						{ 
+							log.Time, 
+							Change = log.ChangeAmount,
+							log.CardID,
+							UserID
+						});
+                    }
 				}
 			}
 		}

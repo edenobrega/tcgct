@@ -1,5 +1,6 @@
 ﻿@page "/mtg/sets/{set_id}"
 @using tcgct_mud.Data;
+@using tcgct_service_interfaces.Generic;
 @using tcgct_services_framework.MTG.Models;
 @using tcgct_mud.Data.MTG;
 @using tcgct_services_framework;
@@ -151,13 +152,16 @@ else
 	CardHTML loneCard = null;
 	protected override async Task OnInitializedAsync()
 	{
-		var _data = await mtgs.GetSetCardsAsync(int.Parse(set_id));
+		var _data = await mtgs.GetSetCardsAsync(int.Parse(set_id), "1");
+
 		// todo: change to dictionary
 		data = new List<CardHTML>();
+
 		_data.ToList().ForEach(fe =>
 		{
 			data.Add(new CardHTML(fe));
 		});
+
 		log = new List<EditLog<Card>>();
 		messages = new List<Message>();
 		loading = false;
@@ -169,10 +173,9 @@ else
 		log.Add(new EditLog<Card> 
 			{ 
 				Card = card,
-				Increment = true,
 				QuickEdit = quickEdit,
 				ChangeAmount = 1,
-				Time = TimeOnly.FromDateTime(DateTime.Now)
+				Time = DateTime.Now
 			});
 	}
 	public void RemoveCard(Card card)
@@ -180,7 +183,13 @@ else
 		if (card.Collected != 0)
 		{
 			card.Collected--; 			
-			log.Add(new EditLog<Card> { Card = card, Increment = false, QuickEdit = quickEdit, ChangeAmount = 1, Time = TimeOnly.FromDateTime(DateTime.Now) });
+			log.Add(new EditLog<Card> 
+				{ 
+					Card = card,
+					QuickEdit = quickEdit,
+					ChangeAmount = -1,
+					Time = DateTime.Now
+				});
 		}
 	}
 
@@ -269,7 +278,7 @@ else
 	{
 		loading = true;
 		List<Collection> collection = data.Select(s => new Collection{ CardID = s.Card.ID, UserID = "1", Count = s.Card.Collected  }).ToList();
-		mtgs.UpdateCollected(collection, "1");
+		mtgs.UpdateCollected(collection, "1", log);
 		loading = false;
 		messages.Add(new Message( Severity.Success, "Sucessfully updated collection!" ));
 	}

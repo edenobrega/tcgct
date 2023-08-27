@@ -1,5 +1,6 @@
 ﻿@typeparam T
 @using Data
+@using tcgct_service_interfaces.Generic;
 
 <MudDialog>
     <DialogContent>
@@ -9,7 +10,6 @@
                 <th>ID</th>
                 <th>Name</th>
                 <th>Quick Edit?</th>
-                <th>Increment?</th>
                 <th>Change Ammount</th>
             </tr>    
 
@@ -20,7 +20,6 @@
                     <td>@item.CardID</td>
                     <td>@item.CardName</td>
                     <td>@item.QuickEdit</td>
-                    <td>@item.Increment</td>
                     <td>@item.ChangeAmount</td>
                 </tr>
             }

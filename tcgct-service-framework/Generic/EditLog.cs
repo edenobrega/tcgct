@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using tcgct_service_interfaces.Attributes;
 
-namespace tcgct_mud.Data
+namespace tcgct_service_interfaces.Generic
 {
 	public class EditLog<T>
 	{
@@ -69,8 +69,7 @@ namespace tcgct_mud.Data
 			} 
 		}
 		public bool QuickEdit { get; set; }
-        public bool Increment { get; set; }
         public int ChangeAmount { get; set; }
-        public TimeOnly Time { get; set; }
+        public DateTime Time { get; set; }
     }
 }
