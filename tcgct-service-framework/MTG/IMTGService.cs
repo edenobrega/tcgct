@@ -1,7 +1,7 @@
-﻿using tcgct_service_interfaces.Generic;
+﻿using tcgct_services_framework.Generic;
 using tcgct_services_framework.MTG.Models;
 
-namespace tcgct_services_interfaces.MTG
+namespace tcgct_services_framework.MTG
 {
     public interface IMTGService
     {

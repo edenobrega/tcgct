@@ -3,8 +3,8 @@ using MTG.Classes.Response;
 using Newtonsoft.Json;
 using RestSharp;
 using tcgct_mtg.Services;
+using tcgct_services_framework.MTG;
 using tcgct_services_framework.MTG.Models;
-using tcgct_services_interfaces.MTG;
 
 namespace MTG
 {

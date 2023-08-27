@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
-using tcgct_service_interfaces.Attributes;
+using tcgct_services_framework.Attributes;
 
-namespace tcgct_service_interfaces.Generic
+namespace tcgct_services_framework.Generic
 {
 	public class EditLog<T>
 	{

@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\tcgct-service-interfaces\tcgct-services-framework.csproj" />
+    <ProjectReference Include="..\tcgct-service-framework\tcgct-services-framework.csproj" />
   </ItemGroup>
 
 </Project>

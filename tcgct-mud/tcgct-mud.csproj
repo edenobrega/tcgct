@@ -13,7 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\tcgct-mtg\tcgct-mtg.csproj" />
-    <ProjectReference Include="..\tcgct-service-interfaces\tcgct-services-framework.csproj" />
+    <ProjectReference Include="..\tcgct-service-framework\tcgct-services-framework.csproj" />
   </ItemGroup>
 
 </Project>

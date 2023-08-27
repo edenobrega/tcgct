@@ -1,6 +1,6 @@
 using MudBlazor.Services;
 using tcgct_mtg.Services;
-using tcgct_services_interfaces.MTG;
+using tcgct_services_framework.MTG;
 
 namespace tcgct_mud
 {

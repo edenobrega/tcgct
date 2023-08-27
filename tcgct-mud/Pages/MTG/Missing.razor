@@ -2,7 +2,7 @@
 @using tcgct_services_framework.MTG.Models;
 @using tcgct_mud.Data.MTG;
 @using tcgct_services_framework;
-@using tcgct_services_interfaces.MTG;
+@using tcgct_services_framework.MTG;
 @inject IMTGService mtgs
 
 <MudTable Items="@data" Loading="loading" @ref="mudTable" Filter="new Func<CardHTML,bool>(FilterFuncBase)" LoadingProgressColor="Color.Info">

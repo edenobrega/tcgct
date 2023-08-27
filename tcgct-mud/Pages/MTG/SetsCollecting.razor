@@ -1,7 +1,7 @@
 ﻿@page "/mtg/sets/collecting"
 @using tcgct_services_framework;
 @using tcgct_services_framework.MTG.Models;
-@using tcgct_services_interfaces.MTG;
+@using tcgct_services_framework.MTG;
 @inject IMTGService mtgs
 
 <MudTable Items="@data" Loading="data == null" Filter="new Func<Set,bool>(FilterFunc1)">

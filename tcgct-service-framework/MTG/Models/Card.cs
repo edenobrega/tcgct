@@ -1,4 +1,4 @@
-﻿using tcgct_service_interfaces.Attributes;
+﻿using tcgct_services_framework.Attributes;
 
 namespace tcgct_services_framework.MTG.Models
 {

@@ -1,10 +1,9 @@
 ﻿using Dapper;
 using Microsoft.Data.SqlClient;
-using Microsoft.IdentityModel.Logging;
-using tcgct_service_interfaces.Generic;
+using tcgct_services_framework.Generic;
+using tcgct_services_framework.MTG;
 using tcgct_services_framework.MTG.Models;
 using tcgct_services_framework.MTG.Models.Helpers;
-using tcgct_services_interfaces.MTG;
 
 namespace tcgct_mtg.Services
 {
