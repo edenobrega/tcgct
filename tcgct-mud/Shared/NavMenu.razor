@@ -1,7 +1,18 @@
 ﻿@inject NavigationManager NavigationManager
 
 <MudNavMenu Margin="Margin.None" Color="Color.Error">
-    <MudNavLink Href="/dashboard" Icon="@Icons.Material.Filled.Dashboard" IconColor="Color.Info">Dashboard</MudNavLink>
+	<AuthorizeView>
+		<Authorized>
+			<MudNavLink IconColor="Color.Tertiary" Match="NavLinkMatch.Prefix" Href="/Identity/Account/Logout" Icon="@Icons.Material.Filled.Logout">Logout</MudNavLink>
+		</Authorized>
+
+		<NotAuthorized>
+			<MudNavLink IconColor="Color.Tertiary" Match="NavLinkMatch.Prefix" Href="/Identity/Account/Login" Icon="@Icons.Material.Filled.Login">Login</MudNavLink>
+			<MudNavLink IconColor="Color.Tertiary" Match="NavLinkMatch.Prefix" Href="/Identity/Account/Register" Icon="@Icons.Material.Filled.AppRegistration">Register</MudNavLink>
+		</NotAuthorized>
+	</AuthorizeView>
+
+	<MudNavLink Href="/dashboard" Icon="@Icons.Material.Filled.Dashboard" IconColor="Color.Info">Dashboard</MudNavLink>
         
     <MudNavGroup Icon="@Icons.Material.Filled.Satellite" IconColor="Color.Error" Title="MTG" Expanded="false">
 		<MudNavLink IconColor="Color.Tertiary" Match="NavLinkMatch.Prefix" Href="/mtg/dashboard" Icon="@Icons.Material.Filled.Analytics">Dashboard</MudNavLink>
