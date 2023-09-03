@@ -1,5 +1,6 @@
 ﻿@inject NavigationManager NavigationManager
 
+
 <MudNavMenu Margin="Margin.None" Color="Color.Error">
 	<AuthorizeView>
 		<Authorized>
@@ -12,12 +13,22 @@
 		</NotAuthorized>
 	</AuthorizeView>
 
-	<MudNavLink Href="/dashboard" Icon="@Icons.Material.Filled.Dashboard" IconColor="Color.Info">Dashboard</MudNavLink>
+	<MudNavLink Href="/admin" Icon="@Icons.Material.Filled.Dashboard" IconColor="Color.Info">Admin</MudNavLink>
         
     <MudNavGroup Icon="@Icons.Material.Filled.Satellite" IconColor="Color.Error" Title="MTG" Expanded="false">
-		<MudNavLink IconColor="Color.Tertiary" Match="NavLinkMatch.Prefix" Href="/mtg/dashboard" Icon="@Icons.Material.Filled.Analytics">Dashboard</MudNavLink>
+		<AuthorizeView>
+			<Authorized>
+				<MudNavLink IconColor="Color.Tertiary" Match="NavLinkMatch.Prefix" Href="/mtg/dashboard" Icon="@Icons.Material.Filled.Analytics">Dashboard</MudNavLink>
+			</Authorized>
+		</AuthorizeView>
+
 		<MudNavLink IconColor="Color.Primary" Match="NavLinkMatch.Prefix" Href="/mtg/sets/all" Icon="@Icons.Material.Filled.OilBarrel">All Sets</MudNavLink>
-		<MudNavLink IconColor="Color.Secondary" Match="NavLinkMatch.Prefix" Href="/mtg/sets/collecting" Icon="@Icons.Material.Filled.Anchor">Collecting Sets</MudNavLink>
-		<MudNavLink IconColor="Color.Warning" Match="NavLinkMatch.Prefix" Href="/mtg/sets/pinned" Icon="@Icons.Material.Filled.PushPin">Pinned Sets</MudNavLink>
+
+		<AuthorizeView>
+			<Authorized>
+				<MudNavLink IconColor="Color.Secondary" Match="NavLinkMatch.Prefix" Href="/mtg/sets/collecting" Icon="@Icons.Material.Filled.Anchor">Collecting Sets</MudNavLink>
+				<MudNavLink IconColor="Color.Warning" Match="NavLinkMatch.Prefix" Href="/mtg/sets/pinned" Icon="@Icons.Material.Filled.PushPin">Pinned Sets</MudNavLink>
+			</Authorized>
+		</AuthorizeView>
     </MudNavGroup>
 </MudNavMenu>
