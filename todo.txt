@@ -1,7 +1,5 @@
-Implement user logins
-	implement other stuff first, have a static for current user for now
-
 system for storing users config
+use UserClaims for this - SignInManager can be used for this
 configurations
 	config what is classified as a "completed set" 
 		e.g. having atleast 1 card, or having 4
