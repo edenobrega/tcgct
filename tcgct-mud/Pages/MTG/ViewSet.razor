@@ -6,6 +6,8 @@
 @using tcgct_services_framework;
 @using tcgct_services_framework.MTG;
 @using Components
+
+@inject AuthenticationStateProvider auth
 @inject IMTGService mtgs
 @inject IDialogService DialogService
 
@@ -16,16 +18,20 @@
 else
 {
 	<MudStack>
-		<MudPaper>
-			<MudToolBar Class="pa-3">
-				<MudSwitch @bind-Checked="@quickEdit" Class="mr-5" Color="Color.Primary">Quick Edit</MudSwitch>
-				<MudButton Variant="Variant.Outlined" Color="Color.Info" @onclick="OpenLog">Show Log</MudButton>
 
-				<MudSpacer />
-				<MudButton Variant="Variant.Outlined" Color="Color.Success"  OnClick="SaveChanges">Save</MudButton>
-			</MudToolBar>
-		</MudPaper>
+		<AuthorizeView>
+			<Authorized>
+				<MudPaper>
+					<MudToolBar Class="pa-3">
+						<MudSwitch @bind-Checked="@quickEdit" Class="mr-5" Color="Color.Primary">Quick Edit</MudSwitch>
+						<MudButton Variant="Variant.Outlined" Color="Color.Info" @onclick="OpenLog">Show Log</MudButton>
 
+						<MudSpacer />
+						<MudButton Variant="Variant.Outlined" Color="Color.Success" OnClick="SaveChanges">Save</MudButton>
+					</MudToolBar>
+				</MudPaper>
+			</Authorized>
+		</AuthorizeView>
 
 		@if (messages.Count != 0)
 		{
@@ -51,11 +57,15 @@ else
 					<MudTh>Text</MudTh>
 					<MudTh>Flavor</MudTh>
 					<MudTh>Image / Show Faces</MudTh>
-					<MudTh>Collected</MudTh>
-					@if (!quickEdit)
-					{
-						<MudTh>Add / Remove</MudTh>
-					}
+					<AuthorizeView>
+						<Authorized>
+							<MudTh>Collected</MudTh>
+							@if (!quickEdit)
+							{
+								<MudTh>Add / Remove</MudTh>
+							}
+						</Authorized>
+					</AuthorizeView>
 				</HeaderContent>
 				<RowTemplate>
 					@if (!loading)
@@ -73,15 +83,20 @@ else
 						{
 							<MudTd><MudImage Src="@context.Card.Image" Height="200" /></MudTd>
 						}
-						<MudTd>@context.Card.Collected</MudTd>
-						@if (!quickEdit)
-						{
+						<AuthorizeView>
+							<Authorized Context="auth_context">
+								<MudTd>@context.Card.Collected</MudTd>
+								@if (!quickEdit)
+								{
 
-							<MudTd>
-								<MudIconButton Color="Color.Success" Icon="@Icons.Material.Filled.ExposurePlus1" OnClick="@(() => AddCard(context.Card))"></MudIconButton>
-								<MudIconButton Color="Color.Error" Icon="@Icons.Material.Filled.ExposureNeg1" OnClick="@(() => RemoveCard(context.Card))"></MudIconButton>
-							</MudTd>
-						}
+									<MudTd>
+										<MudIconButton Color="Color.Success" Icon="@Icons.Material.Filled.ExposurePlus1" OnClick="@(() => AddCard(context.Card))"></MudIconButton>
+										<MudIconButton Color="Color.Error" Icon="@Icons.Material.Filled.ExposureNeg1" OnClick="@(() => RemoveCard(context.Card))"></MudIconButton>
+									</MudTd>
+								}
+							</Authorized>
+						</AuthorizeView>
+
 					}
 				</RowTemplate>
 				<ChildRowContent>
@@ -128,6 +143,8 @@ else
 	[Parameter]
 	public string set_id { get; set; }
 
+	string? user_id = null;
+
 	MudTable<CardHTML>? mudTable;
 	bool quickEdit;
 	public string _filterValue = "";
@@ -149,11 +166,23 @@ else
 	List<EditLog<Card>> log;
 
 	List<CardHTML>? data;
-	CardHTML loneCard = null;
+
 	protected override async Task OnInitializedAsync()
 	{
-		var _data = await mtgs.GetSetCardsAsync(int.Parse(set_id), "1");
+		var authState = await auth.GetAuthenticationStateAsync();
 
+		if (authState.User.Identity is not null)
+		{
+			if (authState.User.Identity.IsAuthenticated)
+			{
+				user_id = authState.User.Claims.Single(s => s.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier").Value;
+			}			
+		}
+
+
+		IEnumerable<Card> _data;
+		_data = await mtgs.GetSetCardsAsync(int.Parse(set_id), user_id);
+		Console.WriteLine();
 		// todo: change to dictionary
 		data = new List<CardHTML>();
 
@@ -276,11 +305,18 @@ else
 
 	private void SaveChanges()
 	{
-		loading = true;
-		List<Collection> collection = data.Select(s => new Collection{ CardID = s.Card.ID, UserID = "1", Count = s.Card.Collected  }).ToList();
-		mtgs.UpdateCollected(collection, "1", log);
-		loading = false;
-		messages.Add(new Message( Severity.Success, "Sucessfully updated collection!" ));
+		if(user_id is not null)
+		{
+			loading = true;
+			List<Collection> collection = data.Select(s => new Collection{ CardID = s.Card.ID, UserID = user_id, Count = s.Card.Collected  }).ToList();
+			mtgs.UpdateCollected(collection, user_id, log);
+			loading = false;
+			messages.Add(new Message( Severity.Success, "Sucessfully updated collection!" ));			
+		}
+		else
+		{
+			messages.Add(new Message(Severity.Error, "UserID is null, cannot save changes."));
+		}
 	}
 
 	private void OpenLog()
