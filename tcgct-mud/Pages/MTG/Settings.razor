@@ -1,0 +1,36 @@
+﻿@page "/mtg/user/settings"
+@using Microsoft.AspNetCore.Identity;
+@using tcgct_mud.Areas.Identity.Data;
+@using tcgct_mud.Data;
+@using System.Security.Claims;
+@inject AuthenticationStateProvider auth
+
+<h3>Settings</h3>
+@if(claims is not null)
+{
+	@foreach (var item in claims)
+	{
+		<h4>@item.Type | @item.Value</h4>
+	}	
+}
+
+@*pop up page with list of all sets, select one to add its ID
+date range to set the date range
+drop down of set types to add those*@
+
+@code {
+	List<Claim> claims; 
+
+	protected override async Task OnInitializedAsync()
+	{
+		var authState = await auth.GetAuthenticationStateAsync();
+
+		if (authState.User.Identity is not null)
+		{
+			if (authState.User.Identity.IsAuthenticated)
+			{
+				claims = authState.User.Claims.Where(w => w.Type.StartsWith("mtg_")).ToList();
+			}
+		}
+	}
+}

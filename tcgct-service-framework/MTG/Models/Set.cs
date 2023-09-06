@@ -10,6 +10,7 @@ namespace tcgct_services_framework.MTG.Models
         public string Icon { get; set; }
         public string Search_Uri { get; set; }
         public string Source_id { get; set; }
+        public DateTime Release_date{ get; set; }
         public int Set_Type_id { get; set; }
         public SetType Set_Type { get; set; }
         public CollectedData CollectedData { get; set; }

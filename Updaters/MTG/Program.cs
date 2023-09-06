@@ -1,4 +1,6 @@
-﻿using MTG.Classes.Base;
+﻿using Dapper;
+using Microsoft.Data.SqlClient;
+using MTG.Classes.Base;
 using MTG.Classes.Response;
 using Newtonsoft.Json;
 using RestSharp;
@@ -71,7 +73,8 @@ namespace MTG
 						Icon = _set.icon_svg_uri,
 						Search_Uri = _set.search_uri,
 						Source_id = _set.id,
-						Set_Type_id = _sti
+						Set_Type_id = _sti,
+                        Release_date = DateTime.Parse(_set.released_at)
 
 					};
 					_si = mtgservice.CreateSet(set);

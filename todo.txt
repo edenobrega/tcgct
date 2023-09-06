@@ -16,15 +16,7 @@ search all cards
 
 choose what to filter by on tables
 
-have the loading screens actually load on tables
-
 custom sets
-
-databasebuilder
-	build db from project
-	push data to db from sql files
-	have script to update those files directly from db, just use backups?
-	have the builder implemented in unit testing to test the data in a empty db
 
 dashboard data
 
@@ -34,7 +26,3 @@ drafting page
 	all players will draft from this
 	will save drafted cards and all players can view what they drafted whenever
 	set rules draft rules, e.g. singles only
-
-
-Use attributes above card data to specify what they are so that general reusable items can be used in front end
-	e.g. in the editlog it will auto show the ones with the attributes "name" "id" etc etc

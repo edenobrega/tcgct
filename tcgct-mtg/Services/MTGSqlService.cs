@@ -259,7 +259,7 @@ namespace tcgct_mtg.Services
 			using (var conn = new SqlConnection(ConnectionString))
 			{
 				conn.Open();
-				var sql = "insert into [MTG].[Set]([Name], shorthand, icon, search_uri, Source_ID, set_type_id) output inserted.id values(@NAME, @SHORTHAND, @ICON, @SEARCH_URI, @Source_ID, @SET_TYPE_ID)";
+				var sql = "insert into [MTG].[Set]([Name], shorthand, icon, search_uri, Source_ID, set_type_id) output inserted.id values(@NAME, @SHORTHAND, @ICON, @SEARCH_URI, @Source_ID, @SET_TYPE_ID, @release_date)";
 				return conn.QuerySingle<int>(sql, new
 				{
 					set.Name,
@@ -267,7 +267,8 @@ namespace tcgct_mtg.Services
 					set.Icon,
 					set.Search_Uri,
 					set.Source_id,
-					set.Set_Type_id
+					set.Set_Type_id,
+					set.Release_date
 				});
 			}
 		}
