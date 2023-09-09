@@ -18,7 +18,7 @@ namespace tcgct_mud
             builder.Services.AddDbContext<IdentityContext>(options =>
                 options.UseSqlServer(connectionString));
 
-            builder.Services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfirmedAccount = true)
+            builder.Services.AddDefaultIdentity<TCGCTUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<IdentityContext>();
             // Add services to the container.
             builder.Services.AddRazorPages();

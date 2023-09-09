@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Identity;
 namespace tcgct_mud.Areas.Identity.Data;
 
 // Add profile data for application users by adding properties to the User class
-public class User : IdentityUser
+public class TCGCTUser : IdentityUser
 {
 }
 

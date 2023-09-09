@@ -5,7 +5,7 @@ using tcgct_mud.Areas.Identity.Data;
 
 namespace tcgct_mud.Data;
 
-public class IdentityContext : IdentityDbContext<User>
+public class IdentityContext : IdentityDbContext<TCGCTUser>
 {
     public IdentityContext(DbContextOptions<IdentityContext> options)
         : base(options)
