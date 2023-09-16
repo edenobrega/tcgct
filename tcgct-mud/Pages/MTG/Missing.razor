@@ -1,11 +1,11 @@
 ﻿@page "/mtg/sets/missing/{set_id}"
+@using tcgct_mud.Data;
 @using tcgct_services_framework.MTG.Models;
-@using tcgct_mud.Data.MTG;
 @using tcgct_services_framework;
 @using tcgct_services_framework.MTG;
 @inject IMTGService mtgs
 
-<MudTable Items="@data" Loading="loading" @ref="mudTable" Filter="new Func<CardHTML,bool>(FilterFuncBase)" LoadingProgressColor="Color.Info">
+<MudTable Items="@data" Loading="loading" @ref="mudTable" Filter="new Func<DisplayHTML<Card>,bool>(FilterFuncBase)" LoadingProgressColor="Color.Info">
 	<ToolBarContent>
 		<MudText>Viewing set: @mtgs.GetSet(int.Parse(set_id)).Name</MudText>
 		<MudSpacer />
@@ -25,35 +25,35 @@
 	<RowTemplate>
 		@if (!loading)
 		{
-			<MudTd>@context.Card.Collector_Number</MudTd>
-			<MudTd>@context.Card.Name</MudTd>
-			<MudTd>@context.Card.ManaCost</MudTd>
-			<MudTd>@context.Card.Text</MudTd>
-			<MudTd><i>@context.Card.Flavor</i></MudTd>
-			@if (context.Card.MultiFace)
+			<MudTd>@context.Object.Collector_Number</MudTd>
+			<MudTd>@context.Object.Name</MudTd>
+			<MudTd>@context.Object.ManaCost</MudTd>
+			<MudTd>@context.Object.Text</MudTd>
+			<MudTd><i>@context.Object.Flavor</i></MudTd>
+			@if (context.Object.MultiFace)
 			{
-				<MudTd><MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="@(() => ShowFaces(context.Card.Collector_Number))">@(context.HTMLValues.Show ? "Hide" : "Show")</MudButton></MudTd>
+				<MudTd><MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="@(() => ShowFaces(context.Object.Collector_Number))">@(context.HTML.Show ? "Hide" : "Show")</MudButton></MudTd>
 			}
 			else
 			{
-				<MudTd><MudImage Src="@context.Card.Image" Height="200" /></MudTd>
+				<MudTd><MudImage Src="@context.Object.Image" Height="200" /></MudTd>
 			}
-			<MudTd>@context.Card.Collected</MudTd>
+			<MudTd>@context.Object.Collected</MudTd>
 		}
 	</RowTemplate>
 	<ChildRowContent>
-		@if (context.HTMLValues.Show)
+		@if (context.HTML.Show)
 		{
 			<MudTr>
 				<td colspan="7">
 					<MudCard Elevation="0">
 						<MudCardHeader>
 							<CardHeaderContent>
-								<MudText Align="Align.Center" Typo="Typo.body1">Card Faces for <strong>@context.Card.Name</strong></MudText>
+								<MudText Align="Align.Center" Typo="Typo.body1">Card Faces for <strong>@context.Object.Name</strong></MudText>
 							</CardHeaderContent>
 						</MudCardHeader>
 						<MudCardContent Style="padding-left:400px;">
-							<MudTable Items="@context.Card.Faces" Context="faceContext" Hover="true" Breakpoint="Breakpoint.Sm" Elevation="0">
+							<MudTable Items="@context.Object.Faces" Context="faceContext" Hover="true" Breakpoint="Breakpoint.Sm" Elevation="0">
 								<HeaderContent>
 									<MudTh>Name</MudTh>
 									<MudTh>Mana Cost</MudTh>
@@ -83,7 +83,7 @@
 	[Parameter]
 	public string set_id { get; set; }
 
-	MudTable<CardHTML>? mudTable;
+	MudTable<DisplayHTML<Card>>? mudTable;
 
 	public string _filterValue = "";
 	public string filterValue
@@ -101,33 +101,33 @@
 	bool loading;
 
 
-	List<CardHTML>? data;
-	CardHTML loneCard = null;
+	List<DisplayHTML<Card>>? data;
+	DisplayHTML<Card> loneCard = null;
 	protected override async Task OnInitializedAsync()
 	{
 		loading = true;
 		var _data = await mtgs.GetSetCardsAsync(int.Parse(set_id));
-		data = new List<CardHTML>();
+		data = new List<DisplayHTML<Card>>();
 		_data.ToList().ForEach(fe =>
 		{
-			data.Add(new CardHTML(fe));
+			data.Add(new DisplayHTML<Card>(fe));
 		});
 		loading = false;
 	}
 
-	private bool FilterFuncBase(CardHTML card) => FilterFunc(card, filterValue);
-	private bool FilterFunc(CardHTML card, string value)
+	private bool FilterFuncBase(DisplayHTML<Card> card) => FilterFunc(card, filterValue);
+	private bool FilterFunc(DisplayHTML<Card> card, string value)
 	{
 		if (string.IsNullOrWhiteSpace(value))
 		{
 			return true;
 		}
-		if (card.Card.Collector_Number.Contains(value, StringComparison.OrdinalIgnoreCase))
+		if (card.Object.Collector_Number.Contains(value, StringComparison.OrdinalIgnoreCase))
 		{
 			return true;
 		}
 
-		if (card.Card.Name.Contains(value, StringComparison.OrdinalIgnoreCase))
+		if (card.Object.Name.Contains(value, StringComparison.OrdinalIgnoreCase))
 		{
 			return true;
 		}
@@ -137,8 +137,8 @@
 
 	private void ShowFaces(string collectors_number)
 	{
-		CardHTML temp = data.Single(s => s.Card.Collector_Number == collectors_number);
-		temp.HTMLValues.Show = !temp.HTMLValues.Show;
+		DisplayHTML<Card> temp = data.Single(s => s.Object.Collector_Number == collectors_number);
+		temp.HTML.Show = !temp.HTML.Show;
 	}
 
 	string[] invalidQuickEdit = new string[]

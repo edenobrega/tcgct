@@ -1,0 +1,71 @@
+﻿@using tcgct_mud.Data;
+@using tcgct_services_framework.MTG.Models;
+
+<MudDialog>
+    <DialogContent>
+        <MudPaper>
+            <MudTable Items="@_setTypes" Height="300px" Filter="new Func<DisplayHTML<SetType>,bool>(FilterFuncBase)">
+                <ToolBarContent>
+                    <MudTextField Immediate="true" Placeholder="Search" Adornment="Adornment.Start" @bind-Value="filterValue" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium"></MudTextField>
+                </ToolBarContent>
+
+                <HeaderContent>
+                    <MudTh>ID</MudTh>
+                    <MudTh>Name</MudTh>
+                    <MudTh>Pin</MudTh>
+                </HeaderContent>
+
+                <RowTemplate>
+                    <MudTd>@context.Object.ID</MudTd>
+                    <MudTd>@context.Object.Name</MudTd>
+                    <MudIconButton Icon="@Icons.Material.Filled.PushPin" Color="data[context.Object.ID] ? Color.Error : Color.Success" OnClick="@(() => Flip(context.Object.ID))" aria-label="pin"></MudIconButton>
+                </RowTemplate>
+            </MudTable>
+        </MudPaper>
+
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" OnClick="OK">Close</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter]
+    public Dictionary<int, bool> data { get; set; }
+
+    [Parameter]
+    public List<SetType> SetTypes { get; set; }
+
+    public List<DisplayHTML<SetType>> _setTypes;
+
+    public string filterValue = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        _setTypes = SetTypes.Select(s => new DisplayHTML<SetType>(s)).ToList();
+    }
+
+    private bool FilterFuncBase(DisplayHTML<SetType> set) => FilterFunc(set, filterValue);
+    private bool FilterFunc(DisplayHTML<SetType> set, string value)
+    {
+        if (value == string.Empty)
+        {
+            return true;
+        }
+        if (set.Object.Name.ToUpper().Contains(value.ToUpper()))
+        {
+            return true;
+        }
+        return StringHelpers.FindSimilarity(set.Object.Name, value) > 0.5;
+    }
+
+    private void Flip(int id)
+    {
+        data[id] = !data[id];
+    }
+
+    private void OK() => this.MudDialog.Close(DialogResult.Ok(data));
+}

@@ -1,18 +1,162 @@
-﻿@page "/mtg/user/settings"
+﻿@page "/mtg/settings"
+@using tcgct_mud.Areas.Identity.Data;
+@using tcgct_mud.Components;
+@using tcgct_mud.Components.MTG.Settings;
+@using tcgct_mud.Data;
+@using tcgct_services_framework.Generic;
+@using tcgct_services_framework.MTG.Models;
+@using tcgct_services_framework.MTG;
 @inject AuthenticationStateProvider auth
+@inject IMTGService mtgs
+@inject IDialogService DialogService
 <h3>User Settings</h3>
 
+@if(loaded == false)
+{
+	<h1>loading . . .</h1>
+}
+else
+{
+	<MessageBox @ref="_messageBox"></MessageBox>
+	<MudSimpleTable>
+		<thead>
+			<tr>
+				<th>Key</th>
+				<th>Value</th>
+				<th>Modify</th>
+				<th>Save</th>
+			</tr>
+		</thead>
+
+		<tbody>
+			<tr>
+				<td>Filter By Set Ids</td>
+				<td>@string.Join(",", CurrentSetIds)</td>
+				<td><MudButton OnClick="OpenEditSets"><MudIcon Icon="@Icons.Material.Filled.ModeEdit"></MudIcon></MudButton></td>
+				<td><MudButton OnClick="() => Save(1)">Save</MudButton></td>
+			</tr>
+
+			<tr>
+				<td>Filter By Set Type</td>
+				<td>@string.Join(",", CurrentSetTypeIds)</td>
+				<td><MudButton OnClick="OpenEditSetTypes"><MudIcon Icon="@Icons.Material.Filled.ModeEdit"></MudIcon></MudButton></td>
+				<td><MudButton OnClick="() => Save(2)">Save</MudButton></td>
+			</tr>
+		</tbody>
+	</MudSimpleTable>
+}
+
 @code {
+	MessageBox _messageBox;
+
+	AuthenticationState? authState;
+
+	List<Set> allSets;
+
+	List<int> CurrentSetIds;
+
+	List<SetType> allSetTypes;
+
+	List<int> CurrentSetTypeIds;
+
+	bool loaded = false;
+
 	protected override async Task OnInitializedAsync()
 	{
-		var authState = await auth.GetAuthenticationStateAsync();
+		authState = await auth.GetAuthenticationStateAsync();
 
-		if (authState.User.Identity is not null)
+		var _allSets = await mtgs.GetAllSetsAsync();
+		allSets = _allSets.ToList();
+
+		var _allSetTypes = await mtgs.GetAllSetTypesAsync();
+		allSetTypes = _allSetTypes.ToList();
+
+		var response = mtgs.GetSetting("FilterBySetIDs", AuthHelper.GetUserID(authState)).Value;
+		if (!string.IsNullOrEmpty(response))
 		{
-			if (authState.User.Identity.IsAuthenticated)
-			{
-				
-			}
+			CurrentSetIds = response.Split(",").Select(int.Parse).ToList();
 		}
+		else
+		{
+			CurrentSetIds = new List<int>();
+		}
+
+		response = mtgs.GetSetting("FilterBySetTypes", AuthHelper.GetUserID(authState)).Value;
+		if (!string.IsNullOrEmpty(response))
+		{
+			CurrentSetTypeIds = response.Split(",").Select(int.Parse).ToList();
+		}
+		else
+		{
+			CurrentSetTypeIds = new List<int>();
+		}
+
+		loaded = true;
+	}
+
+	private void Save(int target)
+	{
+		if (target == 1)
+		{
+			SettingsRow row = new SettingsRow
+			{
+				UserID = AuthHelper.GetUserID(authState),
+				Key = "FilterBySetIDs",
+				Value = string.Join(",", CurrentSetIds)
+			};
+			mtgs.UpdateSetting(row);
+			_messageBox.AddMessage(new Message(Severity.Success, "Setting changed!"));
+		}
+		if (target == 2)
+		{
+			SettingsRow row = new SettingsRow
+			{
+				UserID = AuthHelper.GetUserID(authState),
+					Key = "FilterBySetTypes",
+				Value = string.Join(",", CurrentSetTypeIds)
+			};
+			mtgs.UpdateSetting(row);
+			_messageBox.AddMessage(new Message(Severity.Success, "Setting changed!"));
+		}
+	}
+
+	private async void OpenEditSets()
+	{
+		var data = allSets.ToDictionary(key => key.ID, value => false);
+		CurrentSetIds.ForEach(fe => data[fe] = true);
+
+		var parameters = new DialogParameters { { "data", data }, {  "Sets", allSets } };
+
+		var val = await DialogService.Show<SetSelecterDialog>("Select Sets", parameters).Result;
+
+		Dictionary<int, bool>? returnval = (Dictionary<int, bool>)val.Data;
+		if (returnval is null)
+		{
+			_messageBox.AddMessage(new Message(Severity.Warning, "Value changed, not saved on server."));
+			return;
+		}
+		CurrentSetIds = returnval.Where(w => w.Value).Select(s => s.Key).ToList();
+		StateHasChanged();
+		_messageBox.AddMessage(new Message(Severity.Warning, "Value changed, not saved on server."));
+	}
+
+	private async void OpenEditSetTypes()
+	{
+		var data = allSetTypes.ToDictionary(key => key.ID, value => false);
+		CurrentSetTypeIds.ForEach(fe => data[fe] = true);
+
+		var parameters = new DialogParameters { { "data", data }, { "SetTypes", allSetTypes } };
+
+		var val = await DialogService.Show<SetTypeSelecterDialog>("Select Set Types", parameters).Result;
+
+		Dictionary<int, bool>? returnval = (Dictionary<int, bool>)val.Data;
+		if (returnval is null)
+		{
+			_messageBox.AddMessage(new Message(Severity.Warning, "Value changed, not saved on server."));
+			return;
+		}
+		CurrentSetTypeIds = returnval.Where(w => w.Value).Select(s => s.Key).ToList();
+		StateHasChanged();
+		_messageBox.AddMessage(new Message(Severity.Warning, "Value changed, not saved on server."));
 	}
 }

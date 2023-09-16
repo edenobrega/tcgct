@@ -3,9 +3,9 @@ using tcgct_services_framework.MTG.Models;
 
 namespace tcgct_services_framework.MTG
 {
+	// todo: seperate into its own interfaces for readability
     public interface IMTGService
     {
-		// Async
 		Task CreatePinnedSetAsync(string UserID, int SetID);
 		Task DeletePinnedSetAsync(string UserID, int SetID);
 		Task<IEnumerable<Set>> GetAllSetsAsync();
@@ -16,8 +16,6 @@ namespace tcgct_services_framework.MTG
 		Task<IEnumerable<Card>> GetSetCardsAsync(int id, string? user_id = null);
 		Task<IEnumerable<Set>> GetUserPinnedSetsAsync(string UserID);
 		Task<IEnumerable<Set>> PopulateSetCollectedAsync(IEnumerable<Set> Data, string UserID);
-
-		// Sync
 		Set GetSet(int id);
 		void UpdateCollected(List<Collection> newCollection, string UserID, List<EditLog<Card>>? logs = null);
 		int CreateCard(Card card);
@@ -34,7 +32,14 @@ namespace tcgct_services_framework.MTG
 		IEnumerable<CardType> GetAllCardTypes();
 		IEnumerable<Set> GetAllSets();
 		IEnumerable<SetType> GetAllSetTypes();
+		IEnumerable<SetType> GetSetTypesByID(IEnumerable<int> ids);
 		CardTypeLine GetCardTypeLine(int card_id);
 		IEnumerable<Rarity> GetRarities();
+		Task<IEnumerable<Set>> GetSets(IEnumerable<int> ids);
+		// Settings
+		Task CreateDefaultSettings(string UserID);
+		SettingsRow GetSetting(string Key, string UserID);
+		void UpdateSetting(SettingsRow row);
+
 	}
 }

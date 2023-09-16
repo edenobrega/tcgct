@@ -2,7 +2,6 @@
 @using tcgct_mud.Data;
 @using tcgct_services_framework.Generic;
 @using tcgct_services_framework.MTG.Models;
-@using tcgct_mud.Data.MTG;
 @using tcgct_services_framework;
 @using tcgct_services_framework.MTG;
 @using Components
@@ -44,7 +43,7 @@ else
 		}
 
 		<MudPaper Class="pa-3">
-			<MudTable Items="@data" Loading="loading" @ref="mudTable" Filter="new Func<CardHTML,bool>(FilterFuncBase)">
+			<MudTable Items="@data" Loading="loading" @ref="mudTable" Filter="new Func<DisplayHTML<Card>,bool>(FilterFuncBase)">
 				<ToolBarContent>
 					<MudText>Viewing set: @mtgs.GetSet(int.Parse(set_id)).Name</MudText>
 					<MudSpacer />
@@ -70,28 +69,28 @@ else
 				<RowTemplate>
 					@if (!loading)
 					{
-						<MudTd>@context.Card.Collector_Number</MudTd>
-						<MudTd>@context.Card.Name</MudTd>
-						<MudTd>@context.Card.ManaCost</MudTd>
-						<MudTd>@context.Card.Text</MudTd>
-						<MudTd><i>@context.Card.Flavor</i></MudTd>
-						@if (context.Card.MultiFace)
+						<MudTd>@context.Object.Collector_Number</MudTd>
+						<MudTd>@context.Object.Name</MudTd>
+						<MudTd>@context.Object.ManaCost</MudTd>
+						<MudTd>@context.Object.Text</MudTd>
+						<MudTd><i>@context.Object.Flavor</i></MudTd>
+						@if (context.Object.MultiFace)
 						{
-							<MudTd><MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="@(() => ShowFaces(context.Card.Collector_Number))">@(context.HTMLValues.Show ? "Hide" : "Show")</MudButton></MudTd>
+							<MudTd><MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="@(() => ShowFaces(context.Object.Collector_Number))">@(context.HTML.Show ? "Hide" : "Show")</MudButton></MudTd>
 						}
 						else
 						{
-							<MudTd><MudImage Src="@context.Card.Image" Height="200" /></MudTd>
+							<MudTd><MudImage Src="@context.Object.Image" Height="200" /></MudTd>
 						}
 						<AuthorizeView>
 							<Authorized Context="auth_context">
-								<MudTd>@context.Card.Collected</MudTd>
+								<MudTd>@context.Object.Collected</MudTd>
 								@if (!quickEdit)
 								{
 
 									<MudTd>
-										<MudIconButton Color="Color.Success" Icon="@Icons.Material.Filled.ExposurePlus1" OnClick="@(() => AddCard(context.Card))"></MudIconButton>
-										<MudIconButton Color="Color.Error" Icon="@Icons.Material.Filled.ExposureNeg1" OnClick="@(() => RemoveCard(context.Card))"></MudIconButton>
+										<MudIconButton Color="Color.Success" Icon="@Icons.Material.Filled.ExposurePlus1" OnClick="@(() => AddCard(context.Object))"></MudIconButton>
+										<MudIconButton Color="Color.Error" Icon="@Icons.Material.Filled.ExposureNeg1" OnClick="@(() => RemoveCard(context.Object))"></MudIconButton>
 									</MudTd>
 								}
 							</Authorized>
@@ -100,18 +99,18 @@ else
 					}
 				</RowTemplate>
 				<ChildRowContent>
-					@if (context.HTMLValues.Show)
+					@if (context.HTML.Show)
 					{
 						<MudTr>
 							<td colspan="7">
 								<MudCard Elevation="0">
 									<MudCardHeader>
 										<CardHeaderContent>
-											<MudText Align="Align.Center" Typo="Typo.body1">Card Faces for <strong>@context.Card.Name</strong></MudText>
+											<MudText Align="Align.Center" Typo="Typo.body1">Card Faces for <strong>@context.Object.Name</strong></MudText>
 										</CardHeaderContent>
 									</MudCardHeader>
 									<MudCardContent Style="padding-left:400px;">
-										<MudTable Items="@context.Card.Faces" Context="faceContext" Hover="true" Breakpoint="Breakpoint.Sm" Elevation="0">
+										<MudTable Items="@context.Object.Faces" Context="faceContext" Hover="true" Breakpoint="Breakpoint.Sm" Elevation="0">
 											<HeaderContent>
 												<MudTh>Name</MudTh>
 												<MudTh>Mana Cost</MudTh>
@@ -145,7 +144,7 @@ else
 
 	string? user_id = null;
 
-	MudTable<CardHTML>? mudTable;
+	MudTable<DisplayHTML<Card>>? mudTable;
 	bool quickEdit;
 	public string _filterValue = "";
 	public string filterValue 
@@ -165,7 +164,7 @@ else
 
 	List<EditLog<Card>> log;
 
-	List<CardHTML>? data;
+	List<DisplayHTML<Card>>? data;
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -175,7 +174,7 @@ else
 		{
 			if (authState.User.Identity.IsAuthenticated)
 			{
-				user_id = authState.User.Claims.Single(s => s.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier").Value;
+				user_id = AuthHelper.GetUserID(authState);
 			}			
 		}
 
@@ -184,11 +183,11 @@ else
 		_data = await mtgs.GetSetCardsAsync(int.Parse(set_id), user_id);
 		Console.WriteLine();
 		// todo: change to dictionary
-		data = new List<CardHTML>();
+		data = new List<DisplayHTML<Card>>();
 
 		_data.ToList().ForEach(fe =>
 		{
-			data.Add(new CardHTML(fe));
+			data.Add(new DisplayHTML<Card>(fe));
 		});
 
 		log = new List<EditLog<Card>>();
@@ -222,8 +221,8 @@ else
 		}
 	}
 
-	private bool FilterFuncBase(CardHTML card) => FilterFunc(card, filterValue);
-	private bool FilterFunc(CardHTML card, string value)
+	private bool FilterFuncBase(DisplayHTML<Card> card) => FilterFunc(card, filterValue);
+	private bool FilterFunc(DisplayHTML<Card> card, string value)
 	{
 		if (string.IsNullOrWhiteSpace(value))
 		{
@@ -231,18 +230,18 @@ else
 		}
 		if (quickEdit)
 		{
-			if (card.Card.Collector_Number == value)
+			if (card.Object.Collector_Number == value)
 			{
 				return true;
 			}
 			return false;
 		}
-		if (card.Card.Collector_Number.Contains(value, StringComparison.OrdinalIgnoreCase))
+		if (card.Object.Collector_Number.Contains(value, StringComparison.OrdinalIgnoreCase))
 		{
 			return true;			
 		}
 
-		if (card.Card.Name.Contains(value, StringComparison.OrdinalIgnoreCase))
+		if (card.Object.Name.Contains(value, StringComparison.OrdinalIgnoreCase))
 		{
 			return true;			
 		}
@@ -252,8 +251,8 @@ else
 
 	private void ShowFaces(string collectors_number)
 	{
-		CardHTML temp = data.Single(s => s.Card.Collector_Number ==  collectors_number);
-		temp.HTMLValues.Show = !temp.HTMLValues.Show;
+		DisplayHTML<Card> temp = data.Single(s => s.Object.Collector_Number == collectors_number);
+		temp.HTML.Show = !temp.HTML.Show;
 	}
 
 	string[] invalidQuickEdit = new string[]
@@ -281,12 +280,12 @@ else
 			{
 				if (args.Key == "+")
 				{
-					AddCard(mudTable.FilteredItems.First().Card);
+					AddCard(mudTable.FilteredItems.First().Object);
 					return;
 				}
 				if (args.Key == "-")
 				{
-					RemoveCard(mudTable.FilteredItems.First().Card);
+					RemoveCard(mudTable.FilteredItems.First().Object);
 					return;
 				}
 				if(args.Key == ".")
@@ -308,7 +307,7 @@ else
 		if(user_id is not null)
 		{
 			loading = true;
-			List<Collection> collection = data.Select(s => new Collection{ CardID = s.Card.ID, UserID = user_id, Count = s.Card.Collected  }).ToList();
+			List<Collection> collection = data.Select(s => new Collection{ CardID = s.Object.ID, UserID = user_id, Count = s.Object.Collected  }).ToList();
 			mtgs.UpdateCollected(collection, user_id, log);
 			loading = false;
 			messages.Add(new Message( Severity.Success, "Sucessfully updated collection!" ));			

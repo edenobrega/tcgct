@@ -20,6 +20,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using tcgct_mud.Areas.Identity.Data;
 using tcgct_mud.Data;
+using tcgct_services_framework.MTG;
 
 namespace tcgct_mud.Areas.Identity.Pages.Account
 {
@@ -31,13 +32,15 @@ namespace tcgct_mud.Areas.Identity.Pages.Account
         private readonly IUserEmailStore<TCGCTUser> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
+        private readonly IMTGService _mtgservice;
 
         public RegisterModel(
             UserManager<TCGCTUser> userManager,
             IUserStore<TCGCTUser> userStore,
             SignInManager<TCGCTUser> signInManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            IMTGService mtgservice)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -45,6 +48,7 @@ namespace tcgct_mud.Areas.Identity.Pages.Account
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
+            _mtgservice = mtgservice;
         }
 
         /// <summary>
@@ -136,10 +140,7 @@ namespace tcgct_mud.Areas.Identity.Pages.Account
                     await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
                         $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
 
-                    foreach (var claim in DefaultClaims.claims)
-                    {
-						await _userManager.AddClaimAsync(user, claim);
-                    }
+                    await _mtgservice.CreateDefaultSettings(userId);
 
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {

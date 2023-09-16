@@ -610,6 +610,72 @@ namespace tcgct_mtg.Services
 				return conn.Query<Collection>(sql, new { UserID, CardIDs });
 			}
 		}
+		public async Task<IEnumerable<Set>> GetSets(IEnumerable<int> ids)
+		{
+			return await Task.Run(() => 
+			{ 
+				using (var conn = new SqlConnection(ConnectionString))
+				{
+					conn.Open();
+					string sql = @"select * from MTG.[Set] where [id] in @ids";
+					return conn.Query<Set>(sql, new { ids });
+				}			
+			});
+		}
+		public IEnumerable<SetType> GetSetTypesByID(IEnumerable<int> ids)
+		{
+			using(var conn = new SqlConnection(ConnectionString))
+			{
+				conn.Open();
+				string sql = @"select [id], [name] from [MTG].[SetType] where [id] in @SetIds";
+				return conn.Query<SetType>(sql, new { SetIds = ids });
+			}
+		}
+
+		private int GetGameID()
+		{
+			using (var conn = new SqlConnection(ConnectionString))
+			{
+				conn.Open();
+				return conn.QuerySingle<int>("select [ID] from [TCGCT].[Games] where [Name] = 'MTG'");
+			}
+		}
+		public SettingsRow GetSetting(string Key, string UserID)
+		{
+			using (var conn = new SqlConnection(ConnectionString))
+			{
+				conn.Open();
+				string sql = @"select * from [TCGCT].[Settings] where GameID = @GameID and [UserID] = @UserID and [Key] = @Key";
+				return conn.QuerySingle<SettingsRow>(sql, new { GameID = GetGameID(), UserID, Key });
+			}
+		}
+		public async Task CreateDefaultSettings(string UserID)
+		{
+			await Task.Run(() =>
+			{
+				using (var conn = new SqlConnection(ConnectionString))
+				{
+					conn.Open();
+					int GameID = GetGameID();
+					string sql = @"insert into [TCGCT].[Settings]([GameID], [UserID], [Key], [Value]) VALUES 
+									(@GameID, @UserID, 'FilterBySetIDs', NULL),
+									(@GameID, @UserID, 'FilterBySetTypes', NULL)";
+					conn.Execute(sql, new { GameID, UserID });
+				}
+			});
+		}
+		public void UpdateSetting(SettingsRow row)
+		{
+			using (var conn = new SqlConnection(ConnectionString))
+			{
+				conn.Open();
+				string sql = @"update TCGCT.Settings
+								set [Value] = @Value
+								where UserID = @UserID and [Key] = @Key and [GameID] = @GameID";
+				conn.Execute(sql, new { GameID = GetGameID(), row.UserID, row.Key, row.Value });
+			}
+		}
+
 		#endregion
 	}
 }
