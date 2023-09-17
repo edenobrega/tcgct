@@ -71,24 +71,38 @@ else
 		var _allSetTypes = await mtgs.GetAllSetTypesAsync();
 		allSetTypes = _allSetTypes.ToList();
 
-		var response = mtgs.GetSetting("FilterBySetIDs", AuthHelper.GetUserID(authState)).Value;
-		if (!string.IsNullOrEmpty(response))
+		SettingsRow? emptyresponse = mtgs.GetSetting("notreal",AuthHelper.GetUserID(authState));
+
+		SettingsRow? response = mtgs.GetSetting("FilterBySetIDs", AuthHelper.GetUserID(authState));
+		if (response is not null)
 		{
-			CurrentSetIds = response.Split(",").Select(int.Parse).ToList();
+			if (!string.IsNullOrEmpty(response.Value))
+			{
+				CurrentSetIds = response.Value.Split(",").Select(int.Parse).ToList();
+			}
+			else
+			{
+				CurrentSetIds = new List<int>();
+			}			
 		}
 		else
 		{
-			CurrentSetIds = new List<int>();
+			// todo: handle if the setting doesnt exist
+			//		 display what didnt get loaded and 
+			//		 dont load the row in the setting
 		}
 
-		response = mtgs.GetSetting("FilterBySetTypes", AuthHelper.GetUserID(authState)).Value;
-		if (!string.IsNullOrEmpty(response))
+		response = mtgs.GetSetting("FilterBySetTypes", AuthHelper.GetUserID(authState));
+		if(response is not null)
 		{
-			CurrentSetTypeIds = response.Split(",").Select(int.Parse).ToList();
-		}
-		else
-		{
-			CurrentSetTypeIds = new List<int>();
+			if (!string.IsNullOrEmpty(response.Value))
+			{
+				CurrentSetTypeIds = response.Value.Split(",").Select(int.Parse).ToList();
+			}
+			else
+			{
+				CurrentSetTypeIds = new List<int>();
+			}			
 		}
 
 		loaded = true;

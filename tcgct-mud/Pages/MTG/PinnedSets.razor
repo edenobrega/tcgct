@@ -1,7 +1,9 @@
 ﻿@page "/mtg/sets/pinned"
+@attribute [Authorize]
 @using tcgct_services_framework.MTG.Models;
 @using tcgct_services_framework;
 @using tcgct_services_framework.MTG;
+@inject AuthenticationStateProvider auth
 @inject IMTGService mtgs
 
 <MudTable Items="@data" Loading="data == null" Filter="new Func<Set,bool>(FilterFunc1)">
@@ -42,20 +44,19 @@
 	IEnumerable<Set>? data;
 	string[] columns;
 	string filterValue = "";
+	AuthenticationState? authState;
 
 	protected override async Task OnInitializedAsync()
 	{
-		string userID = "1";
-		data = await mtgs.GetUserPinnedSetsAsync("1");
+		authState = await auth.GetAuthenticationStateAsync();
+
+		data = await mtgs.GetUserPinnedSetsAsync(AuthHelper.GetUserID(authState));
 		IEnumerable<SetType> setTypes = await mtgs.GetAllSetTypesAsync();
 		data.ToList().ForEach(fe =>
 		{
 			fe.Set_Type = setTypes.Single(s => s.ID == fe.Set_Type_id);
 		});
-		if (userID != "")
-		{
-			data = await mtgs.PopulateSetCollectedAsync(data, userID);
-		}
+		data = await mtgs.PopulateSetCollectedAsync(data, AuthHelper.GetUserID(authState));
 	}
 
 	private bool FilterFunc1(Set set) => FilterFunc(set, filterValue);
@@ -74,7 +75,7 @@
 
 	private async Task DeletePinned(int id)
 	{
-		await mtgs.DeletePinnedSetAsync("1", id);
+		await mtgs.DeletePinnedSetAsync(AuthHelper.GetUserID(authState), id);
 		data = data.Where(w => w.ID != id);
 	}
 }

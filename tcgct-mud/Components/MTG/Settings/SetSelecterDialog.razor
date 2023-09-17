@@ -12,12 +12,14 @@
 				<HeaderContent>
 					<MudTh>ID</MudTh>
 					<MudTh>Name</MudTh>
+                    <MudTh>Short</MudTh>
 					<MudTh>Pin</MudTh>
 				</HeaderContent>
 
 				<RowTemplate>
 					<MudTd>@context.Object.ID</MudTd>
 					<MudTd>@context.Object.Name</MudTd>
+                    <MudTd>@context.Object.Shorthand</MudTd>
 					<MudIconButton Icon="@Icons.Material.Filled.PushPin" Color="data[context.Object.ID] ? Color.Error : Color.Success" OnClick="@(() => Flip(context.Object.ID))" aria-label="pin"></MudIconButton>
 				</RowTemplate>
 			</MudTable>
@@ -56,6 +58,10 @@
             return true;
         }
         if (set.Object.Name.ToUpper().Contains(value.ToUpper()))
+        {
+            return true;
+        }
+        if (set.Object.Shorthand.ToUpper().Contains(value.ToUpper()))
         {
             return true;
         }

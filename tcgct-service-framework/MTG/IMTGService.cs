@@ -38,7 +38,7 @@ namespace tcgct_services_framework.MTG
 		Task<IEnumerable<Set>> GetSets(IEnumerable<int> ids);
 		// Settings
 		Task CreateDefaultSettings(string UserID);
-		SettingsRow GetSetting(string Key, string UserID);
+		SettingsRow? GetSetting(string Key, string UserID);
 		void UpdateSetting(SettingsRow row);
 
 	}

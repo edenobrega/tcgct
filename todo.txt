@@ -1,5 +1,3 @@
-system for storing users config
-use UserClaims for this - SignInManager can be used for this
 configurations
 	config what is classified as a "completed set" 
 		e.g. having atleast 1 card, or having 4
@@ -28,5 +26,7 @@ drafting page
 	set rules draft rules, e.g. singles only
 
 
-Settomgs dialog should probably be put into a singular reusable componenent
+Custom lists
+	Instead of the current implementation for settings, have a page for creating custom lists, and then a page
+	for selecting which list you want to view
 

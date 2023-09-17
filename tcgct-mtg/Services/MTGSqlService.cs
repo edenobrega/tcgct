@@ -640,13 +640,13 @@ namespace tcgct_mtg.Services
 				return conn.QuerySingle<int>("select [ID] from [TCGCT].[Games] where [Name] = 'MTG'");
 			}
 		}
-		public SettingsRow GetSetting(string Key, string UserID)
+		public SettingsRow? GetSetting(string Key, string UserID)
 		{
 			using (var conn = new SqlConnection(ConnectionString))
 			{
 				conn.Open();
 				string sql = @"select * from [TCGCT].[Settings] where GameID = @GameID and [UserID] = @UserID and [Key] = @Key";
-				return conn.QuerySingle<SettingsRow>(sql, new { GameID = GetGameID(), UserID, Key });
+				return conn.QuerySingleOrDefault<SettingsRow?>(sql, new { GameID = GetGameID(), UserID, Key });
 			}
 		}
 		public async Task CreateDefaultSettings(string UserID)
