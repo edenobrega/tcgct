@@ -17,7 +17,10 @@
 		<MudTh>Shorthand</MudTh>
 		<MudTh>Icon</MudTh>
 		<MudTh>Set Type</MudTh>
-		<MudTh>Pin</MudTh>
+		@if (authState.User.Identity.IsAuthenticated)
+		{
+			<MudTh>Pin</MudTh>			
+		}
 	</HeaderContent>
 	<RowTemplate>
 		<MudTd><MudLink Href=@($"mtg/sets/{context.ID}")>@context.ID</MudLink></MudTd>
@@ -25,8 +28,11 @@
 		<MudTd>@context.Shorthand</MudTd>
 		<MudTd><MudImage Src="@context.Icon" Height="30"/></MudTd>
 		<MudTd>@context.Set_Type.Name</MudTd>
-		<MudTd><MudIconButton Icon="@Icons.Material.Filled.PushPin" Color="context.Pinned ? Color.Error : Color.Success" OnClick="@(() => UpdatePinned(context))" aria-label="pin"></MudIconButton></MudTd>
-	</RowTemplate>
+		@if (authState.User.Identity.IsAuthenticated)
+		{
+			<MudTd><MudIconButton Icon="@Icons.Material.Filled.PushPin" Color="context.Pinned ? Color.Error : Color.Success" OnClick="@(() => UpdatePinned(context))" aria-label="pin"></MudIconButton></MudTd>
+		}
+		</RowTemplate>
 	<PagerContent>
 		<MudTablePager />
 	</PagerContent>
@@ -47,25 +53,28 @@
 
 		data = await mtgs.GetAllSetsAsync();
 
-		SettingsRow? setting = mtgs.GetSetting("FilterBySetIDs", AuthHelper.GetUserID(authState));
-		if (setting is not null && !string.IsNullOrEmpty(setting.Value))
+		if (authState.User.Identity.IsAuthenticated)
 		{
-			var ids = setting.Value.Split(",").Select(int.Parse);
-			data = data.Where(w => ids.Contains(w.ID));
-		}
+			SettingsRow? setting = mtgs.GetSetting("FilterBySetIDs", AuthHelper.GetUserID(authState));
+			if (setting is not null && !string.IsNullOrEmpty(setting.Value))
+			{
+				var ids = setting.Value.Split(",").Select(int.Parse);
+				data = data.Where(w => ids.Contains(w.ID));
+			}
 
-		setting = mtgs.GetSetting("FilterBySetTypes", AuthHelper.GetUserID(authState));
-		if (setting is not null && !string.IsNullOrEmpty(setting.Value))
-		{
-			var ids = setting.Value.Split(",").Select(int.Parse);
-			data = data.Where(w => ids.Contains(w.Set_Type_id));
+			setting = mtgs.GetSetting("FilterBySetTypes", AuthHelper.GetUserID(authState));
+			if (setting is not null && !string.IsNullOrEmpty(setting.Value))
+			{
+				var ids = setting.Value.Split(",").Select(int.Parse);
+				data = data.Where(w => ids.Contains(w.Set_Type_id));
+			}
+			
+			IEnumerable<PinnedSet> pins = await mtgs.GetPinnedSetsAsync(AuthHelper.GetUserID(authState));
+			data.ToList().ForEach(fe =>
+			{
+				fe.Pinned = pins.Any(s => s.SetID == fe.ID);
+			});
 		}
-
-		IEnumerable<PinnedSet> pins = await mtgs.GetPinnedSetsAsync(AuthHelper.GetUserID(authState));
-		data.ToList().ForEach(fe =>
-		{
-			fe.Pinned = pins.Any(s => s.SetID == fe.ID);
-		});
 	}
 
 	private bool FilterFunc1(Set set) => FilterFunc(set, filterValue);
