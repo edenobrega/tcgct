@@ -30,3 +30,4 @@ Custom lists
 	Instead of the current implementation for settings, have a page for creating custom lists, and then a page
 	for selecting which list you want to view
 
+Style login page
