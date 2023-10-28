@@ -12,20 +12,21 @@ namespace MTG
 {
     internal class Program
     {
+        static string ConnectionString = "Server=localhost\\SQLEXPRESS;Database=tcgct-load-test;Trusted_Connection=True;";
         static IMTGService mtgservice;
         static Dictionary<string, Set> sets;
-        static List<SetType> settypes;
+        static Dictionary<string, SetType> settypes;
         static Dictionary<string, Card> cards;
-        static List<Rarity> rarities;
-        static List<CardType> cardtypes;
-        static List<tcgct_services_framework.MTG.Models.CardFace> cardfaces;
-        static List<tcgct_services_framework.MTG.Models.CardPart> cardparts;
+        static Dictionary<string, Rarity> rarities;
+        static Dictionary<string, CardType> cardtypes;
+        static List<CardFace> cardfaces;
+        static List<CardPart> cardparts;
         // TODO: replace above with dictionary <IDENTIFYABLE INFO, OBJ> and see if its faster
         static void Main(string[] args)
         {
             Logger.ShouldLog = true;
 
-            mtgservice = new MTGSqlService("Server=localhost\\SQLEXPRESS;Database=tcgct_dev;Trusted_Connection=True;");
+            mtgservice = new MTGSqlService(ConnectionString);
 			Logger.Log("Info", "Loading cards from json");
 			var parsed = JsonConvert.DeserializeObject<APICard[]>(File.ReadAllText(@"D:\Programming\tcgct-new\tcgct\Updaters\MTG\Data\default-cards-20230722091336.json"))
                     .Where(w => w.lang == "en").ToArray();
@@ -33,13 +34,13 @@ namespace MTG
             Logger.Log("Info", "Getting existing sets");
             sets = mtgservice.GetAllSets().ToDictionary(k => k.Source_id, v => v);
 			Logger.Log("Info", "Getting existing set types");
-			settypes = mtgservice.GetAllSetTypes().ToList();
+			settypes = mtgservice.GetAllSetTypes().ToDictionary(k => k.Name, v => v);
             Logger.Log("Info", "Getting existing cards");
 			cards = mtgservice.GetAllCards().ToDictionary(k => k.Source_ID, v => v);
             Logger.Log("Info", "Getting existing rarities");
-			rarities = mtgservice.GetRarities().ToList();
+			rarities = mtgservice.GetRarities().ToDictionary(k => k.Name, v => v);
             Logger.Log("Info", "Getting existing card types");
-			cardtypes = mtgservice.GetAllCardTypes().ToList();
+			cardtypes = mtgservice.GetAllCardTypes().ToDictionary(k => k.Name, v => v);
             Logger.Log("Info", "Getting exisiting card faces");
 			cardfaces = mtgservice.GetAllCardFaces().ToList();
             Logger.Log("Info", "Getting existing card parts");
@@ -54,18 +55,21 @@ namespace MTG
             }
 			Logger.Log("Info", "Request successful");
 			Logger.Log("Info", "Populating Sets table");
+            int added = 0;
+            int removed = 0;
 			foreach (var _set in all_sets.data)
             {
 				int _si = -1;   // set id
 				int _sti = -1;  // set type id
+                var xxx = DateTime.Parse(_set.released_at);
 				if (sets.ContainsKey(_set.id))
                 {
                     continue;
                 }
-				if (!settypes.Exists(x => x.Name == _set.set_type))
+                if (!settypes.ContainsKey(_set.set_type))
 				{
 					_sti = mtgservice.CreateSetType(_set.set_type);
-					settypes.Add(new SetType { ID = _sti, Name = _set.set_type });
+                    settypes.Add(_set.set_type, new SetType { ID = _sti, Name = _set.set_type });
 					Set set = new Set
 					{
 						Name = _set.name,
@@ -78,12 +82,13 @@ namespace MTG
 
 					};
 					_si = mtgservice.CreateSet(set);
+                    added++;
                     set.ID = _si;
                     sets[set.Source_id] = set;
 				}
 				else
 				{
-					_sti = settypes.Single(x => x.Name == _set.set_type).ID;
+                    _sti = settypes[_set.set_type].ID;
 					Set set = new Set
 					{
 						Name = _set.name,
@@ -91,14 +96,21 @@ namespace MTG
 						Icon = _set.icon_svg_uri,
 						Search_Uri = _set.search_uri,
 						Source_id = _set.id,
-						Set_Type_id = _sti
-
+						Set_Type_id = _sti,
+						Release_date = DateTime.Parse(_set.released_at)
 					};
 					_si = mtgservice.CreateSet(set);
+                    added++;
 					set.ID = _si;
                     sets[set.Source_id] = set;
 				}
 			}
+
+            if(added > 0)
+            {
+                SQLLog("MTG.Sets", Additions: added);
+            }
+
 			
             Logger.Log("Info", "Populating Card Types table");
 			// Update card types
@@ -113,33 +125,35 @@ namespace MTG
 				}
 			});
             
-			var missing_card_types = _tempCardTypes.Except(cardtypes.Select(s => s.Name.ToUpper()));
+			var missing_card_types = _tempCardTypes.Except(cardtypes.Keys);
 
             foreach (var item in missing_card_types)
             {
 				int ct = mtgservice.CreateCardType(item.Trim());
-				cardtypes.Add(new CardType
-				{
-					ID = ct,
-					Name = item.Trim()
-				});
+				cardtypes.Add(item, new CardType { ID = ct, Name = item.Trim() });
 			}
 
+            added = 0;
+            removed = 0;
 			Logger.Log("Info", "Populating Rarity table");
 			// Update rarity
 			parsed.ToList().Select(s => s.rarity).Distinct().ToList().ForEach(fe =>
             {
-                if(!rarities.Exists(e => e.Name == fe))
+                if(!rarities.ContainsKey(fe))
                 {
                     int ri = mtgservice.CreateRarity(fe);
-                    rarities.Add(new Rarity
-                    {
-                        ID = ri,
-                        Name = fe
-                    });
+                    added++;
+                    rarities.Add(fe, new Rarity { ID = ri, Name = fe });
                 }
             });
 
+			if (added > 0)
+			{
+				SQLLog("MTG.Rarities", Additions: added);
+			}
+
+			added = 0;
+			removed = 0;
 			Logger.Log("Info", "Populating Cards table");
 			foreach (var card in parsed)
             {
@@ -155,9 +169,8 @@ namespace MTG
                     continue;
                 }
 
-                //Set _set = sets.Single(s => s.Scryfall_id == card.set_id);
                 Set _set = sets[card.set_id];
-                Rarity _rarity = rarities.Single(r => r.Name == card.rarity);
+                Rarity _rarity = rarities[card.rarity];
                 if(card.oracle_id == null)
                 {
                     card.oracle_id = card.card_faces[0].oracle_id;
@@ -184,6 +197,7 @@ namespace MTG
                 };
 
                 int _ci = mtgservice.CreateCard(_card);
+                added++;
                 _card.ID = _ci;
                 cards[_card.Source_ID] = _card;
 
@@ -192,7 +206,7 @@ namespace MTG
                     foreach (var face in card.card_faces)
                     {
 						// todo: Some are two of the same face? maybe just drop all if something exists
-						tcgct_services_framework.MTG.Models.CardFace _cf = new tcgct_services_framework.MTG.Models.CardFace
+						CardFace _cf = new CardFace
                         {
                             CardID = _ci,
                             Card = _card,
@@ -216,6 +230,14 @@ namespace MTG
                     }
                 }
             }
+
+			if (added > 0)
+			{
+				SQLLog("MTG.Cards", Additions: added);
+			}
+
+			added = 0;
+			removed = 0;
 			Logger.Log("Info", "Populating Card Parts table");
 			// Update card parts
 			foreach (var card in parsed.Where(w => w.all_parts != null).ToList())
@@ -232,15 +254,14 @@ namespace MTG
                     {
                         _c = cards[card.card_id];
                     }
-					tcgct_services_framework.MTG.Models.CardPart cpa;
+					CardPart cpa;
                     try
                     {
-                        cpa = new tcgct_services_framework.MTG.Models.CardPart
+                        cpa = new CardPart
                         {
                             Object = part.@object,
                             Component = part.component,
                             Name = part.name,
-                            //RelatedCardID = cards.Single(s => s.Scryfall_ID == part.uri.Segments[2]).ID,
                             RelatedCardID = cards[part.uri.Segments[2]].ID,
                             CardID = _c.ID
                         };
@@ -253,12 +274,20 @@ namespace MTG
 
 
                     int _cpi = mtgservice.CreateCardPart(cpa);
+                    added++;
                     cpa.ID = _cpi;
                     cardparts.Add(cpa);
                 }
             }
-			
-            Logger.Log("Info", "Updating Type Line table");
+
+			if (added > 0)
+			{
+				SQLLog("MTG.CardPart", Additions: added);
+			}
+
+            added = 0;
+            removed = 0;
+			Logger.Log("Info", "Updating Type Line table");
             // Update type lines
 			foreach (var card in parsed)
             {
@@ -277,12 +306,29 @@ namespace MTG
                     {
                         continue;
                     }
-                    int _cti = cardtypes.Single(s => s.Name == _type.ToUpper()).ID;
+
+                    int _cti = cardtypes[_type.ToUpper()].ID;
                     mtgservice.CreateTypeLine(_cti, _ci, _order);
+                    added++;
                     _order++;
                 }
             }
-        }
+
+			if (added > 0)
+			{
+				SQLLog("MTG.TypeLine", Additions: added);
+			}
+		}
+
+        internal static void SQLLog(string TableName, int Additions = 0, int Removals = 0)
+        {
+			using (var conn = new SqlConnection(ConnectionString))
+			{
+				conn.Open();
+				var sql = "insert into [TCGCT].[LoaderLog](Table_Target, Additions, Removals)  values(@TableName, @Additions, @Removals)";
+                conn.Execute(sql, new { TableName, Additions, Removals });
+			}
+		}
     }
 
     internal static class HttpHelpers
