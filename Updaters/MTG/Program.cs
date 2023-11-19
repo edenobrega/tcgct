@@ -12,7 +12,7 @@ namespace MTG
 {
     internal class Program
     {
-        static string ConnectionString = "Server=localhost\\SQLEXPRESS;Database=tcgct-load-test;Trusted_Connection=True;";
+        static string ConnectionString = "Server=localhost\\SQLEXPRESS;Database=tcgct-dev;Trusted_Connection=True;";
         static IMTGService mtgservice;
         static Dictionary<string, Set> sets;
         static Dictionary<string, SetType> settypes;

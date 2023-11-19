@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using tcgct_services_framework.Identity.Interface;
 
 namespace tcgct_mud.Data.Identity
 {

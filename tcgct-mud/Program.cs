@@ -6,6 +6,10 @@ using tcgct_mud.Data.Identity;
 using tcgct_mud.Areas.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.SqlClient;
+using tcgct_services_framework.Identity.Interface;
+using tcgct_services_framework.Identity.Implementations.MSSQL;
+using System.Reflection;
+using tcgct_services_framework.Identity;
 
 namespace tcgct_mud
 {
@@ -15,15 +19,28 @@ namespace tcgct_mud
         {
             var builder = WebApplication.CreateBuilder(args);
             var connectionString = builder.Configuration.GetSection("ConnectionStrings")["MainDB"];
+            var backendTech = builder.Configuration["BackendTech"];
+            // Identity old
+            //builder.Services.AddDefaultIdentity<CustomIdentityUser>();
 
-            builder.Services.AddDefaultIdentity<CustomIdentityUser>();
+            //builder.Services.AddTransient<IUserStore<CustomIdentityUser>, CustomUserStore>();
+            //builder.Services.AddTransient<IRoleStore<CustomRole>, CustomRoleStore>();
 
-            builder.Services.AddTransient<IUserStore<CustomIdentityUser>, CustomUserStore>();
+            //builder.Services.AddTransient<SqlConnection>(conn => new SqlConnection(connectionString));
+            //builder.Services.AddTransient<CustomDataAccess>();
+            //builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<CustomIdentityUser>>();
+
+            IdentityHelper.CheckBackendTechs();
+
+            // Identity new
+            builder.Services.AddDefaultIdentity<ICustomIdentityUser>();
+
+            builder.Services.AddTransient<IUserStore<ICustomIdentityUser>, ICustomUserStore<ICustomIdentityUser>>();
             builder.Services.AddTransient<IRoleStore<CustomRole>, CustomRoleStore>();
 
             builder.Services.AddTransient<SqlConnection>(conn => new SqlConnection(connectionString));
-            builder.Services.AddTransient<CustomDataAccess>();
-            builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<CustomIdentityUser>>();
+            builder.Services.AddTransient<ICustomDataAccess<ICustomIdentityUser>>();
+            builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<ICustomIdentityUser>>();
 
             // todo: make this use the above sqlconnection service
             builder.Services.AddScoped<IMTGService>(di => new MTGSqlService(connectionString));
