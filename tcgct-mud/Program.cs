@@ -1,10 +1,11 @@
 using MudBlazor.Services;
 using tcgct_mtg.Services;
 using tcgct_services_framework.MTG;
-using Microsoft.EntityFrameworkCore;
-using tcgct_mud.Data;
-using tcgct_mud.Areas.Identity.Data;
+using Microsoft.AspNetCore.Components.Authorization;
+using tcgct_mud.Data.Identity;
+using tcgct_mud.Areas.Identity;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Data.SqlClient;
 
 namespace tcgct_mud
 {
@@ -13,18 +14,24 @@ namespace tcgct_mud
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-            var connectionString = builder.Configuration.GetConnectionString("IdentityContextConnection") ?? throw new InvalidOperationException("Connection string 'IdentityContextConnection' not found.");
+            var connectionString = builder.Configuration.GetSection("ConnectionStrings")["MainDB"];
 
-            builder.Services.AddDbContext<IdentityContext>(options =>
-                options.UseSqlServer(connectionString));
+            builder.Services.AddDefaultIdentity<CustomIdentityUser>();
 
-            builder.Services.AddDefaultIdentity<TCGCTUser>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddEntityFrameworkStores<IdentityContext>();
+            builder.Services.AddTransient<IUserStore<CustomIdentityUser>, CustomUserStore>();
+            builder.Services.AddTransient<IRoleStore<CustomRole>, CustomRoleStore>();
+
+            builder.Services.AddTransient<SqlConnection>(conn => new SqlConnection(connectionString));
+            builder.Services.AddTransient<CustomDataAccess>();
+            builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<CustomIdentityUser>>();
+
+            // todo: make this use the above sqlconnection service
+            builder.Services.AddScoped<IMTGService>(di => new MTGSqlService(connectionString));
+
             // Add services to the container.
             builder.Services.AddRazorPages();
             builder.Services.AddServerSideBlazor();
             builder.Services.AddMudServices();
-            builder.Services.AddScoped<IMTGService>(di => new MTGSqlService(builder.Configuration.GetSection("ConnectionStrings")["MainDB"]));
 
             var app = builder.Build();
 
@@ -46,7 +53,7 @@ namespace tcgct_mud
 
             app.MapBlazorHub();
             app.MapFallbackToPage("/_Host");
-            
+
             app.Run();
         }
     }

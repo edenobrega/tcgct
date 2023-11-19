@@ -1,8 +1,8 @@
 ﻿@using Microsoft.AspNetCore.Identity
-@using tcgct_mud.Areas.Identity.Data
+@using tcgct_mud.Data.Identity;
 
-@inject SignInManager<TCGCTUser> SignInManager
-@inject UserManager<TCGCTUser> UserManager
+@inject SignInManager<CustomIdentityUser> SignInManager
+@inject UserManager<CustomIdentityUser> UserManager
 
 <ul class="navbar-nav">
 @if (SignInManager.IsSignedIn(User))
