@@ -3,7 +3,7 @@
 namespace tcgct_services_framework.Identity.Interface
 {
 
-    public interface ICustomUserStore<TIdentity> : IUserStore<TIdentity>, IUserPasswordStore<TIdentity> where TIdentity : class, ICustomIdentityUser
+    public interface ICustomUserStore : IUserStore<TCGCTUser>, IUserPasswordStore<TCGCTUser>
     {
 
     }

@@ -1,11 +1,5 @@
-﻿using Microsoft.AspNetCore.SignalR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using tcgct_services_framework.Identity.Interface;
+﻿using System.Reflection;
+using tcgct_services_framework.Identity.Implementations.MSSQL;
 
 namespace tcgct_services_framework.Identity
 {
@@ -15,16 +9,12 @@ namespace tcgct_services_framework.Identity
         internal class ImplementedStamps
         {
             public bool ICustomDataAccess { get; set; } = false;
-            public bool ICustomIdentityUser { get; set; } = false;
-            public bool ICustomRole { get; set; } = true;
-            public bool ICustomRoleStore { get; set; } = true;
+            public bool ICustomRoleStore { get; set; } = false;
             public bool ICustomUserStore { get; set; } = false;
 
             public bool CheckIfFullyImplemented()
             {
                 return ICustomDataAccess &&
-                    ICustomIdentityUser &&
-                    ICustomRole &&
                     ICustomRoleStore &&
                     ICustomUserStore;
             }
@@ -39,18 +29,54 @@ namespace tcgct_services_framework.Identity
             }
             return Implementations.Distinct();
         }
-        public static void CheckBackendTechs()
+        public static IEnumerable<string> GetValidImplementations()
         {
             Dictionary<string, ImplementedStamps> stamps = new Dictionary<string, ImplementedStamps>();
-            var ding = Assembly.GetExecutingAssembly().GetTypes().Where(w => w.FullName != "tcgct_services_framework.Identity.Implementations" && w.FullName.Contains("tcgct_services_framework.Identity.Implementations"));
+            var imps = Assembly.GetExecutingAssembly().GetTypes().Where(w => w.FullName != "tcgct_services_framework.Identity.Implementations" && w.FullName.Contains("tcgct_services_framework.Identity.Implementations"));
 
-            foreach (var imps in GetImplementations())
+            foreach (var imp in GetImplementations())
             {
-                Console.WriteLine($"Implementation for {imps} found");
-                stamps[imps] = new ImplementedStamps();
+                Console.WriteLine($"Implementation for {imp} found");
+                stamps[imp] = new ImplementedStamps();
             }
 
-            foreach (var item in ding)
+            foreach (var item in imps)
+            {
+                if (item.GetInterfaces().Length > 0)
+                {
+                    foreach (var i in item.GetInterfaces())
+                    {
+                        Console.WriteLine(i);
+                        switch (i.Name)
+                        {
+                            case "ICustomDataAccess":
+                                stamps[item.FullName.Split('.').SkipLast(1).TakeLast(1).First()].ICustomDataAccess = true;
+                                break;
+                            case "IRoleStore`1":
+                                stamps[item.FullName.Split('.').SkipLast(1).TakeLast(1).First()].ICustomRoleStore = true;
+                                break;
+                            case "ICustomUserStore":
+                                stamps[item.FullName.Split('.').SkipLast(1).TakeLast(1).First()].ICustomUserStore = true;
+                                break;
+                        }
+                    }
+                }
+            }
+            var fic = stamps.Where(w => w.Value.CheckIfFullyImplemented()).Select(s => s.Key).ToArray();
+
+            foreach (var stamp in stamps)
+            {
+                string str = stamp.Value.CheckIfFullyImplemented() ? "fully implemented" : "not fully implemented";
+                Console.WriteLine($"Implementation for {stamp.Key} is {str}.");
+            }
+
+            return fic;
+        }
+        public static IdentityClassHolder GetClasses(string tech)
+        {
+            IdentityClassHolder ich = new IdentityClassHolder();
+            var imps = Assembly.GetExecutingAssembly().GetTypes().Where(w => w.FullName != "tcgct_services_framework.Identity.Implementations" && w.FullName.Contains("tcgct_services_framework.Identity.Implementations."+tech));
+            foreach (var item in imps)
             {
                 if (item.GetInterfaces().Length > 0)
                 {
@@ -58,36 +84,19 @@ namespace tcgct_services_framework.Identity
                     {
                         switch (i.Name)
                         {
-                            case "ICustomDataAccess`1":
-                                stamps[item.FullName.Split('.').SkipLast(1).TakeLast(1).First()].ICustomDataAccess = true;
+                            case "ICustomDataAccess":
+                                ich.DataAccess = item;
                                 break;
-                            case "ICustomIdentityUser":
-                                stamps[item.FullName.Split('.').SkipLast(1).TakeLast(1).First()].ICustomIdentityUser = true;
+                            case "IRoleStore`1":
+                                ich.RoleStore = item;
                                 break;
-                            case "ICustomRole`1":
-                                stamps[item.FullName.Split('.').SkipLast(1).TakeLast(1).First()].ICustomRole = true;
-                                break;
-                            case "ICustomRoleStore`1":
-                                stamps[item.FullName.Split('.').SkipLast(1).TakeLast(1).First()].ICustomRoleStore = true;
-                                break;
-                            case "ICustomUserStore`1":
-                                stamps[item.FullName.Split('.').SkipLast(1).TakeLast(1).First()].ICustomUserStore = true;
+                            case "ICustomUserStore":
+                                ich.UserStore = item;
                                 break;
                         }
                     }
                 }
             }
-
-            foreach (var stamp in stamps)
-            {
-                string str = stamp.Value.CheckIfFullyImplemented() ? "fully implemented" : "not fully implemented";
-                Console.WriteLine($"Implementation for {stamp.Key} is {str}.");
-            }
-        }
-        public static IdentityClassHolder GetClasses(string tech)
-        {
-            IdentityClassHolder ich = new IdentityClassHolder();
-
             return ich;
         }
     }

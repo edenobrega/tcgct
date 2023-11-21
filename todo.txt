@@ -31,3 +31,6 @@ Custom lists
 	for selecting which list you want to view
 
 Style login page
+
+
+perhaps have a way of having custom services created e.g. the sqlconnection

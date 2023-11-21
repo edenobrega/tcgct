@@ -2,47 +2,55 @@ using MudBlazor.Services;
 using tcgct_mtg.Services;
 using tcgct_services_framework.MTG;
 using Microsoft.AspNetCore.Components.Authorization;
-using tcgct_mud.Data.Identity;
 using tcgct_mud.Areas.Identity;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Data.SqlClient;
-using tcgct_services_framework.Identity.Interface;
-using tcgct_services_framework.Identity.Implementations.MSSQL;
-using System.Reflection;
 using tcgct_services_framework.Identity;
+using tcgct_services_framework.Generic;
 
 namespace tcgct_mud
 {
     public class Program
     {
+
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-            var connectionString = builder.Configuration.GetSection("ConnectionStrings")["MainDB"];
+            string connectionString = builder.Configuration.GetSection("ConnectionStrings")["MainDB"];
+
+            if (string.IsNullOrEmpty(connectionString) || string.IsNullOrWhiteSpace(connectionString))
+            {
+                throw new Exception("No connection string found.");
+            }
+
             var backendTech = builder.Configuration["BackendTech"];
-            // Identity old
-            //builder.Services.AddDefaultIdentity<CustomIdentityUser>();
 
-            //builder.Services.AddTransient<IUserStore<CustomIdentityUser>, CustomUserStore>();
-            //builder.Services.AddTransient<IRoleStore<CustomRole>, CustomRoleStore>();
+            if(string.IsNullOrEmpty(backendTech) || string.IsNullOrWhiteSpace(backendTech))
+            {
+                throw new Exception("No backend technology defined.");
+            }
 
-            //builder.Services.AddTransient<SqlConnection>(conn => new SqlConnection(connectionString));
-            //builder.Services.AddTransient<CustomDataAccess>();
-            //builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<CustomIdentityUser>>();
+            var validImps = IdentityHelper.GetValidImplementations();
 
-            IdentityHelper.CheckBackendTechs();
+            if (!validImps.Contains(backendTech))
+            {
+                throw new Exception($"Chosen implementation is not valid: {backendTech}");
+            }
 
-            // Identity new
-            builder.Services.AddDefaultIdentity<ICustomIdentityUser>();
+            builder.Services.AddScoped(di => new SettingsService(connectionString));
 
-            builder.Services.AddTransient<IUserStore<ICustomIdentityUser>, ICustomUserStore<ICustomIdentityUser>>();
-            builder.Services.AddTransient<IRoleStore<CustomRole>, CustomRoleStore>();
+            var identityClasses = IdentityHelper.GetClasses(backendTech);
 
-            builder.Services.AddTransient<SqlConnection>(conn => new SqlConnection(connectionString));
-            builder.Services.AddTransient<ICustomDataAccess<ICustomIdentityUser>>();
-            builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<ICustomIdentityUser>>();
+            builder.Services.AddDefaultIdentity<TCGCTUser>();
 
-            // todo: make this use the above sqlconnection service
+            builder.Services.AddTransient(typeof(IUserStore<TCGCTUser>), identityClasses.UserStore);
+            builder.Services.AddTransient(typeof(IRoleStore<TCGCTRole>), identityClasses.RoleStore);
+
+            builder.Services.AddTransient(identityClasses.DataAccess);
+
+            builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<TCGCTUser>>();
+
+            // End of identity services
+            // todo: do above to here.
             builder.Services.AddScoped<IMTGService>(di => new MTGSqlService(connectionString));
 
             // Add services to the container.

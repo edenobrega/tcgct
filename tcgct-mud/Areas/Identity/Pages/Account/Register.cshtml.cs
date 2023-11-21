@@ -6,23 +6,23 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using tcgct_mud.Data.Identity;
+using tcgct_services_framework.Identity;
 using tcgct_services_framework.MTG;
 
 namespace tcgct_mud.Areas.Identity.Pages.Account
 {
     public class RegisterModel : PageModel
     {
-        private readonly SignInManager<CustomIdentityUser> _signInManager;
-        private readonly UserManager<CustomIdentityUser> _userManager;
-        private readonly IUserStore<CustomIdentityUser> _userStore;
+        private readonly SignInManager<TCGCTUser> _signInManager;
+        private readonly UserManager<TCGCTUser> _userManager;
+        private readonly IUserStore<TCGCTUser> _userStore;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IMTGService _mtgservice;
 
         public RegisterModel(
-            UserManager<CustomIdentityUser> userManager,
-            IUserStore<CustomIdentityUser> userStore,
-            SignInManager<CustomIdentityUser> signInManager,
+            UserManager<TCGCTUser> userManager,
+            IUserStore<TCGCTUser> userStore,
+            SignInManager<TCGCTUser> signInManager,
             ILogger<RegisterModel> logger,
             IMTGService mtgservice)
         {
@@ -133,11 +133,11 @@ namespace tcgct_mud.Areas.Identity.Pages.Account
             return Page();
         }
 
-        private CustomIdentityUser CreateUser()
+        private TCGCTUser CreateUser()
         {
             try
             {
-                return Activator.CreateInstance<CustomIdentityUser>();
+                return Activator.CreateInstance<TCGCTUser>();
             }
             catch
             {

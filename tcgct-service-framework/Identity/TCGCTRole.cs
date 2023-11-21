@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace tcgct_services_framework.Identity.Implementations.MongoDB
+namespace tcgct_services_framework.Identity
 {
-    public class MongoRole
+    public class TCGCTRole
     {
+
     }
 }

@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Security.Principal;
 using tcgct_services_framework.Identity.Interface;
 
-namespace tcgct_services_framework.Identity.Implementations.MSSQL
+namespace tcgct_services_framework.Identity
 {
-    public class MSIdentityUser : ICustomIdentityUser
+    public class TCGCTUser : IIdentity
     {
         public string? AuthenticationType => throw new NotImplementedException();
 

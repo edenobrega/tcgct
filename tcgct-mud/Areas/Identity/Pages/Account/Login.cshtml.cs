@@ -7,16 +7,16 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using tcgct_mud.Data.Identity;
+using tcgct_services_framework.Identity;
 
 namespace tcgct_mud.Areas.Identity.Pages.Account
 {
     public class LoginModel : PageModel
     {
-        private readonly SignInManager<CustomIdentityUser> _signInManager;
+        private readonly SignInManager<TCGCTUser> _signInManager;
         private readonly ILogger<LoginModel> _logger;
 
-        public LoginModel(SignInManager<CustomIdentityUser> signInManager, ILogger<LoginModel> logger)
+        public LoginModel(SignInManager<TCGCTUser> signInManager, ILogger<LoginModel> logger)
         {
             _signInManager = signInManager;
             _logger = logger;

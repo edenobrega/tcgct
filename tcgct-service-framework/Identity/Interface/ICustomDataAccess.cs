@@ -2,10 +2,10 @@
 
 namespace tcgct_services_framework.Identity.Interface
 {
-    public interface ICustomDataAccess<TIdentity> where TIdentity : ICustomIdentityUser
+    public interface ICustomDataAccess
     {
-        Task<IdentityResult> CreateUser(TIdentity user);
-        Task<TIdentity> GetByID(Guid ID);
-        Task<TIdentity> GetNameFromName(string Name);
+        Task<IdentityResult> CreateUser(TCGCTUser user);
+        Task<TCGCTUser> GetByID(Guid ID);
+        Task<TCGCTUser> GetNameFromName(string Name);
     }
 }
