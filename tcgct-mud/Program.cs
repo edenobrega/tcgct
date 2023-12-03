@@ -6,6 +6,9 @@ using tcgct_mud.Areas.Identity;
 using Microsoft.AspNetCore.Identity;
 using tcgct_services_framework.Identity;
 using tcgct_services_framework.Generic;
+using tcgct_services_framework.MTG.Services;
+using tcgct_sql.Services;
+using tcgct_services_framework.Generic.Interface;
 
 namespace tcgct_mud
 {
@@ -36,7 +39,7 @@ namespace tcgct_mud
                 throw new Exception($"Chosen implementation is not valid: {backendTech}");
             }
 
-            builder.Services.AddScoped(di => new SettingsService(connectionString));
+            builder.Services.AddSingleton(di => new ConfigService(connectionString));
 
             var identityClasses = IdentityHelper.GetClasses(backendTech);
 
@@ -51,7 +54,11 @@ namespace tcgct_mud
 
             // End of identity services
             // todo: do above to here.
-            builder.Services.AddScoped<IMTGService>(di => new MTGSqlService(connectionString));
+            builder.Services.AddScoped<ISettingsService, SettingsService>();
+            builder.Services.AddScoped<IMTGSetService, MTGSetService>();
+            builder.Services.AddScoped<IMTGCardService, MTGCardService>();
+            builder.Services.AddScoped<IMTGCollectionService, MTGCollectionService>();
+
 
             // Add services to the container.
             builder.Services.AddRazorPages();

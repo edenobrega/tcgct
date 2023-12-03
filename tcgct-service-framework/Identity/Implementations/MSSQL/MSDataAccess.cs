@@ -10,7 +10,7 @@ namespace tcgct_services_framework.Identity.Implementations.MSSQL
     public class MSDataAccess : ICustomDataAccess
     {
         private readonly SqlConnection _connection;
-        public MSDataAccess(SettingsService ss)
+        public MSDataAccess(ConfigService ss)
         {
             this._connection = new SqlConnection(ss.ConnectionString);
         }

@@ -3,11 +3,12 @@
 @using tcgct_services_framework.MTG.Models;
 @using tcgct_services_framework;
 @using tcgct_services_framework.MTG;
-@inject IMTGService mtgs
+@using tcgct_services_framework.MTG.Services;
+@inject IMTGCardService cardService
 
 <MudTable Items="@data" Loading="loading" @ref="mudTable" Filter="new Func<DisplayHTML<Card>,bool>(FilterFuncBase)" LoadingProgressColor="Color.Info">
 	<ToolBarContent>
-		<MudText>Viewing set: @mtgs.GetSet(int.Parse(set_id)).Name</MudText>
+		<MudText>Viewing set: @data.First()?.Object.Set.Name</MudText>
 		<MudSpacer />
 		<MudSpacer />
 		<MudTextField ReadOnly="true" Immediate="true" Placeholder="@filterValue" Adornment="Adornment.Start" Value="filterValue" OnKeyDown="DownHandler" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium"></MudTextField>
@@ -106,7 +107,7 @@
 	protected override async Task OnInitializedAsync()
 	{
 		loading = true;
-		var _data = await mtgs.GetSetCardsAsync(int.Parse(set_id));
+		var _data = await cardService.GetSetCardsAsync(int.Parse(set_id));
 		data = new List<DisplayHTML<Card>>();
 		_data.ToList().ForEach(fe =>
 		{

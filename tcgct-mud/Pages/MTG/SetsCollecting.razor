@@ -3,7 +3,9 @@
 @using tcgct_services_framework;
 @using tcgct_services_framework.MTG.Models;
 @using tcgct_services_framework.MTG;
-@inject IMTGService mtgs
+@using tcgct_services_framework.MTG.Services;
+@inject IMTGSetService setService
+@inject IMTGCollectionService collectionService
 
 <MudTable Items="@data" Loading="data == null" Filter="new Func<Set,bool>(FilterFunc1)">
 	<ToolBarContent>
@@ -45,10 +47,10 @@
 	protected override async Task OnInitializedAsync()
 	{
 		string userID = "1";
-		data = await mtgs.GetCollectingSetsAsync(userID);
+		data = await setService.GetCollectingSetsAsync(userID);
 		if(userID != "")
 		{
-			data = await mtgs.PopulateSetCollectedAsync(data, userID);
+			data = await collectionService.PopulateSetCollectedAsync(data, userID);
 		}
 	}
 

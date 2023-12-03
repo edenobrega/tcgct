@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using tcgct_services_framework.Generic.Interface;
 using tcgct_services_framework.Identity;
 using tcgct_services_framework.MTG;
 
@@ -17,20 +18,20 @@ namespace tcgct_mud.Areas.Identity.Pages.Account
         private readonly UserManager<TCGCTUser> _userManager;
         private readonly IUserStore<TCGCTUser> _userStore;
         private readonly ILogger<RegisterModel> _logger;
-        private readonly IMTGService _mtgservice;
+        private readonly ISettingsService _settingsService;
 
         public RegisterModel(
             UserManager<TCGCTUser> userManager,
             IUserStore<TCGCTUser> userStore,
             SignInManager<TCGCTUser> signInManager,
             ILogger<RegisterModel> logger,
-            IMTGService mtgservice)
+            ISettingsService settingsService)
         {
             _userManager = userManager;
             _userStore = userStore;
             _signInManager = signInManager;
             _logger = logger;
-            _mtgservice = mtgservice;
+            _settingsService = settingsService;
         }
 
         /// <summary>
@@ -111,7 +112,7 @@ namespace tcgct_mud.Areas.Identity.Pages.Account
 
                     var userId = await _userManager.GetUserIdAsync(user);
 
-                    await _mtgservice.CreateDefaultSettings(userId);
+                    await _settingsService.CreateDefaultSettings(userId);
 
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {

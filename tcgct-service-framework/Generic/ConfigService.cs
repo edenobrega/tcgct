@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace tcgct_services_framework.Generic
 {
-    public class SettingsService
+    public class ConfigService
     {
-        public SettingsService(string connectionString)
+        public ConfigService(string connectionString)
         {
             ConnectionString = connectionString;
         }

@@ -1,9 +1,12 @@
 ﻿@page "/mtg/sets/all"
 @using tcgct_services_framework.Generic;
+@using tcgct_services_framework.Generic.Interface;
 @using tcgct_services_framework.MTG.Models;
 @using tcgct_services_framework.MTG;
+@using tcgct_services_framework.MTG.Services;
 @inject AuthenticationStateProvider auth
-@inject IMTGService mtgs
+@inject IMTGSetService setService
+@inject ISettingsService settingsService
 
 <MudTable Items="@data" Loading="data == null" Filter="new Func<Set,bool>(FilterFunc1)">
 	<ToolBarContent>
@@ -51,25 +54,25 @@
 	{
 		authState = await auth.GetAuthenticationStateAsync();
 
-		data = await mtgs.GetAllSetsAsync();
+		data = await setService.GetAllSetsAsync();
 
 		if (authState.User.Identity.IsAuthenticated)
 		{
-			SettingsRow? setting = mtgs.GetSetting("FilterBySetIDs", AuthHelper.GetUserID(authState));
+			SettingsRow? setting = settingsService.GetSetting("FilterBySetIDs", AuthHelper.GetUserID(authState));
 			if (setting is not null && !string.IsNullOrEmpty(setting.Value))
 			{
 				var ids = setting.Value.Split(",").Select(int.Parse);
 				data = data.Where(w => ids.Contains(w.ID));
 			}
 
-			setting = mtgs.GetSetting("FilterBySetTypes", AuthHelper.GetUserID(authState));
+			setting = settingsService.GetSetting("FilterBySetTypes", AuthHelper.GetUserID(authState));
 			if (setting is not null && !string.IsNullOrEmpty(setting.Value))
 			{
 				var ids = setting.Value.Split(",").Select(int.Parse);
 				data = data.Where(w => ids.Contains(w.Set_Type_id));
 			}
 			
-			IEnumerable<PinnedSet> pins = await mtgs.GetPinnedSetsAsync(AuthHelper.GetUserID(authState));
+			IEnumerable<PinnedSet> pins = await setService.GetPinnedSetsAsync(AuthHelper.GetUserID(authState));
 			data.ToList().ForEach(fe =>
 			{
 				fe.Pinned = pins.Any(s => s.SetID == fe.ID);
@@ -99,11 +102,11 @@
 		}
 		if (set.Pinned)
 		{
-			await mtgs.DeletePinnedSetAsync(AuthHelper.GetUserID(authState), set.ID);
+			await setService.DeletePinnedSetAsync(AuthHelper.GetUserID(authState), set.ID);
 			set.Pinned = false;
 			return;
 		}
-		await mtgs.CreatePinnedSetAsync(AuthHelper.GetUserID(authState), set.ID);
+		await setService.CreatePinnedSetAsync(AuthHelper.GetUserID(authState), set.ID);
 		set.Pinned = true;
 	}
 }

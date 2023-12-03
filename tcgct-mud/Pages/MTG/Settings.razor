@@ -3,10 +3,13 @@
 @using tcgct_mud.Components.MTG.Settings;
 @using tcgct_mud.Data;
 @using tcgct_services_framework.Generic;
+@using tcgct_services_framework.Generic.Interface;
 @using tcgct_services_framework.MTG.Models;
 @using tcgct_services_framework.MTG;
+@using tcgct_services_framework.MTG.Services;
 @inject AuthenticationStateProvider auth
-@inject IMTGService mtgs
+@inject IMTGSetService setService
+@inject ISettingsService settingsService
 @inject IDialogService DialogService
 <h3>User Settings</h3>
 
@@ -64,15 +67,15 @@ else
 	{
 		authState = await auth.GetAuthenticationStateAsync();
 
-		var _allSets = await mtgs.GetAllSetsAsync();
+		var _allSets = await setService.GetAllSetsAsync();
 		allSets = _allSets.ToList();
 
-		var _allSetTypes = await mtgs.GetAllSetTypesAsync();
+		var _allSetTypes = await setService.GetAllSetTypesAsync();
 		allSetTypes = _allSetTypes.ToList();
 
-		SettingsRow? emptyresponse = mtgs.GetSetting("notreal",AuthHelper.GetUserID(authState));
+		SettingsRow? emptyresponse = settingsService.GetSetting("notreal", AuthHelper.GetUserID(authState));
 
-		SettingsRow? response = mtgs.GetSetting("FilterBySetIDs", AuthHelper.GetUserID(authState));
+		SettingsRow? response = settingsService.GetSetting("FilterBySetIDs", AuthHelper.GetUserID(authState));
 		if (response is not null)
 		{
 			if (!string.IsNullOrEmpty(response.Value))
@@ -91,7 +94,7 @@ else
 			//		 dont load the row in the setting
 		}
 
-		response = mtgs.GetSetting("FilterBySetTypes", AuthHelper.GetUserID(authState));
+		response = settingsService.GetSetting("FilterBySetTypes", AuthHelper.GetUserID(authState));
 		if(response is not null)
 		{
 			if (!string.IsNullOrEmpty(response.Value))
@@ -117,7 +120,7 @@ else
 				Key = "FilterBySetIDs",
 				Value = string.Join(",", CurrentSetIds)
 			};
-			mtgs.UpdateSetting(row);
+			settingsService.UpdateSetting(row);
 			_messageBox.AddMessage(new Message(Severity.Success, "Setting changed!"));
 		}
 		if (target == 2)
@@ -128,7 +131,7 @@ else
 					Key = "FilterBySetTypes",
 				Value = string.Join(",", CurrentSetTypeIds)
 			};
-			mtgs.UpdateSetting(row);
+			settingsService.UpdateSetting(row);
 			_messageBox.AddMessage(new Message(Severity.Success, "Setting changed!"));
 		}
 	}

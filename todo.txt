@@ -3,7 +3,6 @@ configurations
 		e.g. having atleast 1 card, or having 4
 		set if duplicate cards are counted as the same, as some sets have the same card twice but different frame etc
 
-simplify sql library?
 implement unit testing for library
 
 export 
