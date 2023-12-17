@@ -22,7 +22,6 @@ namespace tcgct_sql.Services
 
         public void UpdateCollected(List<Collection> newCollection, string UserID, List<EditLog<Card>>? logs = null)
         {
-            // todo: turn this into a merge query
             var oldCollection = GetCollectionDynamic(newCollection.Select(s => s.CardID), UserID).ToList();
             List<Collection> update = new List<Collection>();
             List<Collection> delete = new List<Collection>();
@@ -48,6 +47,7 @@ namespace tcgct_sql.Services
                 }
             }
 
+            // todo: this can be done without looping over
             using (var conn = new SqlConnection(configService.ConnectionString))
             {
                 string sql;

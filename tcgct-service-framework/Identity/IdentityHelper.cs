@@ -46,7 +46,6 @@ namespace tcgct_services_framework.Identity
                 {
                     foreach (var i in item.GetInterfaces())
                     {
-                        Console.WriteLine(i);
                         switch (i.Name)
                         {
                             case "ICustomDataAccess":
