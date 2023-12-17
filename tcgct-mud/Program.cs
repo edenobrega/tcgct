@@ -9,6 +9,8 @@ using tcgct_services_framework.Generic;
 using tcgct_services_framework.MTG.Services;
 using tcgct_sql.Services;
 using tcgct_services_framework.Generic.Interface;
+using tcgct_mud.Data;
+using tcgct_mud.Data.Draft;
 
 namespace tcgct_mud
 {
@@ -58,7 +60,11 @@ namespace tcgct_mud
             builder.Services.AddScoped<IMTGSetService, MTGSetService>();
             builder.Services.AddScoped<IMTGCardService, MTGCardService>();
             builder.Services.AddScoped<IMTGCollectionService, MTGCollectionService>();
+            builder.Services.AddScoped<IMTGCustomSetService, MTGCustomSetService>();
 
+            // Draft Services
+            builder.Services.AddSingleton<DraftController>();
+            builder.Services.AddScoped<DraftSession>();
 
             // Add services to the container.
             builder.Services.AddRazorPages();

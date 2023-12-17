@@ -1,0 +1,55 @@
+﻿@page "/DraftHome"
+@using tcgct_mud.Data.Draft;
+@inject AuthenticationStateProvider auth
+@inject DraftSession ds;
+@inject NavigationManager nm;
+
+<PageTitle>Index</PageTitle>
+<h1>@ds.SessionID | @ds.DraftHub.listeners.Count Connections</h1>
+<AuthorizeView>
+	<Authorized>
+		<input @bind="newRoomName" />
+		<button onclick="@(() => ds.DraftHub.CreateRoom(newRoomName, userID))">Create</button>
+	</Authorized>
+</AuthorizeView>
+
+@foreach (var room in ds.DraftHub.Rooms)
+{
+	<h2>@room.Value.Name</h2>
+}
+
+
+@code {
+	string userID = string.Empty;
+	string newRoomName = string.Empty;
+	protected override async Task OnInitializedAsync()
+	{
+		var authState = await auth.GetAuthenticationStateAsync();
+
+		if (authState.User.Identity is not null)
+		{
+			if (authState.User.Identity.IsAuthenticated)
+			{
+				userID = AuthHelper.GetUserID(authState);
+			}
+		}
+		ds.Subscribe(onAdded);
+		nm.LocationChanged += onChange;
+		ds.DraftHub.RerenderAll();
+		base.OnInitialized();
+	}
+
+	void onAdded()
+	{
+		InvokeAsync(StateHasChanged);
+	}
+
+	void onChange(object sender, LocationChangedEventArgs e)
+	{
+		if (new Uri(e.Location).AbsolutePath != "/")
+		{
+			ds.Dispose();
+			ds.DraftHub.RerenderAll();
+		}
+	}
+}
