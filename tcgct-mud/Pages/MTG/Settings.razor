@@ -7,9 +7,11 @@
 @using tcgct_services_framework.MTG.Models;
 @using tcgct_services_framework.MTG;
 @using tcgct_services_framework.MTG.Services;
+@using tcgct_mud.Helpers;
 @inject AuthenticationStateProvider auth
 @inject IMTGSetService setService
 @inject ISettingsService settingsService
+@inject SettingsHelper settingsHelper
 @inject IDialogService DialogService
 <h3>User Settings</h3>
 
@@ -63,6 +65,8 @@ else
 
 	bool loaded = false;
 
+	int GameID;
+
 	protected override async Task OnInitializedAsync()
 	{
 		authState = await auth.GetAuthenticationStateAsync();
@@ -73,39 +77,15 @@ else
 		var _allSetTypes = await setService.GetAllSetTypesAsync();
 		allSetTypes = _allSetTypes.ToList();
 
-		SettingsRow? emptyresponse = settingsService.GetSetting("notreal", AuthHelper.GetUserID(authState));
+		GameID = settingsService.GetGameID("MTG");
 
-		SettingsRow? response = settingsService.GetSetting("FilterBySetIDs", AuthHelper.GetUserID(authState));
-		if (response is not null)
-		{
-			if (!string.IsNullOrEmpty(response.Value))
-			{
-				CurrentSetIds = response.Value.Split(",").Select(int.Parse).ToList();
-			}
-			else
-			{
-				CurrentSetIds = new List<int>();
-			}			
-		}
-		else
-		{
-			// todo: handle if the setting doesnt exist
-			//		 display what didnt get loaded and 
-			//		 dont load the row in the setting
-		}
+		CurrentSetIds = settingsHelper.GetFilterBySetIDs(AuthHelper.GetUserID(authState), GameID).ToList();
 
-		response = settingsService.GetSetting("FilterBySetTypes", AuthHelper.GetUserID(authState));
-		if(response is not null)
-		{
-			if (!string.IsNullOrEmpty(response.Value))
-			{
-				CurrentSetTypeIds = response.Value.Split(",").Select(int.Parse).ToList();
-			}
-			else
-			{
-				CurrentSetTypeIds = new List<int>();
-			}			
-		}
+		// todo: handle if the setting doesnt exist
+		//		 display what didnt get loaded and 
+		//		 dont load the row in the setting
+		
+		CurrentSetTypeIds = settingsHelper.GetFilterBySetTypes(AuthHelper.GetUserID(authState), GameID).ToList();
 
 		loaded = true;
 	}
@@ -118,7 +98,8 @@ else
 			{
 				UserID = AuthHelper.GetUserID(authState),
 				Key = "FilterBySetIDs",
-				Value = string.Join(",", CurrentSetIds)
+				Value = string.Join(",", CurrentSetIds),
+				GameID = GameID
 			};
 			settingsService.UpdateSetting(row);
 			_messageBox.AddMessage(new Message(Severity.Success, "Setting changed!"));
@@ -128,8 +109,9 @@ else
 			SettingsRow row = new SettingsRow
 			{
 				UserID = AuthHelper.GetUserID(authState),
-					Key = "FilterBySetTypes",
-				Value = string.Join(",", CurrentSetTypeIds)
+				Key = "FilterBySetTypes",
+				Value = string.Join(",", CurrentSetTypeIds),
+				GameID = GameID
 			};
 			settingsService.UpdateSetting(row);
 			_messageBox.AddMessage(new Message(Severity.Success, "Setting changed!"));

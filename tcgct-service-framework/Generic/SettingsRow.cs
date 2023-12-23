@@ -10,7 +10,7 @@ namespace tcgct_services_framework.Generic
 	{
         public int ID { get; set; }
         public int GameID { get; set; }
-        public string UserID { get; set; }
+        public Guid UserID { get; set; }
         public string Key { get; set; }
         public string Value { get; set; }
     }

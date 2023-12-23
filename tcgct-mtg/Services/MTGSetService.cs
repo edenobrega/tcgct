@@ -70,7 +70,7 @@ namespace tcgct_sql.Services
                 return results;
             }
         }
-        public IEnumerable<Set> GetCollectingSets(string UserID)
+        public IEnumerable<Set> GetCollectingSets(Guid UserID)
         {
             using (var conn = new SqlConnection(configService.ConnectionString))
             {
@@ -90,7 +90,7 @@ namespace tcgct_sql.Services
                 return sets;
             }
         }
-        public IEnumerable<PinnedSet> GetPinnedSets(string UserID)
+        public IEnumerable<PinnedSet> GetPinnedSets(Guid UserID)
         {
             using (var conn = new SqlConnection(configService.ConnectionString))
             {
@@ -121,7 +121,7 @@ namespace tcgct_sql.Services
                 return result;
             }
         }
-        public IEnumerable<Set> GetSetsPinned(string UserID)
+        public IEnumerable<Set> GetSetsPinned(Guid UserID)
         {
             using (var conn = new SqlConnection(configService.ConnectionString))
             {
@@ -149,21 +149,21 @@ namespace tcgct_sql.Services
                 return GetSet(id);
             });
         }
-        public async Task<IEnumerable<Set>> GetUserPinnedSetsAsync(string UserID)
+        public async Task<IEnumerable<Set>> GetUserPinnedSetsAsync(Guid UserID)
         {
             return await Task.Run(() =>
             {
                 return GetSetsPinned(UserID);
             });
         }
-        public async Task<IEnumerable<PinnedSet>> GetPinnedSetsAsync(string UserID)
+        public async Task<IEnumerable<PinnedSet>> GetPinnedSetsAsync(Guid UserID)
         {
             return await Task.Run(() =>
             {
                 return GetPinnedSets(UserID);
             });
         }
-        public void CreatePinnedSet(string UserID, int SetID)
+        public void CreatePinnedSet(Guid UserID, int SetID)
         {
             using (var conn = new SqlConnection(configService.ConnectionString))
             {
@@ -199,7 +199,7 @@ namespace tcgct_sql.Services
                 return conn.QuerySingle<int>(sql, new { name });
             }
         }
-        public void DeletePinnedSet(string UserID, int SetID)
+        public void DeletePinnedSet(Guid UserID, int SetID)
         {
             using (var conn = new SqlConnection(configService.ConnectionString))
             {
@@ -208,14 +208,14 @@ namespace tcgct_sql.Services
                 conn.Execute(sql, new { SetID, UserID });
             }
         }
-        public async Task CreatePinnedSetAsync(string UserID, int SetID)
+        public async Task CreatePinnedSetAsync(Guid UserID, int SetID)
         {
             await Task.Run(() =>
             {
                 CreatePinnedSet(UserID, SetID);
             });
         }
-        public async Task DeletePinnedSetAsync(string UserID, int SetID)
+        public async Task DeletePinnedSetAsync(Guid UserID, int SetID)
         {
             await Task.Run(() =>
             {
@@ -236,7 +236,7 @@ namespace tcgct_sql.Services
                 return GetAllSetTypes();
             });
         }
-        public async Task<IEnumerable<Set>> GetCollectingSetsAsync(string UserID)
+        public async Task<IEnumerable<Set>> GetCollectingSetsAsync(Guid UserID)
         {
             return await Task.Run(() =>
             {

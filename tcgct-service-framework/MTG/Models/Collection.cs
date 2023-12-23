@@ -9,7 +9,7 @@ namespace tcgct_services_framework.MTG.Models
     public class Collection
     {
         public int CardID { get; set; }
-        public string UserID { get; set; }
+        public Guid UserID { get; set; }
         public int Count { get; set; }
     }
 }

@@ -6,6 +6,7 @@
 @using tcgct_services_framework.MTG;
 @using Components
 @using tcgct_services_framework.MTG.Services;
+@using tcgct_mud.Helpers;
 
 @inject AuthenticationStateProvider auth
 @inject IMTGCardService cardService
@@ -144,7 +145,7 @@ else
 	[Parameter]
 	public string set_id { get; set; }
 
-	string? user_id = null;
+	Guid user_id = Guid.Empty;
 
 	MudTable<DisplayHTML<Card>>? mudTable;
 	bool quickEdit;
@@ -308,13 +309,13 @@ else
 
 	private void SaveChanges()
 	{
-		if(user_id is not null)
+		if(user_id != Guid.Empty)
 		{
 			loading = true;
 			List<Collection> collection = data.Select(s => new Collection{ CardID = s.Object.ID, UserID = user_id, Count = s.Object.Collected  }).ToList();
 			collectionService.UpdateCollected(collection, user_id, log);
 			loading = false;
-			messages.Add(new Message( Severity.Success, "Sucessfully updated collection!" ));			
+			messages.Add(new Message(Severity.Success, "Sucessfully updated collection!"));			
 		}
 		else
 		{

@@ -1,5 +1,6 @@
 ﻿@page "/DraftHome"
 @using tcgct_mud.Data.Draft;
+@using tcgct_mud.Helpers;
 @inject AuthenticationStateProvider auth
 @inject DraftSession ds;
 @inject NavigationManager nm;
@@ -20,7 +21,7 @@
 
 
 @code {
-	string userID = string.Empty;
+	Guid userID;
 	string newRoomName = string.Empty;
 	protected override async Task OnInitializedAsync()
 	{

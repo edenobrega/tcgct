@@ -1,0 +1,45 @@
+﻿@page "/mtg/customsets"
+@using System.Security.Principal;
+@using Microsoft.AspNetCore.Identity;
+@using tcgct_services_framework.Identity;
+@using tcgct_services_framework.Identity.Interface;
+@using tcgct_services_framework.MTG.Models;
+@using tcgct_services_framework.MTG.Services;
+@inject AuthenticationStateProvider auth
+@inject IMTGCustomSetService customSetService
+<h3>CustomSets</h3>
+@if (sets is not null)
+{
+	<MudTable Items="@sets">
+		<ToolBarContent>
+			<MudText>All MTG Sets</MudText>
+		</ToolBarContent>
+		<HeaderContent>
+			<MudTh>ID</MudTh>
+			<MudTh>Name</MudTh>
+			<MudTh>Card Count</MudTh>
+		</HeaderContent>
+		<RowTemplate>
+			<MudTd>@context.ID</MudTd>
+			<MudTd>@context.Name</MudTd>
+		</RowTemplate>
+		<PagerContent>
+			<MudTablePager />
+		</PagerContent>
+	</MudTable>
+}
+else
+{
+	<h1>Loading . . .</h1>
+}
+
+
+@code {
+	AuthenticationState? authState;
+	IEnumerable<CustomSet>? sets = null;
+	protected override async Task OnInitializedAsync()
+	{
+		authState = await auth.GetAuthenticationStateAsync();
+		sets = customSetService.GetSets(Helpers.AuthHelper.GetUserID(authState));
+	}
+}

@@ -20,7 +20,7 @@ namespace tcgct_sql.Services
             configService = config;
         }
 
-        public void UpdateCollected(List<Collection> newCollection, string UserID, List<EditLog<Card>>? logs = null)
+        public void UpdateCollected(List<Collection> newCollection, Guid UserID, List<EditLog<Card>>? logs = null)
         {
             var oldCollection = GetCollectionDynamic(newCollection.Select(s => s.CardID), UserID).ToList();
             List<Collection> update = new List<Collection>();
@@ -84,7 +84,7 @@ namespace tcgct_sql.Services
                 }
             }
         }
-        public IEnumerable<Collection> GetCollectionDynamic(IEnumerable<int> CardIDs, string UserID)
+        public IEnumerable<Collection> GetCollectionDynamic(IEnumerable<int> CardIDs, Guid UserID)
         {
             using (var conn = new SqlConnection(configService.ConnectionString))
             {
@@ -97,7 +97,7 @@ namespace tcgct_sql.Services
                 return conn.Query<Collection>(sql, new { UserID, CardIDs });
             }
         }
-        public IEnumerable<CollectedData> GetCollectedSetData(IEnumerable<int> SetIDs, string UserID)
+        public IEnumerable<CollectedData> GetCollectedSetData(IEnumerable<int> SetIDs, Guid UserID)
         {
             using (var conn = new SqlConnection(configService.ConnectionString))
             {
@@ -113,7 +113,7 @@ namespace tcgct_sql.Services
                 return conn.Query<CollectedData>(sql, new { SetIDs, UserID });
             }
         }
-        public IEnumerable<Set> PopulateSetCollected(IEnumerable<Set> Data, string UserID)
+        public IEnumerable<Set> PopulateSetCollected(IEnumerable<Set> Data, Guid UserID)
         {
             IEnumerable<CollectedData> csd = GetCollectedSetData(Data.Select(s => s.ID), UserID);
             csd.ToList().ForEach(fe =>
@@ -122,7 +122,7 @@ namespace tcgct_sql.Services
             });
             return Data;
         }
-        public async Task<IEnumerable<Set>> PopulateSetCollectedAsync(IEnumerable<Set> Data, string UserID)
+        public async Task<IEnumerable<Set>> PopulateSetCollectedAsync(IEnumerable<Set> Data, Guid UserID)
         {
             return await Task.Run(() =>
             {

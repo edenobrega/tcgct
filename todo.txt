@@ -1,21 +1,21 @@
+make a setting entry for the below
+
 configurations
 	config what is classified as a "completed set" 
-		e.g. having atleast 1 card, or having 4
+		For default sets, you can choose from the four for ALL of them
+			1. 4 of each
+			2. 1 of each
+			3. 1 of each, excluding duplicates
+			4. 4 of each, excluding duplicates
+
 		set if duplicate cards are counted as the same, as some sets have the same card twice but different frame etc
 
-implement unit testing for library
-
-export 
-	missing files
-	export collection
-
-search all cards
-
-choose what to filter by on tables
 
 custom sets
+	Each set can be assigned its own above classifcation
 
-dashboard data
+
+search all cards
 
 drafting page
 	have a room with where other users can be invited to draft
@@ -25,8 +25,14 @@ drafting page
 	set rules draft rules, e.g. singles only
 
 
-Custom lists
-	Instead of the current implementation for settings, have a page for creating custom lists, and then a page
-	for selecting which list you want to view
-
 Style login page
+
+choose what to filter by on tables
+
+dashboard data
+
+export 
+	missing files
+	export collection
+
+implement unit testing for library

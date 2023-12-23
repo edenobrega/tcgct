@@ -1,12 +1,15 @@
 ﻿@page "/mtg/sets/all"
+@using tcgct_mud.Data;
 @using tcgct_services_framework.Generic;
 @using tcgct_services_framework.Generic.Interface;
 @using tcgct_services_framework.MTG.Models;
 @using tcgct_services_framework.MTG;
 @using tcgct_services_framework.MTG.Services;
+@using tcgct_mud.Helpers;
 @inject AuthenticationStateProvider auth
 @inject IMTGSetService setService
 @inject ISettingsService settingsService
+@inject SettingsHelper settingsHelp
 
 <MudTable Items="@data" Loading="data == null" Filter="new Func<Set,bool>(FilterFunc1)">
 	<ToolBarContent>
@@ -58,18 +61,18 @@
 
 		if (authState.User.Identity.IsAuthenticated)
 		{
-			SettingsRow? setting = settingsService.GetSetting("FilterBySetIDs", AuthHelper.GetUserID(authState));
-			if (setting is not null && !string.IsNullOrEmpty(setting.Value))
+			// todo: gets too much data
+			var GameIDs = settingsService.GetGameIDs();
+			IEnumerable<int> filterBySetIds = settingsHelp.GetFilterBySetIDs(AuthHelper.GetUserID(authState), GameIDs["MTG"]);
+			if (filterBySetIds.Count() != 0)
 			{
-				var ids = setting.Value.Split(",").Select(int.Parse);
-				data = data.Where(w => ids.Contains(w.ID));
+				data = data.Where(w => filterBySetIds.Contains(w.ID));
 			}
 
-			setting = settingsService.GetSetting("FilterBySetTypes", AuthHelper.GetUserID(authState));
-			if (setting is not null && !string.IsNullOrEmpty(setting.Value))
+			IEnumerable<int> filterBySetTypes = settingsHelp.GetFilterBySetTypes(AuthHelper.GetUserID(authState), GameIDs["MTG"]);
+			if (filterBySetTypes.Count() != 0)
 			{
-				var ids = setting.Value.Split(",").Select(int.Parse);
-				data = data.Where(w => ids.Contains(w.Set_Type_id));
+				data = data.Where(w => filterBySetTypes.Contains(w.Set_Type_id));
 			}
 			
 			IEnumerable<PinnedSet> pins = await setService.GetPinnedSetsAsync(AuthHelper.GetUserID(authState));

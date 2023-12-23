@@ -27,8 +27,13 @@
 
 		<AuthorizeView>
 			<Authorized>
-				<MudNavLink IconColor="Color.Secondary" Match="NavLinkMatch.Prefix" Href="/mtg/sets/collecting" Icon="@Icons.Material.Filled.Anchor">Collecting Sets</MudNavLink>
-				<MudNavLink IconColor="Color.Warning" Match="NavLinkMatch.Prefix" Href="/mtg/sets/pinned" Icon="@Icons.Material.Filled.PushPin">Pinned Sets</MudNavLink>
+				<MudNavLink IconColor="Color.Primary" Match="NavLinkMatch.Prefix" Href="/mtg/sets/collecting" Icon="@Icons.Material.Filled.Anchor">Collecting Sets</MudNavLink>
+				<MudNavLink IconColor="Color.Primary" Match="NavLinkMatch.Prefix" Href="/mtg/sets/pinned" Icon="@Icons.Material.Filled.PushPin">Pinned Sets</MudNavLink>
+				<MudNavGroup IconColor="Color.Warning" Icon="@Icons.Material.Filled.FormatListBulleted" Title="Custom Sets">
+					<MudNavLink IconColor="Color.Warning" Match="NavLinkMatch.Prefix" Href="/mtg/customsets" Icon="@Icons.Custom.Uncategorized.FolderOpen">View Custom Sets</MudNavLink>
+					<MudNavLink IconColor="Color.Warning" Match="NavLinkMatch.Prefix" Href="/mtg/customsets/Create" Icon="@Icons.Material.Filled.UploadFile">Create Custom Set</MudNavLink>
+				</MudNavGroup>
+				<MudNavLink IconColor="Color.Surface" Match="NavLinkMatch.Prefix" Href="/mtg/customsets/" Icon="@Icons.Material.Filled.Fort">Drafting</MudNavLink>
 			</Authorized>
 		</AuthorizeView>
     </MudNavGroup>

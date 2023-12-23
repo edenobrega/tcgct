@@ -5,12 +5,12 @@ namespace tcgct_services_framework.Identity
 {
     public class TCGCTUser : IIdentity
     {
-        public string? AuthenticationType => throw new NotImplementedException();
+        public string? AuthenticationType { get; set; }
 
-        public bool IsAuthenticated => throw new NotImplementedException();
+        public bool IsAuthenticated { get; set; }
 
         public string Name { get; set; }
-        public string ID { get; set; }
+        public Guid ID { get; set; }
         public string Password { get; set; }
     }
 }

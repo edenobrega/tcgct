@@ -1,11 +1,13 @@
 ﻿@page "/mtg/sets/collecting"
 @attribute [Authorize]
+@using tcgct_mud.Helpers;
 @using tcgct_services_framework;
 @using tcgct_services_framework.MTG.Models;
 @using tcgct_services_framework.MTG;
 @using tcgct_services_framework.MTG.Services;
 @inject IMTGSetService setService
 @inject IMTGCollectionService collectionService
+@inject AuthenticationStateProvider auth
 
 <MudTable Items="@data" Loading="data == null" Filter="new Func<Set,bool>(FilterFunc1)">
 	<ToolBarContent>
@@ -46,12 +48,10 @@
 
 	protected override async Task OnInitializedAsync()
 	{
-		string userID = "1";
+		var authState = await auth.GetAuthenticationStateAsync();
+		Guid userID = AuthHelper.GetUserID(authState);
 		data = await setService.GetCollectingSetsAsync(userID);
-		if(userID != "")
-		{
-			data = await collectionService.PopulateSetCollectedAsync(data, userID);
-		}
+		data = await collectionService.PopulateSetCollectedAsync(data, userID);
 	}
 
 	private bool FilterFunc1(Set set) => FilterFunc(set, filterValue);

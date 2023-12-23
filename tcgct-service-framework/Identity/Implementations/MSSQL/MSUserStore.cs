@@ -48,7 +48,7 @@ namespace tcgct_services_framework.Identity.Implementations.MSSQL
         public Task<string> GetUserIdAsync(TCGCTUser user, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            return Task.FromResult(user.ID);
+            return Task.FromResult(user.ID.ToString());
         }
 
         public Task<string> GetUserNameAsync(TCGCTUser user, CancellationToken cancellationToken)

@@ -13,10 +13,10 @@ namespace tcgct_mud.Data.Draft
 
         public ConcurrentDictionary<Guid, Action> listeners;
         public ConcurrentDictionary<Guid, DraftRoom> Rooms;
-        public void CreateRoom(string roomName, string userID)
+        public void CreateRoom(string roomName, Guid userID)
         {
             Guid newID = Guid.NewGuid();
-            Rooms.TryAdd(newID, new DraftRoom(newID, roomName, userID));
+            //Rooms.TryAdd(newID, new DraftRoom(newID, roomName, userID));
             foreach (var item in listeners)
             {
                 item.Value.Invoke();

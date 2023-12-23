@@ -286,7 +286,7 @@ namespace tcgct_sql.Services
             }
         }
 
-        public async Task<IEnumerable<Card>> GetSetCardsAsync(int id, string? user_id = null)
+        public async Task<IEnumerable<Card>> GetSetCardsAsync(int id, Guid? user_id = null)
         {
             using (var conn = new SqlConnection(configService.ConnectionString))
             {

@@ -1,5 +1,4 @@
 using MudBlazor.Services;
-using tcgct_mtg.Services;
 using tcgct_services_framework.MTG;
 using Microsoft.AspNetCore.Components.Authorization;
 using tcgct_mud.Areas.Identity;
@@ -11,6 +10,9 @@ using tcgct_sql.Services;
 using tcgct_services_framework.Generic.Interface;
 using tcgct_mud.Data;
 using tcgct_mud.Data.Draft;
+using tcgct_services_framework.Identity.Implementations.MSSQL;
+using tcgct_services_framework.Identity.Interface;
+using tcgct_mud.Helpers;
 
 namespace tcgct_mud
 {
@@ -49,7 +51,7 @@ namespace tcgct_mud
 
             builder.Services.AddTransient(typeof(IUserStore<TCGCTUser>), identityClasses.UserStore);
             builder.Services.AddTransient(typeof(IRoleStore<TCGCTRole>), identityClasses.RoleStore);
-
+            //builder.Services.AddTransient(typeof(ICustomUserStore), identityClasses.UserStore);
             builder.Services.AddTransient(identityClasses.DataAccess);
 
             builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<TCGCTUser>>();
@@ -57,6 +59,7 @@ namespace tcgct_mud
             // End of identity services
             // todo: do above to here.
             builder.Services.AddScoped<ISettingsService, SettingsService>();
+            builder.Services.AddScoped<SettingsHelper>();
             builder.Services.AddScoped<IMTGSetService, MTGSetService>();
             builder.Services.AddScoped<IMTGCardService, MTGCardService>();
             builder.Services.AddScoped<IMTGCollectionService, MTGCollectionService>();

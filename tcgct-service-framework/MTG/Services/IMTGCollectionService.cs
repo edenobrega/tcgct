@@ -5,7 +5,7 @@ namespace tcgct_services_framework.MTG.Services
 {
     public interface IMTGCollectionService
     {
-        Task<IEnumerable<Set>> PopulateSetCollectedAsync(IEnumerable<Set> Data, string UserID);
-        void UpdateCollected(List<Collection> newCollection, string UserID, List<EditLog<Card>>? logs = null);
+        Task<IEnumerable<Set>> PopulateSetCollectedAsync(IEnumerable<Set> Data, Guid UserID);
+        void UpdateCollected(List<Collection> newCollection, Guid UserID, List<EditLog<Card>>? logs = null);
     }
 }

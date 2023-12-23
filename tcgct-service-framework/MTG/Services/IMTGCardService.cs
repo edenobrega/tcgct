@@ -21,6 +21,6 @@ namespace tcgct_services_framework.MTG.Services
         void CreateTypeLine(int type_id, int card_id, int order);
         CardTypeLine GetCardTypeLine(int card_id);
         IEnumerable<Rarity> GetRarities();
-        Task<IEnumerable<Card>> GetSetCardsAsync(int id, string? user_id = null);
+        Task<IEnumerable<Card>> GetSetCardsAsync(int id, Guid? user_id = null);
     }
 }

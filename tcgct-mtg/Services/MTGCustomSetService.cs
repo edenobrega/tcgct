@@ -75,5 +75,14 @@ namespace tcgct_sql.Services
 				return conn.Query<Card>(sql, new { ID });
 			}
 		}
+
+		public IEnumerable<CustomSet> GetSets(Guid Owner)
+		{
+			using (var conn = new SqlConnection(configService.ConnectionString))
+			{
+				string sql = @"SELECT [ID], [Name], [Owner] FROM [tcgct-dev].[MTG].[CustomSet] where [Owner] = @Owner";
+				return conn.Query<CustomSet>(sql, new { Owner });
+			}
+		}
 	}
 }
