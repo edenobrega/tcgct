@@ -22,13 +22,20 @@ namespace tcgct_sql.Services
 			}
 		}
 
+        class GameIDsResult
+        {
+            public string Name { get; set; }
+            public int ID { get; set; }
+        }
 		public Dictionary<string, int> GetGameIDs()
         {
             using (var conn = new SqlConnection(configService.ConnectionString))
             {
                 conn.Open();
-                return conn.QuerySingle<Dictionary<string, int>>("select [Name], [ID] from [TCGCT].[Games]");
-            }
+                return conn.Query<GameIDsResult>("select [Name], [ID] from [TCGCT].[Games]").ToDictionary(
+					row => row.Name,
+					row => row.ID);
+			}
         }
         public SettingsRow? GetSetting(string Key, int GameID, Guid UserID)
         {
@@ -50,7 +57,8 @@ namespace tcgct_sql.Services
                     conn.Open();
                     string sql = @"insert into [TCGCT].[Settings]([GameID], [UserID], [Key], [Value]) VALUES 
 									(@GameID, @UserID, 'FilterBySetIDs', NULL),
-									(@GameID, @UserID, 'FilterBySetTypes', NULL)";
+									(@GameID, @UserID, 'FilterBySetTypes', NULL),
+                                    (@GameID, @UserID, 'CollectingSets', NULL)";
                     conn.Execute(sql, new {GameID = GameIDs["MTG"], UserID });
                 }
             });

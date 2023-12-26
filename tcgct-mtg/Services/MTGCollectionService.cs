@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using tcgct_services_framework.Generic;
+using tcgct_services_framework.Generic.Interface;
 using tcgct_services_framework.MTG.Models;
 using tcgct_services_framework.MTG.Models.Helpers;
 using tcgct_services_framework.MTG.Services;
@@ -15,9 +16,11 @@ namespace tcgct_sql.Services
     public class MTGCollectionService : IMTGCollectionService
     {
         private readonly ConfigService configService;
-        public MTGCollectionService(ConfigService config)
+        private readonly ISettingsService settingsService;
+        public MTGCollectionService(ConfigService config, ISettingsService settingsService)
         {
             configService = config;
+            this.settingsService = settingsService;
         }
 
         public void UpdateCollected(List<Collection> newCollection, Guid UserID, List<EditLog<Card>>? logs = null)
@@ -97,20 +100,69 @@ namespace tcgct_sql.Services
                 return conn.Query<Collection>(sql, new { UserID, CardIDs });
             }
         }
+        // todo: this should probably be moved into a stored procedure
         public IEnumerable<CollectedData> GetCollectedSetData(IEnumerable<int> SetIDs, Guid UserID)
         {
+            var setting = settingsService.GetSetting("CollectingSets", settingsService.GetGameID("MTG"), UserID);
+            if (setting is null)
+            {
+                throw new Exception($"User does not contain \"CollectingSets\" setting entry.");
+            }
+
             using (var conn = new SqlConnection(configService.ConnectionString))
             {
-                conn.Open();
-                var sql = @"select s.id as [SetID],
+                int CollectingCount = 4;
+                string sql = "";
+                if (!string.IsNullOrEmpty(setting.Value))
+                {
+					var split = setting.Value.Split(',');
+					CollectingCount = int.Parse(split[0]);
+					bool include_distinct = int.Parse(split[1]) >= 1;
+
+                    if (include_distinct)
+                    {
+                        sql = @"select s.id as [SetID],
+                                (select count(distinct oracle_id)
+                                from mtg.[Collection] as co
+                                join mtg.[Card] as c on co.CardID = c.id
+                                where c.card_set_id = s.id and co.[Count] >= @CollectingCount and co.UserID = @UserID) as [CollectedCards],
+                                (select count(distinct oracle_id) from mtg.Card as c where c.card_set_id = s.id) as [TotalCards]
+                                from mtg.[Set] as s
+                                where s.id in @SetIDs";
+
+					}
+                    else
+                    {
+						sql = @"select s.id as [SetID],
                             (select count(1)
                             from mtg.[Collection] as co
                             join mtg.[Card] as c on co.CardID = c.id
-                            where c.card_set_id = s.id and co.[Count] >= 4 and co.UserID = @UserID) as [CollectedCards],
+                            where c.card_set_id = s.id and co.[Count] >= @CollectingCount and co.UserID = @UserID) as [CollectedCards],
                             (select count(1) from mtg.Card as c where c.card_set_id = s.id) as [TotalCards]
                             from mtg.[Set] as s
                             where s.id in @SetIDs";
-                return conn.Query<CollectedData>(sql, new { SetIDs, UserID });
+					}
+				}
+                else
+                {
+					sql = @"select s.id as [SetID],
+                            (select count(1)
+                            from mtg.[Collection] as co
+                            join mtg.[Card] as c on co.CardID = c.id
+                            where c.card_set_id = s.id and co.[Count] >= @CollectingCount and co.UserID = @UserID) as [CollectedCards],
+                            (select count(1) from mtg.Card as c where c.card_set_id = s.id) as [TotalCards]
+                            from mtg.[Set] as s
+                            where s.id in @SetIDs";
+				}
+                conn.Open();
+
+                return conn.Query<CollectedData>(sql, 
+                    new 
+                    { 
+                        SetIDs,
+                        UserID,
+                        CollectingCount
+                    });
             }
         }
         public IEnumerable<Set> PopulateSetCollected(IEnumerable<Set> Data, Guid UserID)

@@ -1,18 +1,7 @@
-make a setting entry for the below
-
-configurations
-	config what is classified as a "completed set" 
-		For default sets, you can choose from the four for ALL of them
-			1. 4 of each
-			2. 1 of each
-			3. 1 of each, excluding duplicates
-			4. 4 of each, excluding duplicates
-
-		set if duplicate cards are counted as the same, as some sets have the same card twice but different frame etc
-
+create setting in admin page for collecting sets
 
 custom sets
-	Each set can be assigned its own above classifcation
+	Each set can be assigned its own above collecting classification
 
 
 search all cards
