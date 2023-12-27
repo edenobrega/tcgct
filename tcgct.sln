@@ -25,7 +25,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MTG", "MTG", "{1FF32DF4-0A2
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "tcgct-services-framework", "tcgct-service-framework\tcgct-services-framework.csproj", "{5256150A-F9D3-447E-946A-14ADD2DE14CA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "sandbox", "sandbox\sandbox.csproj", "{55F498EA-1A34-4E84-B01F-B06EC16435AE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "sandbox", "sandbox\sandbox.csproj", "{55F498EA-1A34-4E84-B01F-B06EC16435AE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

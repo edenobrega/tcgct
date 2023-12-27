@@ -31,5 +31,12 @@ namespace tcgct_mud.Helpers
 		{
 			return GetInts(UserID, GameID, "FilterBySetTypes");
 		}
+	
+		public Tuple<int, bool> GetCollectingSetsConfig(Guid UserID, int GameID)
+		{
+			var setting = settingsService.GetSetting("CollectingSets", GameID, UserID);
+			var split = setting.Value.Split(',');
+			return new Tuple<int, bool>(int.Parse(split[0]), int.Parse(split[1]) >= 1);
+		}
 	}
 }

@@ -13,6 +13,8 @@ drafting page
 	will save drafted cards and all players can view what they drafted whenever
 	set rules draft rules, e.g. singles only
 
+lock pages so that users cannot open in two different tabs
+
 
 Style login page
 
@@ -25,3 +27,5 @@ export
 	export collection
 
 implement unit testing for library
+
+perhaps all sets tab should purely show all sets, if you have atleast one filter setting not as null, another tab will appear that is allsets but using the settings

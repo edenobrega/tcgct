@@ -1,0 +1,39 @@
+﻿<MudDialog>
+    <DialogContent>
+        <MudPaper>
+            <MudForm >
+
+            </MudForm>
+
+            <MudNumericField @bind-Value="CardSetCount" Min="1" Max="100">Card Set Count</MudNumericField>
+            <MudDivider />
+            <MudCheckBox @bind-Checked="DistinctOracles">Distinct Oracles?</MudCheckBox>
+        </MudPaper>
+
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" OnClick="OK">Close</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter]
+    public Tuple<int, bool> data { get; set; }
+
+    private int CardSetCount { get; set; }
+    private bool DistinctOracles { get; set; }
+
+    protected override void OnInitialized()
+    {
+        CardSetCount = data.Item1;
+        DistinctOracles = data.Item2;
+    }
+
+    private void OK()
+    {
+        this.MudDialog.Close(DialogResult.Ok(new Tuple<int, bool>(CardSetCount, DistinctOracles)));
+    }
+}

@@ -26,6 +26,7 @@ else
 		<thead>
 			<tr>
 				<th>Key</th>
+				<th>Description</th>
 				<th>Value</th>
 				<th>Modify</th>
 				<th>Save</th>
@@ -35,6 +36,7 @@ else
 		<tbody>
 			<tr>
 				<td>Filter By Set Ids</td>
+				<td>Select specific sets to show up</td>
 				<td>@string.Join(",", CurrentSetIds)</td>
 				<td><MudButton OnClick="OpenEditSets"><MudIcon Icon="@Icons.Material.Filled.ModeEdit"></MudIcon></MudButton></td>
 				<td><MudButton OnClick="() => Save(1)">Save</MudButton></td>
@@ -42,9 +44,18 @@ else
 
 			<tr>
 				<td>Filter By Set Type</td>
+				<td>Select specific set types to filter by</td>
 				<td>@string.Join(",", CurrentSetTypeIds)</td>
 				<td><MudButton OnClick="OpenEditSetTypes"><MudIcon Icon="@Icons.Material.Filled.ModeEdit"></MudIcon></MudButton></td>
 				<td><MudButton OnClick="() => Save(2)">Save</MudButton></td>
+			</tr>
+
+			<tr>
+				<td>Collecting Sets Config</td>
+				<td>First value is how many copies of a card constitutes a collected card <br> Second value is whether duplicate cards in a set should be treated like individuals or as one card</td>
+				<td>@CollectingSets.Item1 | @CollectingSets.Item2</td>
+				<td><MudButton OnClick="OpenCollectingSets"><MudIcon Icon="@Icons.Material.Filled.ModeEdit"></MudIcon></MudButton></td>
+				<td><MudButton OnClick="() => Save(3)">Save</MudButton></td>
 			</tr>
 		</tbody>
 	</MudSimpleTable>
@@ -55,6 +66,8 @@ else
 
 	AuthenticationState? authState;
 
+	Guid userID;
+
 	List<Set> allSets;
 
 	List<int> CurrentSetIds;
@@ -63,10 +76,15 @@ else
 
 	List<int> CurrentSetTypeIds;
 
+	Tuple<int, bool> CollectingSets;
+
 	bool loaded = false;
 
 	int GameID;
 
+	// todo: handle if the setting doesnt exist
+	//		 display what didnt get loaded and 
+	//		 dont load the row in the setting
 	protected override async Task OnInitializedAsync()
 	{
 		authState = await auth.GetAuthenticationStateAsync();
@@ -77,44 +95,57 @@ else
 		var _allSetTypes = await setService.GetAllSetTypesAsync();
 		allSetTypes = _allSetTypes.ToList();
 
+		userID = AuthHelper.GetUserID(authState);
+
 		GameID = settingsService.GetGameID("MTG");
 
-		CurrentSetIds = settingsHelper.GetFilterBySetIDs(AuthHelper.GetUserID(authState), GameID).ToList();
+		CurrentSetIds = settingsHelper.GetFilterBySetIDs(userID, GameID).ToList();
 
-		// todo: handle if the setting doesnt exist
-		//		 display what didnt get loaded and 
-		//		 dont load the row in the setting
-		
-		CurrentSetTypeIds = settingsHelper.GetFilterBySetTypes(AuthHelper.GetUserID(authState), GameID).ToList();
+		CurrentSetTypeIds = settingsHelper.GetFilterBySetTypes(userID, GameID).ToList();
+
+		CollectingSets = settingsHelper.GetCollectingSetsConfig(userID, GameID);
 
 		loaded = true;
 	}
 
 	private void Save(int target)
 	{
-		if (target == 1)
+		SettingsRow row;
+		switch (target)
 		{
-			SettingsRow row = new SettingsRow
-			{
-				UserID = AuthHelper.GetUserID(authState),
-				Key = "FilterBySetIDs",
-				Value = string.Join(",", CurrentSetIds),
-				GameID = GameID
-			};
-			settingsService.UpdateSetting(row);
-			_messageBox.AddMessage(new Message(Severity.Success, "Setting changed!"));
-		}
-		if (target == 2)
-		{
-			SettingsRow row = new SettingsRow
-			{
-				UserID = AuthHelper.GetUserID(authState),
-				Key = "FilterBySetTypes",
-				Value = string.Join(",", CurrentSetTypeIds),
-				GameID = GameID
-			};
-			settingsService.UpdateSetting(row);
-			_messageBox.AddMessage(new Message(Severity.Success, "Setting changed!"));
+			case 1:
+				row = new SettingsRow
+				{
+					UserID = userID,
+					Key = "FilterBySetIDs",
+					Value = string.Join(",", CurrentSetIds),
+					GameID = GameID
+				};
+				settingsService.UpdateSetting(row);
+				_messageBox.AddMessage(new Message(Severity.Success, "Setting changed!"));
+				break;
+			case 2:
+				row = new SettingsRow
+				{
+					UserID = userID,
+					Key = "FilterBySetTypes",
+					Value = string.Join(",", CurrentSetTypeIds),
+					GameID = GameID
+				};
+				settingsService.UpdateSetting(row);
+				_messageBox.AddMessage(new Message(Severity.Success, "Setting changed!"));
+				break;
+			case 3:
+				row = new SettingsRow
+				{
+					UserID = userID,
+					Key = "CollectingSets",
+					Value = $"{CollectingSets.Item1},{(CollectingSets.Item2 == true ? 1 : 0)}",
+					GameID = GameID
+				};
+				settingsService.UpdateSetting(row);
+				_messageBox.AddMessage(new Message(Severity.Success, "Setting changed!"));
+				break;
 		}
 	}
 
@@ -154,6 +185,15 @@ else
 			return;
 		}
 		CurrentSetTypeIds = returnval.Where(w => w.Value).Select(s => s.Key).ToList();
+		StateHasChanged();
+		_messageBox.AddMessage(new Message(Severity.Warning, "Value changed, not saved on server."));
+	}
+
+	private async void OpenCollectingSets()
+	{
+		var parameters = new DialogParameters { { "data", CollectingSets } };
+		var val = await DialogService.Show<CollectingSetsDialog>("Collecting Sets Config", parameters).Result;
+		CollectingSets = (Tuple<int, bool>)val.Data;
 		StateHasChanged();
 		_messageBox.AddMessage(new Message(Severity.Warning, "Value changed, not saved on server."));
 	}
