@@ -9,7 +9,7 @@ namespace tcgct_services_framework.MTG.Services
 {
 	public interface IMTGCustomSetService
 	{
-		int CreateSet(string Name, Guid Owner, int CollectedTarget);
+		int CreateSet(string Name, string Descrption, Guid Owner, int CollectedTarget);
 		void DeleteSet(int ID);
 		void UpdateCards(int ID, IEnumerable<int> CardIDs);
 		IEnumerable<CustomSet> GetSets(Guid Owner);

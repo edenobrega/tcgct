@@ -20,14 +20,14 @@ namespace tcgct_sql.Services
 			this.configService = configService;
 		}
 
-		public int CreateSet(string Name, Guid Owner, int CollectedTarget)
+		public int CreateSet(string Name, string Description, Guid Owner, int CollectedTarget)
 		{
             using (var conn = new SqlConnection(configService.ConnectionString))
 			{
-				string sql = @"insert into [MTG].[CustomSet]([Name], [Owner], [CollectedTarget])
+				string sql = @"insert into [MTG].[CustomSet]([Name], [Description], [Owner], [CollectedTarget])
 							   output inserted.Id
-							   values (@Name, @Owner, @CollectedTarget)";
-				var result = conn.QuerySingle<int>(sql, new { Name, Owner, CollectedTarget });
+							   values (@Name, @Description, @Owner, @CollectedTarget)";
+				var result = conn.QuerySingle<int>(sql, new { Name, Description, Owner, CollectedTarget });
 				return result;
 			}
 		}

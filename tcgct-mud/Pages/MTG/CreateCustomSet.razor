@@ -11,6 +11,7 @@
 <MudPaper Class="pa-4">
     <MudForm>
 		<MudTextField @bind-Value="Name" Label="Custom Set Name" Required="true" RequiredError="A name is required!" />
+		<MudTextField @bind-Value="Description" Label="Descrption" />
         <MudNumericField @bind-Value="CollectingCount" Label="Standard" Variant="Variant.Text" Min="0" Max="10" />
     </MudForm>
     <MudButton Variant="Variant.Filled" Color="Color.Dark" OnClick="Submit">Register</MudButton>
@@ -20,6 +21,7 @@
     AuthenticationState authState;
     MessageBox msgBox;
     public string Name { get; set; }
+    public string Description { get; set; }
     public int CollectingCount { get; set; } = 4;
     protected override void OnInitialized()
     {
@@ -30,7 +32,7 @@
     {
         if ((!string.IsNullOrEmpty(Name) && !string.IsNullOrWhiteSpace(Name)) && (CollectingCount >= 0 && CollectingCount < 11))
         {
-            customSetService.CreateSet(Name, AuthHelper.GetUserID(authState), CollectingCount);
+            customSetService.CreateSet(Name, Description, AuthHelper.GetUserID(authState), CollectingCount);
             navMan.NavigateTo("/mtg/customsets", true);
             return;
         }
