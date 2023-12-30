@@ -286,6 +286,7 @@ namespace tcgct_sql.Services
             }
         }
 
+        // todo: remove the count from here, create a method in collectionservice that takes cards and returns the cards with collection data
         public async Task<IEnumerable<Card>> GetSetCardsAsync(int id, Guid? user_id = null)
         {
             using (var conn = new SqlConnection(configService.ConnectionString))

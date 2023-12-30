@@ -59,7 +59,7 @@
 		{
 			fe.Set_Type = setTypes.Single(s => s.ID == fe.Set_Type_id);
 		});
-		data = await collectionService.PopulateSetCollectedAsync(data, AuthHelper.GetUserID(authState));
+		data = await collectionService.GetSetsCollectedAsync(data, AuthHelper.GetUserID(authState));
 	}
 
 	private bool FilterFunc1(Set set) => FilterFunc(set, filterValue);

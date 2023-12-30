@@ -1,8 +1,5 @@
-create setting in admin page for collecting sets
-
 custom sets
 	Each set can be assigned its own above collecting classification
-
 
 search all cards
 
@@ -14,7 +11,6 @@ drafting page
 	set rules draft rules, e.g. singles only
 
 lock pages so that users cannot open in two different tabs
-
 
 Style login page
 

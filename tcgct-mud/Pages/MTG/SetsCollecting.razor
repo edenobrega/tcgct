@@ -51,7 +51,7 @@
 		var authState = await auth.GetAuthenticationStateAsync();
 		Guid userID = AuthHelper.GetUserID(authState);
 		data = await setService.GetCollectingSetsAsync(userID);
-		data = await collectionService.PopulateSetCollectedAsync(data, userID);
+		data = await collectionService.GetSetsCollectedAsync(data, userID);
 	}
 
 	private bool FilterFunc1(Set set) => FilterFunc(set, filterValue);

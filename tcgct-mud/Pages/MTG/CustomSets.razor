@@ -7,6 +7,7 @@
 @using tcgct_services_framework.MTG.Services;
 @inject AuthenticationStateProvider auth
 @inject IMTGCustomSetService customSetService
+@inject IMTGCollectionService collectionService
 <h3>CustomSets</h3>
 @if (sets is not null)
 {
@@ -17,11 +18,18 @@
 		<HeaderContent>
 			<MudTh>ID</MudTh>
 			<MudTh>Name</MudTh>
-			<MudTh>Card Count</MudTh>
+			<MudTh>Description</MudTh>
+			<MudTh>Collected Count</MudTh>
+			<MudTh>Collecting Target</MudTh>
+			<MudTh>Edit</MudTh>
 		</HeaderContent>
 		<RowTemplate>
 			<MudTd>@context.ID</MudTd>
 			<MudTd>@context.Name</MudTd>
+			<MudTh>@context.Description</MudTh>
+			<MudTh>@context.CollectedCount</MudTh>
+			<MudTh>@context.CollectedTarget</MudTh>
+			<MudTd><MudLink Href=@($"mtg/customsets/{context.ID}")>View</MudLink></MudTd>
 		</RowTemplate>
 		<PagerContent>
 			<MudTablePager />
@@ -41,5 +49,9 @@ else
 	{
 		authState = await auth.GetAuthenticationStateAsync();
 		sets = customSetService.GetSets(Helpers.AuthHelper.GetUserID(authState));
+		foreach (var set in sets)
+		{
+			set.CollectedCount = customSetService.GetCollectionCount(set.ID);	
+		}
 	}
 }

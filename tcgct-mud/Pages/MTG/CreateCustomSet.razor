@@ -1,0 +1,39 @@
+﻿@page "/mtg/customsets/create"
+@using tcgct_mud.Components;
+@using tcgct_mud.Data;
+@using tcgct_mud.Helpers;
+@using tcgct_services_framework.MTG.Services;
+@inject AuthenticationStateProvider auth
+@inject IMTGCustomSetService customSetService
+@inject NavigationManager navMan
+
+<MessageBox @ref="msgBox"></MessageBox>
+<MudPaper Class="pa-4">
+    <MudForm>
+		<MudTextField @bind-Value="Name" Label="Custom Set Name" Required="true" RequiredError="A name is required!" />
+        <MudNumericField @bind-Value="CollectingCount" Label="Standard" Variant="Variant.Text" Min="0" Max="10" />
+    </MudForm>
+    <MudButton Variant="Variant.Filled" Color="Color.Dark" OnClick="Submit">Register</MudButton>
+</MudPaper>
+
+@code {
+    AuthenticationState authState;
+    MessageBox msgBox;
+    public string Name { get; set; }
+    public int CollectingCount { get; set; } = 4;
+    protected override void OnInitialized()
+    {
+        authState = auth.GetAuthenticationStateAsync().Result;
+    }
+
+    void Submit()
+    {
+        if ((!string.IsNullOrEmpty(Name) && !string.IsNullOrWhiteSpace(Name)) && (CollectingCount >= 0 && CollectingCount < 11))
+        {
+            customSetService.CreateSet(Name, AuthHelper.GetUserID(authState), CollectingCount);
+            navMan.NavigateTo("/mtg/customsets", true);
+            return;
+        }
+        msgBox.AddMessage(new Message(Severity.Error, "Error with validation."));
+    }
+}

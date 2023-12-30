@@ -75,12 +75,12 @@ namespace tcgct_sql.Services
                 {
                     foreach (var log in logs)
                     {
-                        sql = "insert into [MTG].[CollectionLog] values (@Time, @Change, @CardID, @UserID)";
+                        sql = "insert into [MTG].[CollectionLog] values (@Time, @Change, @DbID, @UserID)";
                         conn.Execute(sql, new
                         {
                             log.Time,
                             Change = log.ChangeAmount,
-                            log.CardID,
+                            log.DbID,
                             UserID
                         });
                     }
@@ -174,7 +174,7 @@ namespace tcgct_sql.Services
             });
             return Data;
         }
-        public async Task<IEnumerable<Set>> PopulateSetCollectedAsync(IEnumerable<Set> Data, Guid UserID)
+        public async Task<IEnumerable<Set>> GetSetsCollectedAsync(IEnumerable<Set> Data, Guid UserID)
         {
             return await Task.Run(() =>
             {

@@ -1,4 +1,5 @@
 ﻿@page "/mtg/sets/{set_id}"
+@page "/mtg/customsets/{set_id}"
 @using tcgct_mud.Data;
 @using tcgct_services_framework.Generic;
 @using tcgct_services_framework.MTG.Models;
@@ -11,7 +12,9 @@
 @inject AuthenticationStateProvider auth
 @inject IMTGCardService cardService
 @inject IMTGCollectionService collectionService
+@inject IMTGCustomSetService customSetService
 @inject IDialogService DialogService
+@inject NavigationManager navManager
 
 @if(data == null)
 {
@@ -48,7 +51,15 @@ else
 		<MudPaper Class="pa-3">
 			<MudTable Items="@data" Loading="loading" @ref="mudTable" Filter="new Func<DisplayHTML<Card>,bool>(FilterFuncBase)">
 				<ToolBarContent>
-					<MudText>Viewing set: @data.First()?.Object.Set.Name</MudText>
+					@if (customSet)
+					{
+						// todo: need a way to get the customset name, preferably without another sql call
+						<MudText>Viewing a custom set</MudText>
+					}
+					else
+					{
+						<MudText>Viewing set: @data.First()?.Object.Set.Name</MudText>						
+					}
 					<MudSpacer />
 					<MudTextField ReadOnly="true" Immediate="true" Placeholder="@filterValue" Adornment="Adornment.Start" Value="filterValue" OnKeyDown="DownHandler" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium"></MudTextField>
 				</ToolBarContent>
@@ -90,7 +101,6 @@ else
 								<MudTd>@context.Object.Collected</MudTd>
 								@if (!quickEdit)
 								{
-
 									<MudTd>
 										<MudIconButton Color="Color.Success" Icon="@Icons.Material.Filled.ExposurePlus1" OnClick="@(() => AddCard(context.Object))"></MudIconButton>
 										<MudIconButton Color="Color.Error" Icon="@Icons.Material.Filled.ExposureNeg1" OnClick="@(() => RemoveCard(context.Object))"></MudIconButton>
@@ -162,6 +172,8 @@ else
 		}
 	}
 
+	bool customSet = false;
+
 	bool loading = true;
 	List<Message> messages;
 
@@ -171,21 +183,27 @@ else
 
 	protected override async Task OnInitializedAsync()
 	{
+		customSet = navManager.Uri.Contains("customsets");
 		var authState = await auth.GetAuthenticationStateAsync();
 
 		if (authState.User.Identity is not null)
 		{
-			Console.WriteLine(authState.User.Identity.IsAuthenticated);
 			if (authState.User.Identity.IsAuthenticated)
 			{
-				Console.WriteLine("inside auth");
 				user_id = AuthHelper.GetUserID(authState);
 			}			
 		}
 
-
 		IEnumerable<Card> _data;
-		_data = await cardService.GetSetCardsAsync(int.Parse(set_id), user_id);
+
+		if (customSet)
+		{
+			_data = await customSetService.GetCards(int.Parse(set_id), user_id);
+		}
+		else
+		{
+			_data = await cardService.GetSetCardsAsync(int.Parse(set_id), user_id);
+		}
 
 		// todo: change to dictionary
 		data = new List<DisplayHTML<Card>>();
