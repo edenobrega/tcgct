@@ -7,14 +7,14 @@ namespace tcgct_mud.Data.Draft
 	{
 		public Guid ID { get; set; }
 		public string Name { get; set; }
-        public ConcurrentBag<string> UserIDs { get; set; }
-        public string DraftAdmin { get; set; }
-        public DraftRoom(Guid ID, string name, string userName)
+        public ConcurrentBag<Guid> UserIDs { get; set; }
+        public Guid DraftAdmin { get; set; }
+        public DraftRoom(Guid ID, string name, Guid userName)
 		{
 			this.ID = ID;
 			Name = name;
 			DraftAdmin = userName;
-			UserIDs = new ConcurrentBag<string>();
+			UserIDs = new ConcurrentBag<Guid>();
 		}
 	}
 }

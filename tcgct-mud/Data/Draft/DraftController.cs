@@ -15,8 +15,12 @@ namespace tcgct_mud.Data.Draft
         public ConcurrentDictionary<Guid, DraftRoom> Rooms;
         public void CreateRoom(string roomName, Guid userID)
         {
+            if (Rooms.Values.Any(val => val.Name == roomName))
+            {
+                return;
+            }
             Guid newID = Guid.NewGuid();
-            //Rooms.TryAdd(newID, new DraftRoom(newID, roomName, userID));
+            Rooms.TryAdd(newID, new DraftRoom(newID, roomName, userID));
             foreach (var item in listeners)
             {
                 item.Value.Invoke();
