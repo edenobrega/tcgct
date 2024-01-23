@@ -1,5 +1,4 @@
 using MudBlazor.Services;
-using tcgct_services_framework.MTG;
 using Microsoft.AspNetCore.Components.Authorization;
 using tcgct_mud.Areas.Identity;
 using Microsoft.AspNetCore.Identity;
@@ -8,10 +7,7 @@ using tcgct_services_framework.Generic;
 using tcgct_services_framework.MTG.Services;
 using tcgct_sql.Services;
 using tcgct_services_framework.Generic.Interface;
-using tcgct_mud.Data;
 using tcgct_mud.Data.Draft;
-using tcgct_services_framework.Identity.Implementations.MSSQL;
-using tcgct_services_framework.Identity.Interface;
 using tcgct_mud.Helpers;
 
 namespace tcgct_mud

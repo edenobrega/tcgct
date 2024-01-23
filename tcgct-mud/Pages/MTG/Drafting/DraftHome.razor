@@ -1,4 +1,5 @@
 ﻿@page "/mtg/DraftHome"
+@attribute [Authorize]
 @using tcgct_mud.Data.Draft;
 @using tcgct_mud.Helpers;
 @inject AuthenticationStateProvider auth
@@ -13,6 +14,11 @@
 		<button onclick="@(() => ds.DraftHub.CreateRoom(newRoomName, userID))">Create</button>
 	</Authorized>
 </AuthorizeView>
+
+@foreach (var user in ds.DraftHub.listeners)
+{
+	<h2>@user.Key</h2>
+}
 
 @foreach (var room in ds.DraftHub.Rooms)
 {

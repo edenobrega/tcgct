@@ -14,13 +14,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dapper" Version="2.1.21" />
+    <PackageReference Include="Dapper" Version="2.1.28" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="RestSharp" Version="110.2.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\tcgct-mtg\tcgct-sql.csproj" />
+    <ProjectReference Include="..\..\tcgct-mssql\tcgct-sql.csproj" />
     <ProjectReference Include="..\..\tcgct-service-framework\tcgct-services-framework.csproj" />
   </ItemGroup>
 

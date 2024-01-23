@@ -15,7 +15,6 @@ namespace tcgct_services_framework.Identity.Implementations.MSSQL
 
         public async Task<IdentityResult> CreateAsync(TCGCTUser user, CancellationToken cancellationToken)
         {
-            await Console.Out.WriteLineAsync("Creating");
             cancellationToken.ThrowIfCancellationRequested();
             return await _dataAccess.CreateUser(user);
         }

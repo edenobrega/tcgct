@@ -27,6 +27,21 @@ namespace tcgct_mud.Data.Draft
             }
         }
 
+        public EJoinAttempt JoinRoom(Guid roomID, Guid userID, string? password = null)
+        {
+            EJoinAttempt result;
+            if (Rooms.ContainsKey(roomID))
+            {
+			    result = Rooms[roomID].Join(userID, password);
+            }
+            else
+            {
+                result = EJoinAttempt.RoomDoesNotExist;
+            }
+
+            return result;
+        }
+
 		public void RerenderAll()
 		{
 			foreach (var item in listeners)

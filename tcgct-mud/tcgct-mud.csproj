@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\tcgct-mtg\tcgct-sql.csproj" />
+    <ProjectReference Include="..\tcgct-mssql\tcgct-sql.csproj" />
     <ProjectReference Include="..\tcgct-service-framework\tcgct-services-framework.csproj" />
   </ItemGroup>
 

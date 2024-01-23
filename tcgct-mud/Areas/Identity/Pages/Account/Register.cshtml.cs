@@ -112,7 +112,7 @@ namespace tcgct_mud.Areas.Identity.Pages.Account
 
                     var userId = await _userManager.GetUserIdAsync(user);
 
-                    await _settingsService.CreateDefaultSettings(Guid.Parse(userId));
+                    await _settingsService.CreateDefaultSettings(user.ID);
 
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {
@@ -138,7 +138,9 @@ namespace tcgct_mud.Areas.Identity.Pages.Account
         {
             try
             {
-                return Activator.CreateInstance<TCGCTUser>();
+                TCGCTUser user = Activator.CreateInstance<TCGCTUser>();
+                user.ID = Guid.NewGuid();
+                return user;
             }
             catch
             {
