@@ -1,13 +1,6 @@
 # Projects
 ## tcgct-mud
-The actual website, appsettings.json
-`BackendTech` Should be able to take 
-```json
-    "ConnectionStrings": {
-        "MainDB": "CONNECTIONSTRING"
-    },
-    "BackendTech": "MSSQL"
-```
+The actual website, makes use of mudblazor.
 ### Todo
 
 ## tcgct-service-framework
@@ -15,10 +8,3 @@ A library of objects, classes, interfaces etc to help interacting with the db, b
 
 ## tcgct-mssql
 A mssql implementation of the site.
-
-## Updaters/MTG
-A program to populate the SQL db with data using webapi from https://scryfall.com/docs/api
-
-# SQL DB Project
-Located in a seperate project
-https://github.com/edenobrega/tcgct-sql
