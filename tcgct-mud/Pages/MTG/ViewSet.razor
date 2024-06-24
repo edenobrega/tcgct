@@ -179,7 +179,7 @@ else
 
 	List<EditLog<Card>> log;
 
-	List<DisplayHTML<Card>>? data;
+	List<DisplayHTML<Card>> data;
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -202,7 +202,7 @@ else
 		}
 		else
 		{
-			_data = await cardService.GetSetCardsAsync(int.Parse(set_id), user_id);
+			_data = await cardService.GetSetCardsAsync(int.Parse(set_id));
 		}
 
 		// todo: change to dictionary

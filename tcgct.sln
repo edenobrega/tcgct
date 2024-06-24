@@ -9,19 +9,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		todo.txt = todo.txt
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MTG-Sql-Scryfall", "Updaters\MTG\MTG-Sql-Scryfall.csproj", "{0AB3B51B-DE21-491E-AE63-805383B1B535}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "tcgct-mud", "tcgct-mud\tcgct-mud.csproj", "{1AF51914-A0E0-4BE7-93CC-1E2616B60125}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DataFramework", "DataFramework", "{495167C7-3B0A-40F7-AC4E-62E83FB0B761}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Loaders", "Loaders", "{3BE21DB0-0AB0-4690-B702-5979A2949CD9}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MTG", "MTG", "{1FF32DF4-0A25-4EFD-8043-B0EAF17B35A2}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "tcgct-services-framework", "tcgct-service-framework\tcgct-services-framework.csproj", "{5256150A-F9D3-447E-946A-14ADD2DE14CA}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "sandbox", "sandbox\sandbox.csproj", "{55F498EA-1A34-4E84-B01F-B06EC16435AE}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "tcgct-sql", "tcgct-mssql\tcgct-sql.csproj", "{3E1D94C3-E3ED-4C96-B788-B5ED319D4A00}"
 EndProject
@@ -31,10 +23,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{0AB3B51B-DE21-491E-AE63-805383B1B535}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0AB3B51B-DE21-491E-AE63-805383B1B535}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0AB3B51B-DE21-491E-AE63-805383B1B535}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0AB3B51B-DE21-491E-AE63-805383B1B535}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1AF51914-A0E0-4BE7-93CC-1E2616B60125}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{1AF51914-A0E0-4BE7-93CC-1E2616B60125}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1AF51914-A0E0-4BE7-93CC-1E2616B60125}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -43,10 +31,6 @@ Global
 		{5256150A-F9D3-447E-946A-14ADD2DE14CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5256150A-F9D3-447E-946A-14ADD2DE14CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5256150A-F9D3-447E-946A-14ADD2DE14CA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{55F498EA-1A34-4E84-B01F-B06EC16435AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{55F498EA-1A34-4E84-B01F-B06EC16435AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{55F498EA-1A34-4E84-B01F-B06EC16435AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{55F498EA-1A34-4E84-B01F-B06EC16435AE}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3E1D94C3-E3ED-4C96-B788-B5ED319D4A00}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3E1D94C3-E3ED-4C96-B788-B5ED319D4A00}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3E1D94C3-E3ED-4C96-B788-B5ED319D4A00}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -56,8 +40,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{0AB3B51B-DE21-491E-AE63-805383B1B535} = {1FF32DF4-0A25-4EFD-8043-B0EAF17B35A2}
-		{1FF32DF4-0A25-4EFD-8043-B0EAF17B35A2} = {3BE21DB0-0AB0-4690-B702-5979A2949CD9}
 		{5256150A-F9D3-447E-946A-14ADD2DE14CA} = {495167C7-3B0A-40F7-AC4E-62E83FB0B761}
 		{3E1D94C3-E3ED-4C96-B788-B5ED319D4A00} = {495167C7-3B0A-40F7-AC4E-62E83FB0B761}
 	EndGlobalSection

@@ -4,6 +4,7 @@ using Microsoft.Data.SqlClient;
 using tcgct_services_framework.Identity.Interface;
 using System.Configuration;
 using tcgct_services_framework.Generic;
+using System.Data;
 
 namespace tcgct_services_framework.Identity.Implementations.MSSQL
 {
@@ -17,9 +18,7 @@ namespace tcgct_services_framework.Identity.Implementations.MSSQL
 
         public async Task<IdentityResult> CreateUser(TCGCTUser user)
         {
-            await Console.Out.WriteLineAsync("Creating in dataaccess");
-            string sql = "insert into [Account].[User] (ID, [Name], Password) values (@ID, @Name, @Password)";
-            int success = await _connection.ExecuteAsync(sql, new { user.ID, user.Name, user.Password });
+            int success = await _connection.QuerySingleAsync<int>("[Account].[TryCreateAccount]", new { Username = user.Name, Password = user.Password }, commandType: CommandType.StoredProcedure);
             return success == 1 ? IdentityResult.Success : IdentityResult.Failed(new IdentityError { Description = "Something went wrong." });
         }
 
@@ -35,7 +34,7 @@ namespace tcgct_services_framework.Identity.Implementations.MSSQL
         /// <returns></returns>
         public async Task<TCGCTUser> GetNameFromName(string Name)
         {
-            string sql = "select * from [Account].[User] where [Name] = @Name";
+            string sql = "select * from [Account].[User] where [Username] = @Name";
             var v = await _connection.QuerySingleOrDefaultAsync<TCGCTUser>(sql, new { Name });
             return v;
         }

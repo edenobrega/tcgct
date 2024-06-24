@@ -100,7 +100,7 @@ namespace tcgct_mud.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (ModelState.IsValid)
             {
-                var user = CreateUser();
+                var user = new TCGCTUser();
 
                 await _userStore.SetUserNameAsync(user, Input.UserName, CancellationToken.None);
 
@@ -112,7 +112,7 @@ namespace tcgct_mud.Areas.Identity.Pages.Account
 
                     var userId = await _userManager.GetUserIdAsync(user);
 
-                    await _settingsService.CreateDefaultSettings(user.ID);
+                    await _settingsService.CreateDefaultSettings(user.UID);
 
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {
@@ -132,22 +132,6 @@ namespace tcgct_mud.Areas.Identity.Pages.Account
 
             // If we got this far, something failed, redisplay form
             return Page();
-        }
-
-        private TCGCTUser CreateUser()
-        {
-            try
-            {
-                TCGCTUser user = Activator.CreateInstance<TCGCTUser>();
-                user.ID = Guid.NewGuid();
-                return user;
-            }
-            catch
-            {
-                throw new InvalidOperationException($"Can't create an instance of '{nameof(User)}'. " +
-                    $"Ensure that '{nameof(User)}' is not an abstract class and has a parameterless constructor, or alternatively " +
-                    $"override the register page in /Areas/Identity/Pages/Account/Register.cshtml");
-            }
         }
     }
 }

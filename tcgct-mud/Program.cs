@@ -9,6 +9,7 @@ using tcgct_sql.Services;
 using tcgct_services_framework.Generic.Interface;
 using tcgct_mud.Data.Draft;
 using tcgct_mud.Helpers;
+using tcgct_services_framework.Identity.Interface;
 
 namespace tcgct_mud
 {
@@ -43,11 +44,13 @@ namespace tcgct_mud
 
             var identityClasses = IdentityHelper.GetClasses(backendTech);
 
+            Type passwordHasherType = typeof(TCGCTPasswordHasher);
+
             builder.Services.AddDefaultIdentity<TCGCTUser>();
 
             builder.Services.AddTransient(typeof(IUserStore<TCGCTUser>), identityClasses.UserStore);
             builder.Services.AddTransient(typeof(IRoleStore<TCGCTRole>), identityClasses.RoleStore);
-            //builder.Services.AddTransient(typeof(ICustomUserStore), identityClasses.UserStore);
+            builder.Services.AddTransient(typeof(IPasswordHasher<TCGCTUser>), passwordHasherType);
             builder.Services.AddTransient(identityClasses.DataAccess);
 
             builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<TCGCTUser>>();

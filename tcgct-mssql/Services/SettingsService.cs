@@ -49,19 +49,19 @@ namespace tcgct_sql.Services
         // todo: this should create default for all
         public async Task CreateDefaultSettings(Guid UserID)
         {
-            await Task.Run(() =>
-            {
-                var GameIDs = GetGameIDs();
-                using (var conn = new SqlConnection(configService.ConnectionString))
-                {
-                    conn.Open();
-                    string sql = @"insert into [TCGCT].[Settings]([GameID], [UserID], [Key], [Value]) VALUES 
-									(@GameID, @UserID, 'FilterBySetIDs', NULL),
-									(@GameID, @UserID, 'FilterBySetTypes', NULL),
-                                    (@GameID, @UserID, 'CollectingSets', NULL)";
-                    conn.Execute(sql, new {GameID = GameIDs["MTG"], UserID });
-                }
-            });
+         //   await Task.Run(() =>
+         //   {
+         //       var GameIDs = GetGameIDs();
+         //       using (var conn = new SqlConnection(configService.ConnectionString))
+         //       {
+         //           conn.Open();
+         //           string sql = @"insert into [TCGCT].[Settings]([GameID], [UserID], [Key], [Value]) VALUES 
+									//(@GameID, @UserID, 'FilterBySetIDs', NULL),
+									//(@GameID, @UserID, 'FilterBySetTypes', NULL),
+         //                           (@GameID, @UserID, 'CollectingSets', NULL)";
+         //           conn.Execute(sql, new {GameID = GameIDs["MTG"], UserID });
+         //       }
+         //   });
         }
         public void UpdateSetting(SettingsRow row)
         {

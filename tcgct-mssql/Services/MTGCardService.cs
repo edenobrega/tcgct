@@ -287,16 +287,15 @@ namespace tcgct_sql.Services
         }
 
         // todo: remove the count from here, create a method in collectionservice that takes cards and returns the cards with collection data
-        public async Task<IEnumerable<Card>> GetSetCardsAsync(int id, Guid? user_id = null)
+        public async Task<IEnumerable<Card>> GetSetCardsAsync(int id)
         {
             using (var conn = new SqlConnection(configService.ConnectionString))
             {
                 conn.Open();
-                var sql = @"select c.*, co.[Count] as Collected
+                var sql = @"select c.*
 							from mtg.Card as c
-							left join mtg.Collection as co on co.CardID = c.id and co.UserID = @user_id
 							where c.card_set_id = @id";
-                var results = await conn.QueryAsync<Card>(sql, new { id, user_id });
+                var results = await conn.QueryAsync<Card>(sql, new { id });
                 List<Rarity> rarities = GetRarities().ToList();
                 Set set = setService.GetSet(id);
                 results.ToList().ForEach(fe =>
