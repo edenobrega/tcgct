@@ -9,7 +9,7 @@ using tcgct_sql.Services;
 using tcgct_services_framework.Generic.Interface;
 using tcgct_mud.Data.Draft;
 using tcgct_mud.Helpers;
-using tcgct_services_framework.Identity.Interface;
+using tcgct_services_framework.Generic.Logging;
 
 namespace tcgct_mud
 {
@@ -73,6 +73,12 @@ namespace tcgct_mud
             builder.Services.AddServerSideBlazor();
             builder.Services.AddMudServices();
 
+            builder.Logging.ClearProviders();
+
+            builder.Logging.AddProvider(new TCGCTLoggerProvider());
+
+
+            
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -95,6 +101,8 @@ namespace tcgct_mud
             app.MapFallbackToPage("/_Host");
 
             app.Run();
-        }
+
+
+		}
     }
 }

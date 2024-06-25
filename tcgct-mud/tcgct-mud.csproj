@@ -19,4 +19,8 @@
     <ProjectReference Include="..\tcgct-service-framework\tcgct-services-framework.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Logs\" />
+  </ItemGroup>
+
 </Project>

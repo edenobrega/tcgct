@@ -10,6 +10,7 @@
 @inject IMTGSetService setService
 @inject ISettingsService settingsService
 @inject SettingsHelper settingsHelp
+@inject ILogger<Sets> logger
 
 <MudTable Items="@data" Loading="data == null" Filter="new Func<Set,bool>(FilterFunc1)">
 	<ToolBarContent>
@@ -53,6 +54,7 @@
 
 	protected override async Task OnInitializedAsync()
 	{
+		logger.Log(LogLevel.Critical, "a message from sets");
 		authState = await auth.GetAuthenticationStateAsync();
 
 		data = await setService.GetAllSetsAsync();
