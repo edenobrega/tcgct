@@ -2,6 +2,7 @@
 @using tcgct_mud.Data;
 @using tcgct_services_framework.Generic;
 @using tcgct_services_framework.Generic.Interface;
+@using tcgct_services_framework.Generic.Logging
 @using tcgct_services_framework.MTG.Models;
 @using tcgct_services_framework.MTG;
 @using tcgct_services_framework.MTG.Services;
@@ -10,7 +11,7 @@
 @inject IMTGSetService setService
 @inject ISettingsService settingsService
 @inject SettingsHelper settingsHelp
-@inject ILogger<Sets> logger
+@inject LoggerHelper logger 
 
 <MudTable Items="@data" Loading="data == null" Filter="new Func<Set,bool>(FilterFunc1)">
 	<ToolBarContent>
@@ -54,10 +55,16 @@
 
 	protected override async Task OnInitializedAsync()
 	{
-		logger.Log(LogLevel.Critical, "a message from sets");
+		logger.Log(LogLevel.Trace, "Entering Sets", null);
+
 		authState = await auth.GetAuthenticationStateAsync();
 
 		data = await setService.GetAllSetsAsync();
+
+		if(authState.User.Identity is null)
+		{
+			return;
+		}
 
 		if (authState.User.Identity.IsAuthenticated)
 		{

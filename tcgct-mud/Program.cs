@@ -77,6 +77,7 @@ namespace tcgct_mud
 
             builder.Logging.AddProvider(new TCGCTLoggerProvider());
 
+            builder.Services.AddSingleton<LoggerHelper>();
 
             
             var app = builder.Build();

@@ -35,6 +35,10 @@ namespace tcgct_mud.Helpers
 		public Tuple<int, bool> GetCollectingSetsConfig(Guid UserID, int GameID)
 		{
 			var setting = settingsService.GetSetting("CollectingSets", GameID, UserID);
+			if (setting is null)
+			{
+				throw new Exception("Setting not found");
+			}
 			var split = setting.Value.Split(',');
 			return new Tuple<int, bool>(int.Parse(split[0]), int.Parse(split[1]) >= 1);
 		}
