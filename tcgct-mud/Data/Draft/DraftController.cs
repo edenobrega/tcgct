@@ -13,7 +13,7 @@ namespace tcgct_mud.Data.Draft
 
         public ConcurrentDictionary<Guid, Action> listeners;
         public ConcurrentDictionary<Guid, DraftRoom> Rooms;
-        public void CreateRoom(string roomName, Guid userID)
+        public void CreateRoom(string roomName, int userID)
         {
             if (Rooms.Values.Any(val => val.Name == roomName))
             {
@@ -27,7 +27,7 @@ namespace tcgct_mud.Data.Draft
             }
         }
 
-        public EJoinAttempt JoinRoom(Guid roomID, Guid userID, string? password = null)
+        public EJoinAttempt JoinRoom(Guid roomID, int userID, string? password = null)
         {
             EJoinAttempt result;
             if (Rooms.ContainsKey(roomID))

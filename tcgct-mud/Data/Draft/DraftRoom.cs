@@ -7,30 +7,30 @@ namespace tcgct_mud.Data.Draft
 	{
 		public Guid ID { get; set; }
 		public string Name { get; set; }
-        public ConcurrentBag<Guid> UserIDs { get; set; }
-        public Guid DraftAdmin { get; set; }
+        public ConcurrentBag<int> UserIDs { get; set; }
+        public int DraftAdmin { get; set; }
 		private string? Password = null;
-		private void initiliase(Guid ID, string name, Guid userName, string? password = null)
+		private void initiliase(Guid ID, string name, int userID, string? password = null)
 		{
 			this.ID = ID;
 			Name = name;
-			DraftAdmin = userName;
-			UserIDs = new ConcurrentBag<Guid>();
+			DraftAdmin = userID;
+			UserIDs = new ConcurrentBag<int>();
 			if (password != null)
 			{
 				this.Password = password;
 			}
 		}
-        public DraftRoom(Guid ID, string name, Guid userName)
+        public DraftRoom(Guid ID, string name, int userID)
 		{
-			this.initiliase(ID, name, userName);
+			this.initiliase(ID, name, userID);
 		}
-		public DraftRoom(Guid ID, string name, Guid userName, string? password)
+		public DraftRoom(Guid ID, string name, int userID, string? password)
 		{
-			this.initiliase(ID, name, userName, password);
+			this.initiliase(ID, name, userID, password);
 		}
 
-		public EJoinAttempt Join(Guid User, string? password)
+		public EJoinAttempt Join(int User, string? password)
 		{
 			if(this.Password != null && this.Password != password)
 			{

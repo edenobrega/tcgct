@@ -10,8 +10,7 @@ namespace tcgct_services_framework.Generic.Interface
     {
         Dictionary<string, int> GetGameIDs();
         int GetGameID(string Game);
-		Task CreateDefaultSettings(Guid UserID);
-        SettingsRow? GetSetting(string Key, int GameID, Guid UserID);
+        SettingsRow? GetSetting(string Key, int GameID, int UserID);
         void UpdateSetting(SettingsRow row);
     }
 }

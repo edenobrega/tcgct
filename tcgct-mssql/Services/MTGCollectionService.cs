@@ -23,8 +23,9 @@ namespace tcgct_sql.Services
             this.settingsService = settingsService;
         }
 
-        public void UpdateCollected(List<Collection> newCollection, Guid UserID, List<EditLog<Card>>? logs = null)
+        public void UpdateCollected(List<Collection> newCollection, int UserID, List<EditLog<Card>>? logs = null)
         {
+            throw new NotImplementedException("proc handles this all now");
             var oldCollection = GetCollectionDynamic(newCollection.Select(s => s.CardID), UserID).ToList();
             List<Collection> update = new List<Collection>();
             List<Collection> delete = new List<Collection>();
@@ -87,7 +88,7 @@ namespace tcgct_sql.Services
                 }
             }
         }
-        public IEnumerable<Collection> GetCollectionDynamic(IEnumerable<int> CardIDs, Guid UserID)
+        public IEnumerable<Collection> GetCollectionDynamic(IEnumerable<int> CardIDs, int UserID)
         {
             using (var conn = new SqlConnection(configService.ConnectionString))
             {
@@ -95,13 +96,13 @@ namespace tcgct_sql.Services
                 string sql = @"select [CardID]
                                      ,[Count]
                                      ,[UserID]
-                              from [MTG].[Collection]
-                              where UserID = @UserID and CardID in @CardIDs";
+                              from [Collection].[CollectedCards_MTG]
+                              where ID = @UserID and CardID in @CardIDs";
                 return conn.Query<Collection>(sql, new { UserID, CardIDs });
             }
         }
         // todo: this should probably be moved into a stored procedure
-        public IEnumerable<CollectedData> GetCollectedSetData(IEnumerable<int> SetIDs, Guid UserID)
+        public IEnumerable<CollectedData> GetCollectedSetData(IEnumerable<int> SetIDs, int UserID)
         {
             var setting = settingsService.GetSetting("CollectingSets", settingsService.GetGameID("MTG"), UserID);
             if (setting is null)
@@ -165,7 +166,7 @@ namespace tcgct_sql.Services
                     });
             }
         }
-        public IEnumerable<Set> PopulateSetCollected(IEnumerable<Set> Data, Guid UserID)
+        public IEnumerable<Set> PopulateSetCollected(IEnumerable<Set> Data, int UserID)
         {
             IEnumerable<CollectedData> csd = GetCollectedSetData(Data.Select(s => s.ID), UserID);
             csd.ToList().ForEach(fe =>
@@ -174,12 +175,12 @@ namespace tcgct_sql.Services
             });
             return Data;
         }
-        public async Task<IEnumerable<Set>> GetSetsCollectedAsync(IEnumerable<Set> Data, Guid UserID)
+        public async Task<IEnumerable<Set>> GetSetsCollectedAsync(IEnumerable<Set> Data, int UserID)
         {
             return await Task.Run(() =>
             {
                 return PopulateSetCollected(Data, UserID);
             });
         }
-    }
+	}
 }

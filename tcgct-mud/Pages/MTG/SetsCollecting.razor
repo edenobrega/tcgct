@@ -49,7 +49,7 @@
 	protected override async Task OnInitializedAsync()
 	{
 		var authState = await auth.GetAuthenticationStateAsync();
-		Guid userID = AuthHelper.GetUserID(authState);
+		int userID = AuthHelper.GetUserID(authState);
 		data = await setService.GetCollectingSetsAsync(userID);
 		data = await collectionService.GetSetsCollectedAsync(data, userID);
 	}

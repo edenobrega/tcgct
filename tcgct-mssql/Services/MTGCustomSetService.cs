@@ -20,7 +20,7 @@ namespace tcgct_sql.Services
 			this.configService = configService;
 		}
 
-		public int CreateSet(string Name, string Description, Guid Owner, int CollectedTarget)
+		public int CreateSet(string Name, string Description, int Owner, int CollectedTarget)
 		{
             using (var conn = new SqlConnection(configService.ConnectionString))
 			{
@@ -65,7 +65,7 @@ namespace tcgct_sql.Services
 			}
 		}
 
-		public async Task<IEnumerable<Card>> GetCards(int ID, Guid Owner)
+		public async Task<IEnumerable<Card>> GetCards(int ID, int Owner)
 		{
 			using (var conn = new SqlConnection(configService.ConnectionString))
 			{
@@ -79,7 +79,7 @@ namespace tcgct_sql.Services
 			}
 		}
 
-		public IEnumerable<CustomSet> GetSets(Guid Owner)
+		public IEnumerable<CustomSet> GetSets(int Owner)
 		{
 			using (var conn = new SqlConnection(configService.ConnectionString))
 			{
@@ -90,14 +90,6 @@ namespace tcgct_sql.Services
 
         public int GetCollectionCount(int SetID)
         {
-			//select cs.*
-			//,(select count(1)
-			//from mtg.CustomSetCard as csc
-			//left join mtg.Collection as co on co.CardID = csc.CardID
-			//where csc.SetID = cs.Id and co.[Count] >= (select top(1) CollectedTarget from mtg.CustomSet where Id = cs.Id)) as [CollectedCards]
-			//,(select count(1) from mtg.CustomSetCard as csc where csc.SetID = cs.Id ) as [TotalCards]
-			//from mtg.CustomSet as cs
-			//where cs.Id in @SetIDs
             using (var conn = new SqlConnection(configService.ConnectionString))
             {
                 string sql = @"select count(1)

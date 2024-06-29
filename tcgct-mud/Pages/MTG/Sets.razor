@@ -2,7 +2,6 @@
 @using tcgct_mud.Data;
 @using tcgct_services_framework.Generic;
 @using tcgct_services_framework.Generic.Interface;
-@using tcgct_services_framework.Generic.Logging
 @using tcgct_services_framework.MTG.Models;
 @using tcgct_services_framework.MTG;
 @using tcgct_services_framework.MTG.Services;
@@ -11,7 +10,7 @@
 @inject IMTGSetService setService
 @inject ISettingsService settingsService
 @inject SettingsHelper settingsHelp
-@inject LoggerHelper logger 
+@inject ILogger<Sets> _logger
 
 <MudTable Items="@data" Loading="data == null" Filter="new Func<Set,bool>(FilterFunc1)">
 	<ToolBarContent>
@@ -25,7 +24,7 @@
 		<MudTh>Shorthand</MudTh>
 		<MudTh>Icon</MudTh>
 		<MudTh>Set Type</MudTh>
-		@if (authState.User.Identity.IsAuthenticated)
+		@if (isAuthenticated)
 		{
 			<MudTh>Pin</MudTh>			
 		}
@@ -36,7 +35,7 @@
 		<MudTd>@context.Shorthand</MudTd>
 		<MudTd><MudImage Src="@context.Icon" Height="30"/></MudTd>
 		<MudTd>@context.Set_Type.Name</MudTd>
-		@if (authState.User.Identity.IsAuthenticated)
+		@if (isAuthenticated)
 		{
 			<MudTd><MudIconButton Icon="@Icons.Material.Filled.PushPin" Color="context.Pinned ? Color.Error : Color.Success" OnClick="@(() => UpdatePinned(context))" aria-label="pin"></MudIconButton></MudTd>
 		}
@@ -52,11 +51,11 @@
 	string[] columns;
 	string filterValue = "";
 	AuthenticationState? authState;
+	bool isAuthenticated = false;
 
 	protected override async Task OnInitializedAsync()
 	{
-		logger.Log(LogLevel.Trace, "Entering Sets", null);
-
+		_logger.Log(LogLevel.Information, "Loading Sets");
 		authState = await auth.GetAuthenticationStateAsync();
 
 		data = await setService.GetAllSetsAsync();
@@ -68,6 +67,7 @@
 
 		if (authState.User.Identity.IsAuthenticated)
 		{
+			isAuthenticated = true;
 			// todo: gets too much data
 			var GameIDs = settingsService.GetGameIDs();
 			IEnumerable<int> filterBySetIds = settingsHelp.GetFilterBySetIDs(AuthHelper.GetUserID(authState), GameIDs["MTG"]);
@@ -106,7 +106,7 @@
 
 	private async Task UpdatePinned(Set set)
 	{
-		if (authState is null || authState.User.Identity is null || !authState.User.Identity.IsAuthenticated)
+		if (isAuthenticated)
 		{
 			return;
 		}

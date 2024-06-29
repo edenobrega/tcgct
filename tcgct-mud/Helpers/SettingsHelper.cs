@@ -12,7 +12,7 @@ namespace tcgct_mud.Helpers
             this.settingsService = settingsService;
 		}
 
-		private IEnumerable<int> GetInts(Guid userID, int GameID, string SettingName)
+		private IEnumerable<int> GetInts(int userID, int GameID, string SettingName)
 		{
 			SettingsRow? setting = settingsService.GetSetting(SettingName, GameID, userID);
 			if (setting is not null && !string.IsNullOrEmpty(setting.Value))
@@ -22,17 +22,17 @@ namespace tcgct_mud.Helpers
 			return Enumerable.Empty<int>();
 		}
 
-		public IEnumerable<int> GetFilterBySetIDs(Guid UserID, int GameID)
+		public IEnumerable<int> GetFilterBySetIDs(int UserID, int GameID)
         {
 			return GetInts(UserID, GameID, "FilterBySetIDs");
 		}
 
-		public IEnumerable<int> GetFilterBySetTypes(Guid UserID, int GameID)
+		public IEnumerable<int> GetFilterBySetTypes(int UserID, int GameID)
 		{
 			return GetInts(UserID, GameID, "FilterBySetTypes");
 		}
 	
-		public Tuple<int, bool> GetCollectingSetsConfig(Guid UserID, int GameID)
+		public Tuple<int, bool> GetCollectingSetsConfig(int UserID, int GameID)
 		{
 			var setting = settingsService.GetSetting("CollectingSets", GameID, UserID);
 			if (setting is null)

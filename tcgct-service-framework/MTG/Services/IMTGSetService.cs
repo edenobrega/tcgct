@@ -17,12 +17,12 @@ namespace tcgct_services_framework.MTG.Services
         IEnumerable<SetType> GetAllSetTypes();
         IEnumerable<SetType> GetSetTypesByID(IEnumerable<int> ids);
         Task<IEnumerable<Set>> GetSets(IEnumerable<int> ids);
-        Task CreatePinnedSetAsync(Guid UserID, int SetID);
-        Task DeletePinnedSetAsync(Guid UserID, int SetID);
+        Task CreatePinnedSetAsync(int UserID, int SetID);
+        Task DeletePinnedSetAsync(int UserID, int SetID);
         Task<IEnumerable<Set>> GetAllSetsAsync();
         Task<IEnumerable<SetType>> GetAllSetTypesAsync();
-        Task<IEnumerable<Set>> GetCollectingSetsAsync(Guid UserID);
-        Task<IEnumerable<PinnedSet>> GetPinnedSetsAsync(Guid UserID);
-        Task<IEnumerable<Set>> GetUserPinnedSetsAsync(Guid UserID);
+        Task<IEnumerable<Set>> GetCollectingSetsAsync(int UserID);
+        Task<IEnumerable<PinnedSet>> GetPinnedSetsAsync(int UserID);
+        Task<IEnumerable<Set>> GetUserPinnedSetsAsync(int UserID);
     }
 }

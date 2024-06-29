@@ -23,14 +23,19 @@ namespace tcgct_services_framework.Generic
         { 
             get 
             {
-                MemberInfo? info = this.Card.GetType().GetMembers().FirstOrDefault(f => f.CustomAttributes.Any(a => a.AttributeType == typeof(CardID)))
-					?? this.Card.GetType().GetMember("ID").FirstOrDefault()
-					?? this.Card.GetType().GetMember("CardID").FirstOrDefault()
-					?? null;
+				if (this.Card is null)
+				{
+					throw new Exception("EditLog::CardID, Card cannot be null");
+				}
+
+				MemberInfo? info = this.Card.GetType().GetMembers().FirstOrDefault(f => f.CustomAttributes.Any(a => a.AttributeType == typeof(CardID)))
+				?? this.Card.GetType().GetMember("ID").FirstOrDefault()
+				?? this.Card.GetType().GetMember("CardID").FirstOrDefault()
+				?? null;
 
 				if (info is null)
 				{
-					throw new Exception("");
+					throw new Exception("EditLog::CardID, Info cannot be null");
 				}
 
 				return GetValue(info);
@@ -40,12 +45,16 @@ namespace tcgct_services_framework.Generic
 		{
 			get
 			{
+				if (this.Card is null)
+				{
+					throw new Exception("EditLog::DbID, Card cannot be null");
+				}
 				MemberInfo? info = this.Card.GetType().GetMembers().FirstOrDefault(f => f.CustomAttributes.Any(a => a.AttributeType == typeof(DbID)))
 					?? null;
 
 				if (info is null)
 				{
-					throw new Exception("");
+					throw new Exception("EditLog::DbID, info cannot be null");
 				}
 
 				return GetValue(info);
