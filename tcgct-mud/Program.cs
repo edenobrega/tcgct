@@ -9,7 +9,7 @@ using tcgct_sql.Services;
 using tcgct_services_framework.Generic.Interface;
 using tcgct_mud.Data.Draft;
 using tcgct_mud.Helpers;
-using tcgct_services_framework.Generic.Logging;
+using Serilog;
 
 namespace tcgct_mud
 {
@@ -19,7 +19,7 @@ namespace tcgct_mud
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-            string connectionString = builder.Configuration.GetSection("ConnectionStrings")["MainDB"];
+            string? connectionString = builder.Configuration.GetSection("ConnectionStrings")["MainDB"];
 
             if (string.IsNullOrEmpty(connectionString) || string.IsNullOrWhiteSpace(connectionString))
             {
@@ -39,6 +39,9 @@ namespace tcgct_mud
             {
                 throw new Exception($"Chosen implementation is not valid: {backendTech}");
             }
+
+            builder.Host.UseSerilog((context, configuration) => 
+                configuration.ReadFrom.Configuration(context.Configuration));
 
             builder.Services.AddSingleton(di => new ConfigService(connectionString));
 
@@ -75,11 +78,6 @@ namespace tcgct_mud
 
             builder.Logging.ClearProviders();
 
-            builder.Logging.AddProvider(new TCGCTLoggerProvider());
-
-            builder.Services.AddSingleton<LoggerHelper>();
-
-            
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -100,6 +98,8 @@ namespace tcgct_mud
 
             app.MapBlazorHub();
             app.MapFallbackToPage("/_Host");
+
+            app.UseSerilogRequestLogging();
 
             app.Run();
 
